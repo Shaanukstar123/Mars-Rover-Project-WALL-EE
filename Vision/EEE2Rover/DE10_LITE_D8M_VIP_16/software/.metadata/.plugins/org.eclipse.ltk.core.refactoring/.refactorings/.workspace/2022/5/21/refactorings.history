@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Delete resource &apos;D8M_Camera_Test/obj/alt_sys_init.d&apos;" deleteContents="false" description="Delete resource &apos;D8M_Camera_Test/obj/alt_sys_init.d&apos;" element1="/D8M_Camera_Test/obj/alt_sys_init.d" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="1" stamp="1653399380376"/>
+</session>
