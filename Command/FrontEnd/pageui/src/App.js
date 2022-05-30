@@ -15,7 +15,6 @@ function App() {
         <Route path='/' element={<About /> } />
 
         <Route path='/battery' element={<Battery /> } />
-        
 
       </Routes>
 
