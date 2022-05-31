@@ -16,10 +16,13 @@
          value = "18";
          type = "int";
       }
-      datum sopceditor_expanded
+   }
+   element EEE_IMGPROC_0.s1
+   {
+      datum baseAddress
       {
-         value = "0";
-         type = "boolean";
+         value = "266240";
+         type = "String";
       }
    }
    element Qsys
@@ -55,7 +58,7 @@
       }
       datum sopceditor_expanded
       {
-         value = "0";
+         value = "1";
          type = "boolean";
       }
    }
@@ -63,7 +66,7 @@
    {
       datum baseAddress
       {
-         value = "266272";
+         value = "266336";
          type = "String";
       }
    }
@@ -89,7 +92,7 @@
       }
       datum sopceditor_expanded
       {
-         value = "0";
+         value = "1";
          type = "boolean";
       }
    }
@@ -128,7 +131,7 @@
    {
       datum baseAddress
       {
-         value = "266448";
+         value = "266512";
          type = "String";
       }
    }
@@ -152,7 +155,7 @@
    {
       datum baseAddress
       {
-         value = "266304";
+         value = "266368";
          type = "String";
       }
    }
@@ -168,7 +171,7 @@
    {
       datum baseAddress
       {
-         value = "266336";
+         value = "266400";
          type = "String";
       }
    }
@@ -184,7 +187,7 @@
    {
       datum baseAddress
       {
-         value = "266472";
+         value = "266536";
          type = "String";
       }
    }
@@ -200,7 +203,7 @@
    {
       datum baseAddress
       {
-         value = "266400";
+         value = "266464";
          type = "String";
       }
    }
@@ -216,7 +219,7 @@
    {
       datum baseAddress
       {
-         value = "266432";
+         value = "266496";
          type = "String";
       }
    }
@@ -232,7 +235,7 @@
    {
       datum baseAddress
       {
-         value = "266368";
+         value = "266432";
          type = "String";
       }
    }
@@ -248,7 +251,7 @@
    {
       datum baseAddress
       {
-         value = "266384";
+         value = "266448";
          type = "String";
       }
    }
@@ -317,7 +320,7 @@
    {
       datum baseAddress
       {
-         value = "266416";
+         value = "266480";
          type = "String";
       }
    }
@@ -333,7 +336,7 @@
    {
       datum baseAddress
       {
-         value = "266464";
+         value = "266528";
          type = "String";
       }
    }
@@ -349,7 +352,7 @@
    {
       datum baseAddress
       {
-         value = "266240";
+         value = "266304";
          type = "String";
       }
    }
@@ -359,6 +362,14 @@
       {
          value = "4";
          type = "int";
+      }
+   }
+   element uart_0.s1
+   {
+      datum baseAddress
+      {
+         value = "266272";
+         type = "String";
       }
    }
 }
@@ -416,8 +427,19 @@
  <interface name="clk_vga" internal="altpll_0.c3" type="clock" dir="start" />
  <interface name="d8m_xclkin" internal="altpll_0.c4" type="clock" dir="start" />
  <interface
+   name="eee_imgproc_0_avalon_slave_0"
+   internal="EEE_IMGPROC_0.avalon_slave_0" />
+ <interface
+   name="eee_imgproc_0_conduit_custom"
+   internal="EEE_IMGPROC_0.conduit_custom"
+   type="conduit"
+   dir="end" />
+ <interface
    name="eee_imgproc_0_conduit_mode"
-   internal="EEE_IMGPROC_0.conduit_mode"
+   internal="EEE_IMGPROC_0.conduit_mode" />
+ <interface
+   name="eee_imgproc_0_conduit_mode_1"
+   internal="EEE_IMGPROC_0.conduit_mode_1"
    type="conduit"
    dir="end" />
  <interface
@@ -472,7 +494,13 @@
    internal="uart_0.external_connection"
    type="conduit"
    dir="end" />
- <module name="EEE_IMGPROC_0" kind="EEE_IMGPROC" version="1.0" enabled="1" />
+ <module name="EEE_IMGPROC_0" kind="EEE_IMGPROC" version="1.0" enabled="1">
+  <parameter name="BB_COL_DEFAULT" value="65280" />
+  <parameter name="IMAGE_H" value="480" />
+  <parameter name="IMAGE_W" value="640" />
+  <parameter name="MESSAGE_BUF_MAX" value="256" />
+  <parameter name="MSG_INTERVAL" value="6" />
+ </module>
  <module
    name="TERASIC_AUTO_FOCUS_0"
    kind="TERASIC_AUTO_FOCUS"
@@ -815,7 +843,7 @@
   <parameter name="dataAddrWidth" value="19" />
   <parameter name="dataMasterHighPerformanceAddrWidth" value="1" />
   <parameter name="dataMasterHighPerformanceMapParam" value="" />
-  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='onchip_memory2_0.s1' start='0x20000' end='0x40000' type='altera_avalon_onchip_memory2.s1' /><slave name='nios2_gen2.debug_mem_slave' start='0x40800' end='0x41000' type='altera_nios2_gen2.debug_mem_slave' /><slave name='timer.s1' start='0x41000' end='0x41020' type='altera_avalon_timer.s1' /><slave name='TERASIC_AUTO_FOCUS_0.mm_ctrl' start='0x41020' end='0x41040' type='TERASIC_AUTO_FOCUS.mm_ctrl' /><slave name='i2c_opencores_camera.avalon_slave_0' start='0x41040' end='0x41060' type='i2c_opencores.avalon_slave_0' /><slave name='i2c_opencores_mipi.avalon_slave_0' start='0x41060' end='0x41080' type='i2c_opencores.avalon_slave_0' /><slave name='mipi_pwdn_n.s1' start='0x41080' end='0x41090' type='altera_avalon_pio.s1' /><slave name='mipi_reset_n.s1' start='0x41090' end='0x410A0' type='altera_avalon_pio.s1' /><slave name='key.s1' start='0x410A0' end='0x410B0' type='altera_avalon_pio.s1' /><slave name='sw.s1' start='0x410B0' end='0x410C0' type='altera_avalon_pio.s1' /><slave name='led.s1' start='0x410C0' end='0x410D0' type='altera_avalon_pio.s1' /><slave name='altpll_0.pll_slave' start='0x410D0' end='0x410E0' type='altpll.pll_slave' /><slave name='sysid_qsys.control_slave' start='0x410E0' end='0x410E8' type='altera_avalon_sysid_qsys.control_slave' /><slave name='jtag_uart.avalon_jtag_slave' start='0x410E8' end='0x410F0' type='altera_avalon_jtag_uart.avalon_jtag_slave' /><slave name='EEE_IMGPROC_0.s1' start='0x42000' end='0x42020' type='EEE_IMGPROC.s1' /><slave name='uart_0.s1' start='0x42020' end='0x42040' type='altera_avalon_uart.s1' /></address-map>]]></parameter>
+  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='onchip_memory2_0.s1' start='0x20000' end='0x40000' type='altera_avalon_onchip_memory2.s1' /><slave name='nios2_gen2.debug_mem_slave' start='0x40800' end='0x41000' type='altera_nios2_gen2.debug_mem_slave' /><slave name='EEE_IMGPROC_0.s1' start='0x41000' end='0x41020' type='EEE_IMGPROC.s1' /><slave name='uart_0.s1' start='0x41020' end='0x41040' type='altera_avalon_uart.s1' /><slave name='timer.s1' start='0x41040' end='0x41060' type='altera_avalon_timer.s1' /><slave name='TERASIC_AUTO_FOCUS_0.mm_ctrl' start='0x41060' end='0x41080' type='TERASIC_AUTO_FOCUS.mm_ctrl' /><slave name='i2c_opencores_camera.avalon_slave_0' start='0x41080' end='0x410A0' type='i2c_opencores.avalon_slave_0' /><slave name='i2c_opencores_mipi.avalon_slave_0' start='0x410A0' end='0x410C0' type='i2c_opencores.avalon_slave_0' /><slave name='mipi_pwdn_n.s1' start='0x410C0' end='0x410D0' type='altera_avalon_pio.s1' /><slave name='mipi_reset_n.s1' start='0x410D0' end='0x410E0' type='altera_avalon_pio.s1' /><slave name='key.s1' start='0x410E0' end='0x410F0' type='altera_avalon_pio.s1' /><slave name='sw.s1' start='0x410F0' end='0x41100' type='altera_avalon_pio.s1' /><slave name='led.s1' start='0x41100' end='0x41110' type='altera_avalon_pio.s1' /><slave name='altpll_0.pll_slave' start='0x41110' end='0x41120' type='altpll.pll_slave' /><slave name='sysid_qsys.control_slave' start='0x41120' end='0x41128' type='altera_avalon_sysid_qsys.control_slave' /><slave name='jtag_uart.avalon_jtag_slave' start='0x41128' end='0x41130' type='altera_avalon_jtag_uart.avalon_jtag_slave' /></address-map>]]></parameter>
   <parameter name="data_master_high_performance_paddr_base" value="0" />
   <parameter name="data_master_high_performance_paddr_size" value="0" />
   <parameter name="data_master_paddr_base" value="0" />
@@ -1089,7 +1117,7 @@
    start="nios2_gen2.data_master"
    end="jtag_uart.avalon_jtag_slave">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x000410e8" />
+  <parameter name="baseAddress" value="0x00041128" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -1098,7 +1126,7 @@
    start="nios2_gen2.data_master"
    end="i2c_opencores_mipi.avalon_slave_0">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00041060" />
+  <parameter name="baseAddress" value="0x000410a0" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -1107,7 +1135,7 @@
    start="nios2_gen2.data_master"
    end="i2c_opencores_camera.avalon_slave_0">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00041040" />
+  <parameter name="baseAddress" value="0x00041080" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -1116,7 +1144,7 @@
    start="nios2_gen2.data_master"
    end="sysid_qsys.control_slave">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x000410e0" />
+  <parameter name="baseAddress" value="0x00041120" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -1134,7 +1162,7 @@
    start="nios2_gen2.data_master"
    end="TERASIC_AUTO_FOCUS_0.mm_ctrl">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00041020" />
+  <parameter name="baseAddress" value="0x00041060" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -1143,7 +1171,7 @@
    start="nios2_gen2.data_master"
    end="altpll_0.pll_slave">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x000410d0" />
+  <parameter name="baseAddress" value="0x00041110" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -1161,7 +1189,7 @@
    start="nios2_gen2.data_master"
    end="timer.s1">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00041000" />
+  <parameter name="baseAddress" value="0x00041040" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -1170,7 +1198,7 @@
    start="nios2_gen2.data_master"
    end="led.s1">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x000410c0" />
+  <parameter name="baseAddress" value="0x00041100" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -1179,7 +1207,7 @@
    start="nios2_gen2.data_master"
    end="sw.s1">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x000410b0" />
+  <parameter name="baseAddress" value="0x000410f0" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -1188,7 +1216,7 @@
    start="nios2_gen2.data_master"
    end="key.s1">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x000410a0" />
+  <parameter name="baseAddress" value="0x000410e0" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -1197,7 +1225,7 @@
    start="nios2_gen2.data_master"
    end="mipi_reset_n.s1">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00041090" />
+  <parameter name="baseAddress" value="0x000410d0" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -1206,16 +1234,7 @@
    start="nios2_gen2.data_master"
    end="mipi_pwdn_n.s1">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00041080" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="18.0"
-   start="nios2_gen2.data_master"
-   end="EEE_IMGPROC_0.s1">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00042000" />
+  <parameter name="baseAddress" value="0x000410c0" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -1224,7 +1243,16 @@
    start="nios2_gen2.data_master"
    end="uart_0.s1">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x00042020" />
+  <parameter name="baseAddress" value="0x00041020" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="18.0"
+   start="nios2_gen2.data_master"
+   end="EEE_IMGPROC_0.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00041000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -1451,12 +1479,12 @@
    kind="reset"
    version="18.0"
    start="clk_50.clk_reset"
-   end="EEE_IMGPROC_0.reset" />
+   end="uart_0.reset" />
  <connection
    kind="reset"
    version="18.0"
    start="clk_50.clk_reset"
-   end="uart_0.reset" />
+   end="EEE_IMGPROC_0.reset" />
  <connection
    kind="reset"
    version="18.0"
@@ -1546,12 +1574,12 @@
    kind="reset"
    version="18.0"
    start="nios2_gen2.debug_reset_request"
-   end="EEE_IMGPROC_0.reset" />
+   end="uart_0.reset" />
  <connection
    kind="reset"
    version="18.0"
    start="nios2_gen2.debug_reset_request"
-   end="uart_0.reset" />
+   end="EEE_IMGPROC_0.reset" />
  <connection
    kind="reset"
    version="18.0"

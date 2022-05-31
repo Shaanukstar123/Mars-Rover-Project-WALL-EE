@@ -176,7 +176,11 @@ Qsys u0 (
 		.altpll_0_locked_conduit_export            (),            				//          altpll_0_locked_conduit.export
 		.altpll_0_phasedone_conduit_export         (),         					//       altpll_0_phasedone_conduit.export		
 		
-		.eee_imgproc_0_conduit_mode_new_signal     (SW[0]),
+		.eee_imgproc_0_conduit_mode_1_new_signal     (SW[0]),
+		.eee_imgproc_0_conduit_custom_threshue     (),     //     eee_imgproc_0_conduit_custom.threshue
+		.eee_imgproc_0_conduit_custom_threshsat    (),    //                                 .threshsat
+		.eee_imgproc_0_conduit_custom_threshval    (),    //                                 .threshval
+		.eee_imgproc_0_conduit_custom_thresholdsig (), //                                 .thresholdsig
 		
 		.uart_0_rx_tx_rxd                          (ARDUINO_IO[1]),                          //                     uart_0_rx_tx.rxd
 		.uart_0_rx_tx_txd                          (ARDUINO_IO[0])                           //

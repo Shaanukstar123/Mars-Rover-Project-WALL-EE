@@ -202,7 +202,7 @@ int main()
         }
 
   while(1){
-
+	   int averageVal;
        // touch KEY0 to trigger Auto focus
 	   if((IORD(KEY_BASE,0)&0x03) == 0x02){
 
@@ -257,9 +257,25 @@ int main()
            int word = IORD(0x42000,EEE_IMGPROC_MSG); 			//Get next word from message buffer
     	   if (fwrite(&word, 4, 1, ser) != 1)
     		   printf("Error writing to UART");
-           if (word == EEE_IMGPROC_MSG_START)				//Newline on message identifier
-    		   printf("\n");
-    	   printf("%08x ",word);
+           //if (word == EEE_IMGPROC_MSG_START)				//Newline on message identifier
+    	   //   printf("\n");
+    	   //If V received for average value of frame
+    	   if (word & 0xFF000000 == 0x56000000) {
+    		   printf("value:%08x ", word);
+    		   //Word has been received so adjust gain
+    		   averageVal = word & 0x00FFFFFF; //Get average value
+    		   //Adjust gain depending on average frame value, but dont adjust if within 10 of 128
+    		   if (118 < averageVal) {
+    			   gain += GAIN_STEP;
+    			   OV8865SetGain(gain);
+    		   }
+    		   if (138 > averageVal) {
+    			   gain -= GAIN_STEP;
+    			   OV8865SetGain(gain);
+    		   }
+    		   //printf("Gain adjusted to %d\n", gain);
+    		   //printf("Gain adjusted to %d\n", averageVal);
+    	   }
        }
 
        //Update the bounding box colour
