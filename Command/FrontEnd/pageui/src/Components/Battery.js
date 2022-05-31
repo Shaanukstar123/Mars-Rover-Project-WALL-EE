@@ -11,9 +11,16 @@ const Battery = () => {
   const [imgSrc, setImgSrc] = useState('');
 
   const whenClicked = async () => { 
-    const randomNumber = await fetch('http://localhost:8080/battery');
-    const data = await randomNumber.json();
-    setBatteryLevel(data.percentage);
+    try{
+      const randomNumber = await fetch('http://35.176.71.115:8080/battery');
+      const data = await randomNumber.json();
+      setBatteryLevel(data.percentage);
+    }
+    catch(err){
+      console.log(err);
+    }
+
+
   };
 
   const effectz = () => {
