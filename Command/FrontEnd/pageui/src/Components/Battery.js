@@ -4,34 +4,42 @@ import one from './1.png'
 import two from './2.png'
 import three from './3.png'
 
+
 const Battery = () => {
 
-  const [batteryLevel, setBatteryLevel] = useState(0);
-  const [imgSrc, setImgSrc] = useState('one');
+  const [batteryLevel, setBatteryLevel] = useState();
+  const [imgSrc, setImgSrc] = useState('');
 
-  const whenClicked = () => { 
-    let randomNumber = Math.floor(Math.random() * 100);
-    setBatteryLevel(randomNumber);
+  const whenClicked = async () => { 
+    const randomNumber = await fetch('http://localhost:8080/battery');
+    const data = await randomNumber.json();
+    setBatteryLevel(data.percentage);
   };
 
   const effectz = () => {
     let logo = one;
     
-    if(batteryLevel > 70) {
+    if(batteryLevel >= 70) {
       logo = three;
     }
 
-    else if(batteryLevel > 40){
+    else if(batteryLevel >= 40){
       logo = two;
     }
 
     return logo;
   };
 
+  // Same principle as below hook but this is called when page is loaded first time
+  useEffect(() => {
+    whenClicked();
+  }, []);
+
   // This function is called immediately after the render of setBatteryLevel
   //  so it contains the latest batteryLevel and then it re-renders the image based on new level
   // but React is so fast that you don't notice the delay between the 2 renderings.
   useEffect(function() {
+    console.log('hi');
     setImgSrc(effectz());
   }, [batteryLevel]);
 
