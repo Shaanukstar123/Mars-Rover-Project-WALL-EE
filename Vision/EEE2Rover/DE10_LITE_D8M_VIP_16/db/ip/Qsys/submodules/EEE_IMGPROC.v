@@ -82,20 +82,20 @@ wire [7:0]   red_out, green_out, blue_out;
 
 wire         sop, eop, in_valid, out_ready;
 //HSV calculations
-wire [8:0] Hue, zHSV, zmSum;
-wire [15:0] zPartial, zPartial2, zPartial3, Saturation;
-wire [7:0] maxVal, minVal, delta, Value, finalSat, finalVal, mHSV;
-reg [8:0] finalHue;
-reg [7:0] newRed, newGreen, newBlue, averageVal;
-reg [23:0] runningValueTotal;
-wire [13:0] HRed, HGreen, HBlue;
+wire [143:0] tempThresholdsHue;
+wire [15:0] Saturation;
+wire [8:0] Hue;
+wire [7:0] maxVal, minVal, Value, finalSat, finalVal, tempThresholdSat, tempThresholdVal;
+wire [3:0] tempNumThresholds;
 wire isRedMax, isGreenMax, isBlueMax;
 wire isRedMin, isGreenMin, isBlueMin;
 wire satThresholdMet, valThresholdMet;
 
-wire [7:0] tempThresholdSat, tempThresholdVal;
-wire [3:0] tempNumThresholds;
-wire [143:0] tempThresholdsHue;
+reg [23:0] runningValueTotal;
+reg [15:0] zPartial, zPartial2, zPartial3;
+reg [13:0] HRed, HGreen, HBlue;
+reg [8:0] finalHue, zHSV, zmSum;
+reg [7:0] newRed, newGreen, newBlue, averageVal, mHSV, delta;
 
 assign tempNumThresholds = 4'd5;
 assign tempThresholdSat = 8'd128;
@@ -117,18 +117,12 @@ assign isRedMin = (red < blue) & (red < green) ? 1 : 0; //One bit
 assign isGreenMin = (green < blue) & (green < red) ? 1 : 0;
 assign isBlueMin = (blue < red) & (blue < green) ? 1 : 0;
 assign minVal = isRedMin ? red : (isBlueMin ? blue : green);
-
-assign delta = maxVal-minVal; //8 bits
-
-assign HRed = ((60 * (green-blue))/delta) % 6; //Max 14 bits
-assign HGreen = (((60 *(blue-red))/delta) + 120) % 255;
-assign HBlue = (((60 *(red-green))/delta) + 240) % 255;
-
+////
 assign Hue = isRedMax ? HRed : (isGreenMax ? HGreen : HBlue); //(0-360) 9 bits
 assign Saturation = (delta << 8)/maxVal; //(0-255) //8Bits, max 16 bits
 assign Value = maxVal; //(0-255)
 
-//Thresholds
+//Thresholds - might need to encase in clocked logic
 assign satThresholdMet = (tempThresholdSat < Saturation) ? 1 : 0;
 assign valThresholdMet = (tempThresholdVal < Saturation) ? 1 : 0;
 
@@ -136,22 +130,24 @@ assign valThresholdMet = (tempThresholdVal < Saturation) ? 1 : 0;
 assign finalSat = satThresholdMet ? 255 : Saturation;
 assign finalVal = valThresholdMet ? 255 : Value;
 
-
-////////////////////////////////////////////////////////////////////////
-
-//Convert back to RGB
-assign mHSV = finalVal - finalSat; //8bits
-assign zPartial = (((finalHue << 7)/60) % 256) - 128; //Ranges from -128 to 127
-assign zPartial2 = zPartial[15] ? -zPartial : zPartial; //Must be positive : ranges from 0 to 127
-assign zPartial3 = ((finalSat*zPartial2[7:0]) >> 7);
-assign zHSV = finalSat - zPartial3; //Obtain final value for z (8 bits)
-assign zmSum = zHSV + mHSV;
-
 assign {red_out, green_out, blue_out} = (mode & ~sop & packet_video)? {newRed, newGreen, newBlue} : {red,green,blue};
-//Set finalHue to nearest threshold value
+
 always @(posedge clk) begin
-	integer i;
+	//HSV calculations
+	delta <= maxVal-minVal; //8 bits
+	HRed <= ((60 * (green-blue))/delta) % 6; //Max 14 bits
+	HGreen <= (((60 *(blue-red))/delta) + 120) % 255;
+	HBlue <= (((60 *(red-green))/delta) + 240) % 255;
+	//Convert back to RGB
+	mHSV <= finalVal - finalSat; //8bits
+	zPartial <= (((finalHue << 7)/60) % 256) - 128; //Ranges from -128 to 127
+	zPartial2 <= zPartial[15] ? -zPartial : zPartial; //Must be positive : ranges from 0 to 127
+	zPartial3 <= ((finalSat*zPartial2[7:0]) >> 7);
+	zHSV <= finalSat - zPartial3; //Obtain final value for z (8 bits)
+	zmSum <= zHSV + mHSV;
+	//Set finalHue to nearest threshold value
 	if (satThresholdMet & valThresholdMet) begin
+		integer i;
 		for(i = 1; i < tempNumThresholds; i = i + 1) begin
 			if (tempThresholdsHue[9*(i-1)+:9] > Hue) begin
 				if (i > 1) begin
@@ -201,7 +197,7 @@ always@(posedge clk) begin
 	if (sop) begin
 		x <= 11'h0;
 		y <= 11'h0;
-		runningValueTotal <= 24'b0;
+		runningValueTotal <= 24'b0; //reset at the end of every frame
 		packet_video <= (blue[3:0] == 3'h0);
 	end
 	else if (in_valid) begin
@@ -212,7 +208,7 @@ always@(posedge clk) begin
 		else begin
 			x <= x + 11'h1;
 			//Sample every 4 bits
-			if(x % 4 == 0) begin 
+			if((x % 4) == 0) begin 
 				runningValueTotal <= runningValueTotal + Value;
 			end
 		end

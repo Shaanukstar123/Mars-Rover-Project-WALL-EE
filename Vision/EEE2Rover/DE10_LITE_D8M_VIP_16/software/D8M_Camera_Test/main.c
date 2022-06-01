@@ -24,7 +24,7 @@
 #define EXPOSURE_INIT 0x002000
 #define EXPOSURE_STEP 0x100
 #define GAIN_INIT 0x080
-#define GAIN_STEP 0x040
+#define GAIN_STEP 0x010
 #define DEFAULT_LEVEL 3
 
 #define MIPI_REG_PHYClkCtl		0x0056
@@ -274,8 +274,8 @@ int main()
     			   gain -= GAIN_STEP;
     			   OV8865SetGain(gain);
     		   }
-    		   printf("Gain adjusted to %d, value:%d\n", gain, averageVal);
-    		   usleep(1000000);
+    		   printf("Gain adjusted to %d, average:%d, value:%d\n", gain, averageVal, word);
+    		   usleep(10000);
     	   }
     	   //printf("%08x ", word);
        }
