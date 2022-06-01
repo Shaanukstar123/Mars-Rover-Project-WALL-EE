@@ -3,6 +3,9 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 app = express();
 
+// MongoDB URL connection string
+const dbURI = 'mongodb+srv://shaanu:<password>@cluster0.k6p9c.mongodb.net/?retryWrites=true&w=majority';
+
 app.use(cors());
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
