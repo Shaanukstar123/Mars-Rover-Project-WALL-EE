@@ -2,6 +2,7 @@ import './App.css';
 import Navbar from './Components/Navbar';
 import About from './Components/About';
 import Battery from './Components/Battery';
+import Controller from './Components/Controller';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 
 function App() {
@@ -15,6 +16,8 @@ function App() {
         <Route path='/' element={<About /> } />
 
         <Route path='/battery' element={<Battery /> } />
+
+        <Route path='/touristmode' element={<Controller /> } />
 
       </Routes>
 
