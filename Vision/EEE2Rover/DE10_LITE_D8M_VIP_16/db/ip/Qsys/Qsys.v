@@ -160,6 +160,12 @@ module Qsys (
 	wire   [1:0] mm_interconnect_0_mipi_pwdn_n_s1_address;                          // mm_interconnect_0:mipi_pwdn_n_s1_address -> mipi_pwdn_n:address
 	wire         mm_interconnect_0_mipi_pwdn_n_s1_write;                            // mm_interconnect_0:mipi_pwdn_n_s1_write -> mipi_pwdn_n:write_n
 	wire  [31:0] mm_interconnect_0_mipi_pwdn_n_s1_writedata;                        // mm_interconnect_0:mipi_pwdn_n_s1_writedata -> mipi_pwdn_n:writedata
+	wire         mm_interconnect_0_eee_imgproc_0_s1_chipselect;                     // mm_interconnect_0:EEE_IMGPROC_0_s1_chipselect -> EEE_IMGPROC_0:s_chipselect
+	wire  [31:0] mm_interconnect_0_eee_imgproc_0_s1_readdata;                       // EEE_IMGPROC_0:s_readdata -> mm_interconnect_0:EEE_IMGPROC_0_s1_readdata
+	wire   [2:0] mm_interconnect_0_eee_imgproc_0_s1_address;                        // mm_interconnect_0:EEE_IMGPROC_0_s1_address -> EEE_IMGPROC_0:s_address
+	wire         mm_interconnect_0_eee_imgproc_0_s1_read;                           // mm_interconnect_0:EEE_IMGPROC_0_s1_read -> EEE_IMGPROC_0:s_read
+	wire         mm_interconnect_0_eee_imgproc_0_s1_write;                          // mm_interconnect_0:EEE_IMGPROC_0_s1_write -> EEE_IMGPROC_0:s_write
+	wire  [31:0] mm_interconnect_0_eee_imgproc_0_s1_writedata;                      // mm_interconnect_0:EEE_IMGPROC_0_s1_writedata -> EEE_IMGPROC_0:s_writedata
 	wire         mm_interconnect_0_uart_0_s1_chipselect;                            // mm_interconnect_0:uart_0_s1_chipselect -> uart_0:chipselect
 	wire  [15:0] mm_interconnect_0_uart_0_s1_readdata;                              // uart_0:readdata -> mm_interconnect_0:uart_0_s1_readdata
 	wire   [2:0] mm_interconnect_0_uart_0_s1_address;                               // mm_interconnect_0:uart_0_s1_address -> uart_0:address
@@ -167,12 +173,6 @@ module Qsys (
 	wire         mm_interconnect_0_uart_0_s1_begintransfer;                         // mm_interconnect_0:uart_0_s1_begintransfer -> uart_0:begintransfer
 	wire         mm_interconnect_0_uart_0_s1_write;                                 // mm_interconnect_0:uart_0_s1_write -> uart_0:write_n
 	wire  [15:0] mm_interconnect_0_uart_0_s1_writedata;                             // mm_interconnect_0:uart_0_s1_writedata -> uart_0:writedata
-	wire         mm_interconnect_0_eee_imgproc_0_s1_chipselect;                     // mm_interconnect_0:EEE_IMGPROC_0_s1_chipselect -> EEE_IMGPROC_0:s_chipselect
-	wire  [31:0] mm_interconnect_0_eee_imgproc_0_s1_readdata;                       // EEE_IMGPROC_0:s_readdata -> mm_interconnect_0:EEE_IMGPROC_0_s1_readdata
-	wire   [2:0] mm_interconnect_0_eee_imgproc_0_s1_address;                        // mm_interconnect_0:EEE_IMGPROC_0_s1_address -> EEE_IMGPROC_0:s_address
-	wire         mm_interconnect_0_eee_imgproc_0_s1_read;                           // mm_interconnect_0:EEE_IMGPROC_0_s1_read -> EEE_IMGPROC_0:s_read
-	wire         mm_interconnect_0_eee_imgproc_0_s1_write;                          // mm_interconnect_0:EEE_IMGPROC_0_s1_write -> EEE_IMGPROC_0:s_write
-	wire  [31:0] mm_interconnect_0_eee_imgproc_0_s1_writedata;                      // mm_interconnect_0:EEE_IMGPROC_0_s1_writedata -> EEE_IMGPROC_0:s_writedata
 	wire         alt_vip_vfb_0_read_master_waitrequest;                             // mm_interconnect_1:alt_vip_vfb_0_read_master_waitrequest -> alt_vip_vfb_0:read_master_av_waitrequest
 	wire  [31:0] alt_vip_vfb_0_read_master_readdata;                                // mm_interconnect_1:alt_vip_vfb_0_read_master_readdata -> alt_vip_vfb_0:read_master_av_readdata
 	wire  [31:0] alt_vip_vfb_0_read_master_address;                                 // alt_vip_vfb_0:read_master_av_address -> mm_interconnect_1:alt_vip_vfb_0_read_master_address

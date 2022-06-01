@@ -87,7 +87,7 @@ wire [15:0] zPartial, zPartial2, zPartial3, Saturation;
 wire [7:0] maxVal, minVal, delta, Value, finalSat, finalVal, mHSV;
 reg [8:0] finalHue;
 reg [7:0] newRed, newGreen, newBlue, averageVal;
-reg [15:0] runningValueTotal;
+reg [23:0] runningValueTotal;
 wire [13:0] HRed, HGreen, HBlue;
 wire isRedMax, isGreenMax, isBlueMax;
 wire isRedMin, isGreenMin, isBlueMin;
@@ -118,17 +118,19 @@ assign isGreenMin = (green < blue) & (green < red) ? 1 : 0;
 assign isBlueMin = (blue < red) & (blue < green) ? 1 : 0;
 assign minVal = isRedMin ? red : (isBlueMin ? blue : green);
 
+//Might need to encase in clocked logic
 assign delta = maxVal-minVal; //8 bits
 
 assign HRed = ((60 * (green-blue))/delta) % 6; //Max 14 bits
 assign HGreen = (((60 *(blue-red))/delta) + 120) % 255;
 assign HBlue = (((60 *(red-green))/delta) + 240) % 255;
 
+////
 assign Hue = isRedMax ? HRed : (isGreenMax ? HGreen : HBlue); //(0-360) 9 bits
 assign Saturation = (delta << 8)/maxVal; //(0-255) //8Bits, max 16 bits
 assign Value = maxVal; //(0-255)
 
-//Thresholds
+//Thresholds - might need to encase in clocked logic
 assign satThresholdMet = (tempThresholdSat < Saturation) ? 1 : 0;
 assign valThresholdMet = (tempThresholdVal < Saturation) ? 1 : 0;
 
@@ -201,7 +203,7 @@ always@(posedge clk) begin
 	if (sop) begin
 		x <= 11'h0;
 		y <= 11'h0;
-		runningValueTotal <= 16'b0;
+		runningValueTotal <= 24'b0; //reset at the end of every frame
 		packet_video <= (blue[3:0] == 3'h0);
 	end
 	else if (in_valid) begin
@@ -212,7 +214,7 @@ always@(posedge clk) begin
 		else begin
 			x <= x + 11'h1;
 			//Sample every 4 bits
-			if(x % 4 == 0) begin 
+			if((x % 4) == 0) begin 
 				runningValueTotal <= runningValueTotal + Value;
 			end
 		end
@@ -256,16 +258,9 @@ always@(*) begin	//Write words to FIFO as state machine advances
 			msg_buf_in = 32'b0;
 			msg_buf_wr = 1'b0;
 		end
-		2'b01: begin
-			msg_buf_in = {8'b01010110, averageVal, 16'b0};	//Communicate average value to NIOS 2, first part is V
-			msg_buf_wr = 1'b1;
-		end
-		2'b10: begin
-			msg_buf_in = {8'b01010110, averageVal, 16'b0};
-			msg_buf_wr = 1'b1;
-		end
-		2'b11: begin
-			msg_buf_in = {8'b01010110, averageVal, 16'b0}; 
+		default: begin
+			//Communicate V with the average value
+			msg_buf_in = {8'h56, runningValueTotal};
 			msg_buf_wr = 1'b1;
 		end
 	endcase

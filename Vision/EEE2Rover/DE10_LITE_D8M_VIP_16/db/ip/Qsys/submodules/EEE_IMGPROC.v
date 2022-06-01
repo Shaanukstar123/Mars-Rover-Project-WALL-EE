@@ -87,7 +87,7 @@ wire [15:0] zPartial, zPartial2, zPartial3, Saturation;
 wire [7:0] maxVal, minVal, delta, Value, finalSat, finalVal, mHSV;
 reg [8:0] finalHue;
 reg [7:0] newRed, newGreen, newBlue, averageVal;
-reg [15:0] runningValueTotal;
+reg [23:0] runningValueTotal;
 wire [13:0] HRed, HGreen, HBlue;
 wire isRedMax, isGreenMax, isBlueMax;
 wire isRedMin, isGreenMin, isBlueMin;
@@ -201,7 +201,7 @@ always@(posedge clk) begin
 	if (sop) begin
 		x <= 11'h0;
 		y <= 11'h0;
-		runningValueTotal <= 16'b0;
+		runningValueTotal <= 24'b0;
 		packet_video <= (blue[3:0] == 3'h0);
 	end
 	else if (in_valid) begin
@@ -257,7 +257,8 @@ always@(*) begin	//Write words to FIFO as state machine advances
 			msg_buf_wr = 1'b0;
 		end
 		default: begin
-			msg_buf_in = {8'b01010110, averageVal, 16'b0};	//Communicate average value to NIOS 2
+			//Communicate V with the average value
+			msg_buf_in = {8'h56, runningValueTotal};
 			msg_buf_wr = 1'b1;
 		end
 	endcase

@@ -13,6 +13,7 @@
 
 //EEE_IMGPROC defines
 #define EEE_IMGPROC_MSG_START ('R'<<16 | 'B'<<8 | 'B')
+#define EEE_MESSAGE_BASE 0x42000 //was modified from my own changes
 
 //offsets
 #define EEE_IMGPROC_STATUS 0
@@ -134,7 +135,7 @@ int main()
   usleep(2000);
   IOWR(MIPI_RESET_N_BASE, 0x00, 0xFF);
 
-  printf("Image Processor ID: %x\n",IORD(0x42000,EEE_IMGPROC_ID));
+  printf("Image Processor ID: %x\n",IORD(EEE_MESSAGE_BASE,EEE_IMGPROC_ID));
   //printf("Image Processor ID: %x\n",IORD(EEE_IMGPROC_0_BASE,EEE_IMGPROC_ID)); //Don't know why this doesn't work - definition is in system.h in BSP
 
 
@@ -253,34 +254,35 @@ int main()
 	#endif
 
        //Read messages from the image processor and print them on the terminal
-       while ((IORD(0x42000,EEE_IMGPROC_STATUS)>>8) & 0xff) { 	//Find out if there are words to read
-           int word = IORD(0x42000,EEE_IMGPROC_MSG); 			//Get next word from message buffer
+       while ((IORD(EEE_MESSAGE_BASE,EEE_IMGPROC_STATUS)>>8) & 0xff) { 	//Find out if there are words to read
+           int word = IORD(EEE_MESSAGE_BASE,EEE_IMGPROC_MSG); 			//Get next word from message buffer
     	   if (fwrite(&word, 4, 1, ser) != 1)
     		   printf("Error writing to UART");
            //if (word == EEE_IMGPROC_MSG_START)				//Newline on message identifier
     	   //   printf("\n");
-    	   //If V received for average value of frame
-    	   if (word & 0xFF000000 == 0x56000000) {
-    		   printf("value:%08x ", word);
+    	   //If V followed by data recieved
+    	   if ((word & 0xFF000000) == 0x56000000) {
+    		   //printf("\n");
     		   //Word has been received so adjust gain
-    		   averageVal = word & 0x00FFFFFF; //Get average value
+    		   averageVal = (word & 0x00FFFFFF) >> 16; //Get average value
     		   //Adjust gain depending on average frame value, but dont adjust if within 10 of 128
-    		   if (118 < averageVal) {
+    		   if ((118 > averageVal) && (gain < 800 + GAIN_STEP)) {
     			   gain += GAIN_STEP;
     			   OV8865SetGain(gain);
     		   }
-    		   if (138 > averageVal) {
+    		   if ((138 < averageVal) && (gain > GAIN_STEP)){
     			   gain -= GAIN_STEP;
     			   OV8865SetGain(gain);
     		   }
-    		   //printf("Gain adjusted to %d\n", gain);
-    		   //printf("Gain adjusted to %d\n", averageVal);
+    		   printf("Gain adjusted to %d, value:%d\n", gain, averageVal);
+    		   usleep(1000000);
     	   }
+    	   //printf("%08x ", word);
        }
 
        //Update the bounding box colour
        boundingBoxColour = ((boundingBoxColour + 1) & 0xff);
-       IOWR(0x42000, EEE_IMGPROC_BBCOL, (boundingBoxColour << 8) | (0xff - boundingBoxColour));
+       IOWR(EEE_MESSAGE_BASE, EEE_IMGPROC_BBCOL, (boundingBoxColour << 8) | (0xff - boundingBoxColour));
 
        //Process input commands
        int in = getchar();

@@ -77,16 +77,17 @@ parameter MSG_INTERVAL = 6;
 parameter BB_COL_DEFAULT = 24'h00ff00;
 
 
-wire [7:0]   red, green, blue, grey;
+wire [7:0]   red, green, blue, gray;
 wire [7:0]   red_out, green_out, blue_out;
 
 wire         sop, eop, in_valid, out_ready;
 //HSV calculations
 wire [8:0] Hue, zHSV, zmSum;
-wire [15:0] zPartial, zPartial2, zPartial3;
-wire [7:0] maxVal, minVal, delta, Saturation, Value, finalSat, finalVal, mHSV;
+wire [15:0] zPartial, zPartial2, zPartial3, Saturation;
+wire [7:0] maxVal, minVal, delta, Value, finalSat, finalVal, mHSV;
 reg [8:0] finalHue;
-reg [7:0] newRed, newGreen, newBlue;
+reg [7:0] newRed, newGreen, newBlue, averageVal;
+reg [23:0] runningValueTotal;
 wire [13:0] HRed, HGreen, HBlue;
 wire isRedMax, isGreenMax, isBlueMax;
 wire isRedMin, isGreenMin, isBlueMin;
@@ -102,6 +103,7 @@ assign tempThresholdVal = 8'd128;
 assign tempThresholdsHue = {9'd0, 9'd80, 9'd180, 9'd250, 9'd310, 99'd0}; //Red, green, cyan, blue, pink
 ////////////////////////////////////////////////////////////////////////
 
+assign gray = green[7:1] + red[7:2] + blue[7:2]; //Grey = green/2 + red/4 + blue/4 (average of all colours to produce grayscale)
 //Pixels enter sequentially
 //Convert to HSV:
 //Max value
@@ -118,12 +120,12 @@ assign minVal = isRedMin ? red : (isBlueMin ? blue : green);
 
 assign delta = maxVal-minVal; //8 bits
 
-assign HRed = (60 * (green-blue)/delta) % 6; //Max 14 bits
-assign HGreen = (60 *(blue-red)/delta) + 2;
-assign HBlue = (60 *(red-green)/delta) + 4;
+assign HRed = ((60 * (green-blue))/delta) % 6; //Max 14 bits
+assign HGreen = (((60 *(blue-red))/delta) + 120) % 255;
+assign HBlue = (((60 *(red-green))/delta) + 240) % 255;
 
 assign Hue = isRedMax ? HRed : (isGreenMax ? HGreen : HBlue); //(0-360) 9 bits
-assign Saturation = delta/maxVal; //(0-255) //8Bits
+assign Saturation = (delta << 8)/maxVal; //(0-255) //8Bits, max 16 bits
 assign Value = maxVal; //(0-255)
 
 //Thresholds
@@ -137,42 +139,6 @@ assign finalVal = valThresholdMet ? 255 : Value;
 
 ////////////////////////////////////////////////////////////////////////
 
-//Set finalHue to nearest threshold value
-always @(posedge clk) begin
-	integer i;
-	for(i = 0; i < tempNumThresholds*9; i = i + 9) begin
-		if (tempThresholdsHue[i+:8] > Hue) begin
-			finalHue <= tempThresholdsHue[i-9+:8];
-			break;
-		end
-	end
-	if (finalHue < 60) begin
-		newRed <= finalVal;
-		newGreen <= zmSum;
-		newBlue <= mHSV;
-	end	else if (finalHue < 120) begin
-		newRed <= zmSum;
-		newGreen <= finalVal;
-		newBlue <= mHSV;
-	end	else if (finalHue < 180) begin
-		newRed <= mHSV;
-		newGreen <= finalVal;
-		newBlue <= zmSum;
-	end	else if (finalHue < 240) begin
-		newRed <= mHSV;
-		newGreen <= zmSum;
-		newBlue <= finalVal;
-	end	else if (finalHue < 300) begin
-		newRed <= zmSum;
-		newGreen <= mHSV;
-		newBlue <= finalVal;
-	end	else if (finalHue < 360) begin
-		newRed <= finalVal;
-		newGreen <= mHSV;
-		newBlue <= zmSum;
-	end
-end
-
 //Convert back to RGB
 assign mHSV = finalVal - finalSat; //8bits
 assign zPartial = (((finalHue << 7)/60) % 256) - 128; //Ranges from -128 to 127
@@ -182,6 +148,51 @@ assign zHSV = finalSat - zPartial3; //Obtain final value for z (8 bits)
 assign zmSum = zHSV + mHSV;
 
 assign {red_out, green_out, blue_out} = (mode & ~sop & packet_video)? {newRed, newGreen, newBlue} : {red,green,blue};
+//Set finalHue to nearest threshold value
+always @(posedge clk) begin
+	integer i;
+	if (satThresholdMet & valThresholdMet) begin
+		for(i = 1; i < tempNumThresholds; i = i + 1) begin
+			if (tempThresholdsHue[9*(i-1)+:9] > Hue) begin
+				if (i > 1) begin
+					finalHue <= tempThresholdsHue[9*(i-2)+:9];
+				end else begin
+					finalHue <= 9'b0;
+				end
+			end
+		end
+		if (finalHue < 60) begin
+			newRed <= finalVal;
+			newGreen <= zmSum;
+			newBlue <= mHSV;
+		end	else if (finalHue < 120) begin
+			newRed <= zmSum;
+			newGreen <= finalVal;
+			newBlue <= mHSV;
+		end	else if (finalHue < 180) begin
+			newRed <= mHSV;
+			newGreen <= finalVal;
+			newBlue <= zmSum;
+		end	else if (finalHue < 240) begin
+			newRed <= mHSV;
+			newGreen <= zmSum;
+			newBlue <= finalVal;
+		end	else if (finalHue < 300) begin
+			newRed <= zmSum;
+			newGreen <= mHSV;
+			newBlue <= finalVal;
+		end	else if (finalHue < 360) begin
+			newRed <= finalVal;
+			newGreen <= mHSV;
+			newBlue <= zmSum;
+		end
+	//If pixels do not meet the required levels of saturation and value, reduce them to grayscale
+	end else begin
+		newRed <= gray;
+		newGreen <= gray;
+		newBlue <= gray;
+	end
+end
 
 //Count valid pixels to tget the image coordinates. Reset and detect packet type on Start of Packet.
 reg [10:0] x, y;
@@ -190,6 +201,7 @@ always@(posedge clk) begin
 	if (sop) begin
 		x <= 11'h0;
 		y <= 11'h0;
+		runningValueTotal <= 24'b0;
 		packet_video <= (blue[3:0] == 3'h0);
 	end
 	else if (in_valid) begin
@@ -199,6 +211,10 @@ always@(posedge clk) begin
 		end
 		else begin
 			x <= x + 11'h1;
+			//Sample every 4 bits
+			if(x % 4 == 0) begin 
+				runningValueTotal <= runningValueTotal + Value;
+			end
 		end
 	end
 end
@@ -210,7 +226,8 @@ always@(posedge clk) begin
 	if (eop & in_valid & packet_video) begin  //Ignore non-video packets
 		//Start message writer FSM once every MSG_INTERVAL frames, if there is room in the FIFO
 		frame_count <= frame_count - 1;
-		
+		//Calculate average value of the frame
+		averageVal <=  runningValueTotal >> 16;
 		if (frame_count == 0 && msg_buf_size < MESSAGE_BUF_MAX - 3) begin
 			msg_state <= 2'b01;
 			frame_count <= MSG_INTERVAL-1;
@@ -230,20 +247,18 @@ wire msg_buf_rd, msg_buf_flush;
 wire [7:0] msg_buf_size;
 wire msg_buf_empty;
 
-`define RED_BOX_MSG_ID "RBB"
+`define RED_BOX_MSG_ID "RBB" //this is a macro
 
+//Use to communicate with the NIOS processor
 always@(*) begin	//Write words to FIFO as state machine advances
 	case(msg_state)
 		2'b00: begin
 			msg_buf_in = 32'b0;
 			msg_buf_wr = 1'b0;
 		end
-		2'b01: begin
-			msg_buf_in = `RED_BOX_MSG_ID;	//Message ID
-			msg_buf_wr = 1'b1;
-		end
 		default: begin
-			msg_buf_in = `RED_BOX_MSG_ID;	//Message ID
+			//Communicate V with the average value
+			msg_buf_in = {8'h56, runningValueTotal};
 			msg_buf_wr = 1'b1;
 		end
 	endcase
@@ -293,9 +308,9 @@ STREAM_REG #(.DATA_WIDTH(26)) out_reg (
 
 // Addresses
 `define REG_STATUS    			0
-`define READ_MSG    				1
+`define READ_MSG    			1
 `define READ_ID    				2
-`define REG_BBCOL					3
+`define REG_BBCOL				3
 
 //Status register bits
 // 31:16 - unimplemented
