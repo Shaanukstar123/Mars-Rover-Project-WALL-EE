@@ -12,7 +12,7 @@ const Battery = () => {
 
   const whenClicked = async () => { 
     try{
-      const randomNumber = await fetch('http://35.176.71.115:8080/battery');
+      const randomNumber = await fetch('http://localhost:8080/battery');
       const data = await randomNumber.json();
       setBatteryLevel(data.percentage);
     }
@@ -46,7 +46,6 @@ const Battery = () => {
   //  so it contains the latest batteryLevel and then it re-renders the image based on new level
   // but React is so fast that you don't notice the delay between the 2 renderings.
   useEffect(function() {
-    console.log('hi');
     setImgSrc(effectz());
   }, [batteryLevel]);
 
