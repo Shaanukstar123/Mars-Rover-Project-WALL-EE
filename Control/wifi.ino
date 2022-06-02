@@ -13,6 +13,8 @@
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 
+unsigned long previousMillis = 0; //Connection Time-out constants
+unsigned long interval = 30000;
 
 void setup() {
   // put your setup code here, to run once:
@@ -51,8 +53,18 @@ void initWiFi(){
 
 }
 
+void wifi_check(){
+  unsigned long currentMillis = millis();
+  if (WiFi.status()!=WL_CONNECTED && (currentMillis - previousMillis >=interval)){
+    Serial.println("Reconnecting to Wifi...");
+    WiFi.disconnect();
+    WiFi.reconnect();
+    previousMillis = currentMillis;
+  }
+}
+
 void loop() {
-  
+  wifi_check();
   // put your main code here, to run repeatedly:
   if (mfrc522.PICC_IsNewCardPresent()){
     if(mfrc522.PICC_ReadCardSerial()){
