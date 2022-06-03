@@ -129,3 +129,9 @@ void loop() {
   }
   delay(10); // this speeds up the simulation
 }
+
+//Resources:
+//https://www.emqx.com/en/blog/esp32-connects-to-the-free-public-mqtt-broker
+//https://iotdesignpro.com/projects/real-time-data-transfer-between-two-esp32-using-websocket-client-on-arduino-ide
+//https://masteringjs.io/tutorials/express/websockets
+//http://www.martyncurrey.com/esp8266-and-the-arduino-ide-part-9-websockets/
