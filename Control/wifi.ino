@@ -1,7 +1,16 @@
+#include <string.h> 
+#include <Arduino.h>
+#include <stdint.h>
 #include <SPI.h>
 #include <Wire.h>
 #include <MFRC522.h>
 #include <WiFi.h>
+#include <ArduinoJson.h>
+#include<HTTPClient.h>
+#include <WiFiUdp.h>
+#include<NTPClient.h>
+#include <WebSocketsClient.h>
+#include <PubSubClient.h>
 
 #define SCK 18
 #define MISO 19
@@ -12,37 +21,54 @@
 #define SS_PIN 2
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
-
-unsigned long previousMillis = 0; //Connection Time-out constants
+unsigned long previousMillis = 0;
 unsigned long interval = 30000;
+const char* host_ip= "35.176.71.115";
+int host_port = 3000;
+WebSocketsClient webSocket;
+
+//MQTT Broker data:
+
+const char *broker = "broker.emqx.io";
+const char *topic = "";
+const char *mqtt_user ="username";
+const char *mqtt_pass = "password";
+const int mqtt_port = 1883;
+
+void mqttConnect(){
+  client.setServer(broker,mqtt_port);
+  client.setCallback(callback);
+  
+}
 
 void setup() {
   // put your setup code here, to run once:
   SPI.begin();
   mfrc522.PCD_Init();
-  Serial.begin(115200);
+  Serial.begin(115200); //opens serial connection to print to console
   Serial.println("Hello, ESP32!");
 
   initWiFi();
+  initSocket();
 }
+
+
 
 void initWiFi(){
   WiFi.mode(WIFI_STA); //Connection Mode (Connecting to Access Point Mode)
-
 
   int networks = WiFi.scanNetworks();
   Serial.println("Networks: "+networks);
   for (int i=0;i<networks;i++){
     Serial.println("Name: "+WiFi.SSID(i));}
 
+
       //**Access Point Details**//
-  std::string ssid = "Wokwi-GUEST";
-  const char *ssidchar = ssid.c_str();
-  std::string password = "";
-  const char *passwordchar = ssid.c_str(); //converts string to appropriate format
+  const char* ssid = "Wokwi-GUEST";
+  const char* password = "";
 
 
-  WiFi.begin("Wokwi-GUEST","");
+  WiFi.begin(ssid,password);
   Serial.print(" Connecting to WiFi ...");
   while (WiFi.status()!=WL_CONNECTED){
     Serial.print('.');
@@ -50,6 +76,15 @@ void initWiFi(){
   }
   Serial.println("Connected Successfully");
   Serial.println(WiFi.localIP());
+
+}
+
+void initSocket(){
+
+  webSocket.begin(host_ip, host_port, "/"); //address, port, URL route
+
+  webSocket.onEvent(webSocketEvent);
+  webSocket.setReconnectInterval(5000);
 
 }
 
@@ -63,8 +98,19 @@ void wifi_check(){
   }
 }
 
+void webSocketEvent(WStype_t type, uint8_t * payload, size_t length){
+  if (type == WStype_TEXT){
+
+  }
+  webSocket.sendTXT("Hello there");
+  Serial.println("Message sent");
+
+}
+
 void loop() {
+
   wifi_check();
+  webSocket.loop();
   // put your main code here, to run repeatedly:
   if (mfrc522.PICC_IsNewCardPresent()){
     if(mfrc522.PICC_ReadCardSerial()){
