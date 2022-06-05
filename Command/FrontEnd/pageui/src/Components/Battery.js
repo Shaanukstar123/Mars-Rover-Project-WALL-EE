@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 
-import one from './1.png'
-import two from './2.png'
-import three from './3.png'
+import one from './static/1.png'
+import two from './static/2.png'
+import three from './static/3.png'
 
 
 const Battery = () => {
