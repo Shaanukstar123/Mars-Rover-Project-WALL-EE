@@ -1,30 +1,61 @@
 import { useState } from 'react'
 import './Autopilot.css'
 import Rover from './Rover';
+import AddObstacles from './AddObstacles';
 
 
 const Autopilot = () => {
 
+  const [aliens, setAliens] = useState([]);
+
   const [intervalId, setIntervalId] = useState(0);
+
   const [coords, setCoords] = useState({
-    xcoord:90,
-    ycoord:60
+    xcoord:190,
+    ycoord:90
   });
 
 
-  const fetchData = () => {
-    
+  const fetchObstacleData = () => {
+    let x2 = Math.floor((Math.random() * 234));
+    let y2 = Math.floor((Math.random() * 355));
+   
+    let alienObj = {
+      color: 'pink',
+      xcoorda : x2,
+      ycoorda : y2,
+    };
+
+  
+    console.log("Alien location: " , alienObj);
+    setAliens((aliens) => [...aliens, alienObj]);
+
+  };
+
+
+  const fetchCoordinateData = () => {
+    console.log('fetching..');
+
     let x = Math.floor((Math.random() * 234));
     let y = Math.floor((Math.random() * 355));
+    let z = Math.floor((Math.random() * 2));
     
     let obj = {
       xcoord : x,
-      ycoord : y
+      ycoord : y,
+      obstacle: z
     };
 
-    console.log(obj);
-    setCoords(obj);
-  }
+
+    setCoords(obj)
+
+    if(obj.obstacle === 1){
+      fetchObstacleData();
+    }
+
+    console.log("object is:", obj);  
+
+  };
 
   const start = (event) => {
 
@@ -38,12 +69,14 @@ const Autopilot = () => {
       event.currentTarget.classList.add(
         'btn-success',
       );
-
+    
       setIntervalId(0);
+      setAliens([]);
       return;
     }
 
-    const newIntervalId = setInterval(fetchData, 1500);
+  
+    const newIntervalId = setInterval(fetchCoordinateData, 2000);
 
     event.currentTarget.classList.remove(
       'btn-success',
@@ -65,10 +98,12 @@ const Autopilot = () => {
         <Rover  Coordinates={coords}  />
       </div>
 
+      <AddObstacles Aliens={aliens} />
       Autopilot
       <button type="button" className="btn btn-success" onClick={start} > {intervalId ? "STOP" : "Let's Explore with Dora"} </button>
     </div>
   )
 }
+
 
 export default Autopilot
