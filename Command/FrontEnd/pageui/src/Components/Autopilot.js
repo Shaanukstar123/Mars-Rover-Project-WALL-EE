@@ -76,7 +76,7 @@ const Autopilot = () => {
     }
 
   
-    const newIntervalId = setInterval(fetchCoordinateData, 2000);
+    const newIntervalId = setInterval(fetchCoordinateData, 1500);
 
     event.currentTarget.classList.remove(
       'btn-success',
@@ -96,9 +96,9 @@ const Autopilot = () => {
     <div className="d-flex flex-row justify-content-evenly align-items-center" style={{minHeight: "93vh", maxHeight:"100vh", border:"4px solid purple"}}>
       <div style={{border:"4px solid purple", height:"70vh", width:"45vw"}} id="johnCena">
         <Rover  Coordinates={coords}  />
+        <AddObstacles Aliens={aliens} />
       </div>
 
-      <AddObstacles Aliens={aliens} />
       Autopilot
       <button type="button" className="btn btn-success" onClick={start} > {intervalId ? "STOP" : "Let's Explore with Dora"} </button>
     </div>
