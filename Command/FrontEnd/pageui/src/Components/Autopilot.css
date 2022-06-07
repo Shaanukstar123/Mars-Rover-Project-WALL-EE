@@ -1,8 +1,11 @@
-div{
-  background-color: orange;
+#johnCena{
+  position: relative;
+  background-color: #001f3f;
 }
 
-.App-logo{
+/* Change the className to something else as many other things have app-logo className */
+/* .App-logo{
   position: absolute;
-  top:0px;
-}
+  top:10px;
+  left:10px;
+} */
