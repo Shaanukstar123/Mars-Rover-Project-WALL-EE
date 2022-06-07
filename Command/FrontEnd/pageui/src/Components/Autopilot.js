@@ -17,11 +17,13 @@ const Autopilot = () => {
 
 
   const fetchObstacleData = () => {
+    let colors = ['red', 'green', 'blue', 'pink'];
     let x2 = Math.floor((Math.random() * 234));
     let y2 = Math.floor((Math.random() * 355));
+    let colorRandom = colors[ Math.floor(Math.random() * colors.length)]
    
     let alienObj = {
-      color: 'pink',
+      color: colorRandom,
       xcoorda : x2,
       ycoorda : y2,
     };
@@ -76,7 +78,7 @@ const Autopilot = () => {
     }
 
   
-    const newIntervalId = setInterval(fetchCoordinateData, 1500);
+    const newIntervalId = setInterval(fetchCoordinateData, 500);
 
     event.currentTarget.classList.remove(
       'btn-success',
