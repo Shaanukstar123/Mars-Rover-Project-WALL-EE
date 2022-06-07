@@ -16,47 +16,44 @@ const Autopilot = () => {
   });
 
 
-  const fetchObstacleData = () => {
-    let colors = ['red', 'green', 'blue', 'pink'];
-    let x2 = Math.floor((Math.random() * 234));
-    let y2 = Math.floor((Math.random() * 355));
-    let colorRandom = colors[ Math.floor(Math.random() * colors.length)]
-   
-    let alienObj = {
-      color: colorRandom,
-      xcoorda : x2,
-      ycoorda : y2,
-    };
+  const fetchObstacleData = async () => {
+    try{
 
-  
-    console.log("Alien location: " , alienObj);
-    setAliens((aliens) => [...aliens, alienObj]);
+      const request = await fetch('http://localhost:8080/obstacles');
+      const alienObj = await request.json();
 
-  };
-
-
-  const fetchCoordinateData = () => {
-    console.log('fetching..');
-
-    let x = Math.floor((Math.random() * 234));
-    let y = Math.floor((Math.random() * 355));
-    let z = Math.floor((Math.random() * 2));
     
-    let obj = {
-      xcoord : x,
-      ycoord : y,
-      obstacle: z
-    };
-
-
-    setCoords(obj)
-
-    if(obj.obstacle === 1){
-      fetchObstacleData();
+      //console.log("Alien location: " , alienObj);
+      setAliens((aliens) => [...aliens, alienObj]);
+    }
+    
+    catch(err){
+      console.log(err);
     }
 
-    console.log("object is:", obj);  
+  
+  };
 
+  const fetchCoordinateData = async () => {
+    try{
+      //console.log('fetching..');
+
+      const request = await fetch('http://localhost:8080/coordinates');
+      const obj = await request.json();
+
+      setCoords(obj)
+
+      if(obj.obstacle === 1){
+        fetchObstacleData();
+      }
+
+      //console.log("object is:", obj);
+    }
+
+    catch(err){
+      console.log(err);
+    }
+  
   };
 
   const start = (event) => {
@@ -78,7 +75,7 @@ const Autopilot = () => {
     }
 
   
-    const newIntervalId = setInterval(fetchCoordinateData, 500);
+    const newIntervalId = setInterval(fetchCoordinateData, 200);
 
     event.currentTarget.classList.remove(
       'btn-success',
