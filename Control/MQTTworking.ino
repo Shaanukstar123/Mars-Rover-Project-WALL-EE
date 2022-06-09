@@ -29,14 +29,25 @@ WebSocketsClient webSocket;
 
 //MQTT Broker data:
 
-const char *broker = "broker.emqx.io";
-const char *topic = "test";
-const char *mqtt_user ="username";
-const char *mqtt_pass = "password";
+const char *broker = "35.176.71.115";
+const char *topic = "rover/location";
+const char *mqtt_user ="marsrover";
+const char *mqtt_pass = "marsrover123";
 const int mqtt_port = 1883;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
+
+void callback(char *topic, byte *payload, unsigned int length) {
+ Serial.print("Message arrived in topic: ");
+ Serial.println(topic);
+ Serial.print("Message:");
+ for (int i = 0; i < length; i++) {
+     Serial.print((char) payload[i]);
+ }
+ Serial.println();
+ Serial.println("-----------------------");
+}
 
 void mqttConnect(){
   client.setServer(broker,mqtt_port);
@@ -55,36 +66,13 @@ void mqttConnect(){
 
   }
   client.publish(topic, "Yo this is ESP32");
+  Serial.println("Message sent");
   client.subscribe(topic);
   
 }
 
-void callback(char *topic, byte *payload, unsigned int length) {
- Serial.print("Message arrived in topic: ");
- Serial.println(topic);
- Serial.print("Message:");
- for (int i = 0; i < length; i++) {
-     Serial.print((char) payload[i]);
- }
- Serial.println();
- Serial.println("-----------------------");
-}
 
-void setup() {
-  // put your setup code here, to run once:
-  SPI.begin();
-  mfrc522.PCD_Init();
-  Serial.begin(115200); //opens serial connection to print to console
-  Serial.println("Hello, ESP32!");
-
-  initWiFi();
-  mqttConnect();
-  //initSocket();
-}
-
-
-
-void initWiFi(){
+void initWifi(){
   WiFi.mode(WIFI_STA); //Connection Mode (Connecting to Access Point Mode)
 
   int networks = WiFi.scanNetworks();
@@ -92,10 +80,9 @@ void initWiFi(){
   for (int i=0;i<networks;i++){
     Serial.println("Name: "+WiFi.SSID(i));}
 
-
       //**Access Point Details**//
-  const char* ssid = "Wokwi-GUEST";
-  const char* password = "";
+  const char* ssid = "Shan-Wifi";
+  const char* password = "hotspot123";
 
 
   WiFi.begin(ssid,password);
@@ -106,6 +93,15 @@ void initWiFi(){
   }
   Serial.println("Connected Successfully");
   Serial.println(WiFi.localIP());
+
+}
+
+void webSocketEvent(WStype_t type, uint8_t * payload, size_t length){
+  if (type == WStype_TEXT){
+
+  }
+  webSocket.sendTXT("Hello there");
+  Serial.println("Message sent");
 
 }
 
@@ -127,14 +123,16 @@ void wifi_check(){
     previousMillis = currentMillis;
   }
 }
+void setup() {
+  // put your setup code here, to run once:
+  SPI.begin();
+  mfrc522.PCD_Init();
+  Serial.begin(115200); //opens serial connection to print to console
+  Serial.println("Hello, ESP32!");
 
-void webSocketEvent(WStype_t type, uint8_t * payload, size_t length){
-  if (type == WStype_TEXT){
-
-  }
-  webSocket.sendTXT("Hello there");
-  Serial.println("Message sent");
-
+  initWifi();
+  mqttConnect();
+  //initSocket();
 }
 
 void loop() {
