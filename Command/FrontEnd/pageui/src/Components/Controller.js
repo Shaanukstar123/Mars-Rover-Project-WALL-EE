@@ -5,7 +5,7 @@ const Controller = () => {
 
   const mouseLeaveControl = async (evt) => {
     evt.preventDefault();
-    const randomNumber = await fetch('http://localhost:8080/rControl', {
+    const randomNumber = await fetch('http://35.176.71.115:8080/rControl', {
       method: "POST",
       headers: {
         'Content-type': "application/json"
@@ -22,7 +22,7 @@ const Controller = () => {
   const mouseClickControl = async (evt) => {
     evt.preventDefault();
 
-    const randomNumber = await fetch('http://localhost:8080/rControl', {
+    const randomNumber = await fetch('http://35.176.71.115:8080/rControl', {
       method: "POST",
       headers: {
         'Content-type': "application/json"
