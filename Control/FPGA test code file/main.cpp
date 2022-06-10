@@ -5,6 +5,11 @@
 
 #define Testinput 2
 
+#define PIN_SS        5
+#define PIN_MISO      19
+#define PIN_MOSI      23
+#define PIN_SCK       18
+
 String recievedData;
 
 String toBinary(int n)
@@ -20,11 +25,12 @@ int (toInteger(String abc))
   
   for (int x = 0; x < abc.length(); x++)
   {
-    if (abc[x] != '0')
+    if (abc[x] == '1')
     {
       conv += pow(2, x);
     }
   }
+return conv;
 }
 
 String stringFlip(String input)
@@ -118,7 +124,14 @@ void analyseData(String x)
 
 void setup()
 { 
+
+  pinMode(PIN_SS,OUTPUT);
+  pinMode(PIN_MISO,INPUT);
+  pinMode(PIN_MOSI,OUTPUT);
+  pinMode(PIN_SCK,OUTPUT);
+
   Serial.begin(115200);
+
   SPI.begin();
   SPI.setClockDivider(SPI_CLOCK_DIV32);
   SPI.setDataMode(SPI_MODE3);
