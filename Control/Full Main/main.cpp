@@ -1,5 +1,7 @@
 #include <Arduino.h>
 #include <vector>
+//Servo library needed for Radar
+#include <ESP32servo.h>
 
 
 #define Radar 2
@@ -11,6 +13,32 @@
 #define Motor1B 14  //Bwd
 #define Motor2B 15
 //Add ADNS3080 Input ports here. 
+
+//Servo setup stuff
+Servo myservo;  // create servo object to control a servo
+int pos = 0;    // variable to store the servo position
+
+class RadarProperties
+{
+    public:
+    int angle;
+    int CurrentFrequency;
+    bool Detection;
+    bool Swingdirection; //0 is left, 1 is right
+};
+
+RadarProperties RadarObject; // Used for storage of data on the object
+
+class FPGAproperties
+{
+    public:
+    int numberAliens;
+    int numberBuildings;
+    bool alienPresent; //will send flags for if an alien is present
+    bool buildingPresent; //will send flags for if a building is present
+};
+
+FPGAproperties FPGAobject;
 
 class locationdata
 {
@@ -35,23 +63,38 @@ class objectlist
  
 //Place Radar Code here
 
-// int degree = 0; externally defined.
-int RadarFunctionality()
-{
-  //send to the radar: rotate by 1 degree.
-  //degree++
-  //if nothing detected, do nothing.
-  //if (analogRead(FrequencyPin > 60))
-  //  {
-  //    return analogRead(FrequencyPin);
-  //    if not 0 something will happen...
-  //  }
-  //    else 
-  //  {
-  //    return 0; // if 0 nothing will happen
-  //  }
 
-} //If all of the radar stuff needs to be locally hosted we will put the entire code here. 
+int ServoFunctionality()
+{
+  //servo function: go through whole function once. 
+  if (RadarObject.angle <= 0)
+  {
+      RadarObject.Swingdirection = 1;
+  }
+
+  if (RadarObject.angle >= 180)
+  {
+      RadarObject.Swingdirection = 0;
+  }
+
+  if (RadarObject.Swingdirection == 0)
+  {
+      RadarObject.angle--;
+      //servoupdate
+  }
+
+  if (RadarObject.Swingdirection == 1)
+  {
+      RadarObject.angle++; 
+  }
+
+    myservo.write(RadarObject.angle); //update the servoposition
+
+    if (digitalRead(Radar) == HIGH)
+    {
+        RadarObject.Detection = 1;
+    }
+} 
 
 void WiFiSetup() //Setup connection
 {
@@ -64,8 +107,45 @@ void WiFiCheck() //Check wifi connection in loop()
 
 }
 
-void commandCommunicate() //shaanuka's section applicable here
+void sendData()
 {
+    int prevX, prevY; // previous coordinates of Rover
+    //Radar detection
+    if (RadarObject.Detection)
+    {
+        //send fan flag to command
+        RadarObject.Detection = 0; // reset the value to 0. Has been detected now. 
+    }
+
+    //Battery Tracking
+    if (BatteryLevel()!= Rover.BatteryPercentage)
+    {
+        int currentlevel = BatteryLevel();
+        //send the current battery level to command:
+    }
+
+    //FPGA detection (aliens)
+    if (FPGAobject.alienPresent)
+    {
+        //send colour, approximate distance and approximate coordinate
+    }
+
+    if (FPGAobject.buildingPresent)
+    {
+        //send approximate distance and approximate coordinate
+    }
+
+    //send total number of aliens found
+
+    //Location Data
+
+    if (Rover.X != prevX && Rover.Y != prevY)
+    {
+        //send Rover.X and Rover.Y to command.
+        prevX = Rover.X;
+        prevY = Rover.Y;
+    }
+
 
 }
 
@@ -74,10 +154,10 @@ void commandConnect() //shaanuka's section applicable here
 
 }
 
-void BatteryLevel(int example)
+int BatteryLevel()
 {
-  int discharge = example;
-  //int discharge = analogRead(BATTERY);
+  
+  int discharge = analogRead(BATTERY);
 
   int level = (discharge*1000)/40960;
 
@@ -89,20 +169,23 @@ if (Rover.BatteryPercentage != level)
 } // To avoid needless reprinting.
 
   Rover.BatteryPercentage = level;
+  return level;
 }
 
-void RadarDetection()
+void RadarDetection() // May be a redundant function. 
 {
   
   if (digitalRead(Radar))
   {
-    int angle = analogRead(RadarAngle);
-    Serial.println("Radar has detected fan!");
-    Serial.print("Detected at ");
-    Serial.print(angle);
-    Serial.println("Degrees from Rover Forward!");
-    Serial.print("Frequency is: ");
-    Serial.println("Test Frequency Here");
+      //Debugging stuff
+    // int angle = analogRead(RadarAngle);
+    // Serial.println("Radar has detected fan!");
+    // Serial.print("Detected at ");
+    // Serial.print(angle);
+    // Serial.println("Degrees from Rover Forward!");
+    // Serial.print("Frequency is: ");
+    // Serial.println("Test Frequency Here");
+   
   }
 
   //approximate location of fan
@@ -114,12 +197,36 @@ void RadarDetection()
 
 void DriveCommands()
 {
-    //digitalwrite to the drive module with correct values. 
-    //read command from wifi
-    //if else block for fwd, bwd, left, right
-    //set correct pins HIGH, LOW;
-    //if no input, set all inputs to LOW.
-    
+    String command; // = Incoming command...
+    //check for incoming commands:
+    if (command == "Forward")
+    {
+        //set all other pins low
+        //set forwardpins high
+    }
+
+    if (command == "Backward")
+    {
+        //set backward pins high
+    }
+
+    if (command == "Left")
+    {
+        //set all other pins low
+        //set left pins high
+    }
+
+    if (command == "Right")
+    {
+        //set all other pins low
+        //set right pins high
+    }
+
+    if (command = "None")
+    {
+        //set all pins LOW;
+    }
+
 }
 
 void FPGA_Detection() //Do with Shaheen
@@ -153,11 +260,7 @@ void locationsetup()
   Rover.X = 0;
   Rover.Y = 0;
   Rover.angle = 0; 
-  //idea: buy a compass module in order to calibrate angle?
-  //Manual callibration option?
-  //Send specific data from command to tell Rover direction information. 
-  //i.e, tell Rover it is facing in the 45 degree direction. 
-  //so Rover.angle = 45;
+  
 }
 
 void setup()
@@ -176,18 +279,31 @@ void setup()
   //Initialise X, Y coord. 
   locationsetup();
 
+  //SERVO, RADAR
+
+    RadarObject.angle = 0; // initialises the angle of the servo to 0 degrees.
+    RadarObject.Detection = 0; //The variable storing whether a detection has been made
+    ESP32PWM::allocateTimer(0);
+    ESP32PWM::allocateTimer(1);
+    ESP32PWM::allocateTimer(2);
+    ESP32PWM::allocateTimer(3);
+
+  myservo.setPeriodHertz(50);
+  myservo.attach(12);  // attaches the servo on pin 12 to the servo object
+  //Servo is controlled by adjusting the position.
+
 }
 
 void loop()
 { 
-  delay(1000); //Do everything every 100 ms?
+    delay(100); //Do everything every 100 ms?
 
 
 
-  //BatteryLevel(2000);
+    //BatteryLevel(2000);
 
 
 
-  Serial.println("loop Executed");
+    Serial.println("loop Executed");
 
 }
