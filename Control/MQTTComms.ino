@@ -30,7 +30,8 @@ WebSocketsClient webSocket;
 //MQTT Broker data:
 
 const char *broker = "35.176.71.115";
-const char *topic = "rover/location";
+char *topic = "test";
+char *topic2 = "epic";
 const char *mqtt_user ="marsrover";
 const char *mqtt_pass = "marsrover123";
 const int mqtt_port = 1883;
@@ -38,7 +39,7 @@ const int mqtt_port = 1883;
 WiFiClient espClient;
 PubSubClient client(espClient);
 
-void callback(char *topic, byte *payload, unsigned int length) {
+void callback(char *topic, byte *payload, unsigned int length) { //Data received
  Serial.print("Message arrived in topic: ");
  Serial.println(topic);
  Serial.print("Message:");
@@ -47,6 +48,16 @@ void callback(char *topic, byte *payload, unsigned int length) {
  }
  Serial.println();
  Serial.println("-----------------------");
+}
+
+void pub(String message,char *topic){
+  client.publish(topic,"Message");
+  Serial.println("Message sent");
+}
+
+void sub(char *topic){
+  Serial.println("Waiting for sub...");
+  client.subscribe(topic);
 }
 
 void mqttConnect(){
@@ -63,11 +74,11 @@ void mqttConnect(){
       Serial.println("Failed with state: ");
       Serial.print(client.state());
     }
-
+    pub("hello",topic);
+    sub(topic2);
+    
   }
-  client.publish(topic, "Yo this is ESP32");
-  Serial.println("Message sent");
-  client.subscribe(topic);
+  
   
 }
 
@@ -96,14 +107,14 @@ void initWifi(){
 
 }
 
-void webSocketEvent(WStype_t type, uint8_t * payload, size_t length){
+/*void webSocketEvent(WStype_t type, uint8_t * payload, size_t length){
   if (type == WStype_TEXT){
 
   }
   webSocket.sendTXT("Hello there");
   Serial.println("Message sent");
 
-}
+} 
 
 void initSocket(){
 
@@ -113,6 +124,9 @@ void initSocket(){
   webSocket.setReconnectInterval(5000);
 
 }
+
+ */ //Websockets Not used anymore. MQTT used instead
+
 
 void wifi_check(){
   unsigned long currentMillis = millis();
@@ -138,8 +152,7 @@ void setup() {
 void loop() {
   client.loop();
   wifi_check();
-  webSocket.loop();
-  // put your main code here, to run repeatedly:
+  /*webSocket.loop();
   if (mfrc522.PICC_IsNewCardPresent()){
     if(mfrc522.PICC_ReadCardSerial()){
 
@@ -155,7 +168,7 @@ void loop() {
 
     }
   }
-  delay(10); // this speeds up the simulation
+  delay(10); // this speeds up the simulation */
 }
 
 //Resources:
@@ -163,3 +176,6 @@ void loop() {
 //https://iotdesignpro.com/projects/real-time-data-transfer-between-two-esp32-using-websocket-client-on-arduino-ide
 //https://masteringjs.io/tutorials/express/websockets
 //http://www.martyncurrey.com/esp8266-and-the-arduino-ide-part-9-websockets/
+
+//MQTT PubSub help:
+//http://www.steves-internet-guide.com/using-arduino-pubsub-mqtt-client/
