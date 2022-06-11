@@ -19,16 +19,19 @@ String toBinary(int n)
     return r;
 }
 
-int (toInteger(String abc))
+int toInteger(String abc)
 {
   int conv = 0;
   
-  for (int x = 0; x < abc.length(); x++)
+  //for (int x = 0; x < abc.length(); x++)
+  for (int x = abc.length() - 1; x >= 0; x--)
   {
     if (abc[x] == '1')
     {
-      conv += pow(2, x);
+      conv += pow(2, abc.length()-1 - x);
     }
+
+    
   }
 return conv;
 }
@@ -42,6 +45,7 @@ String stringFlip(String input)
   }
   return flipped;
 }
+
 
 void analyseData(String x)
 {
@@ -90,25 +94,54 @@ void analyseData(String x)
       Serial.println("Grey Alien detected.");
     }
 
+    //Distance
+    String distanceBin;
+  
+  for (int y = 3; y < 11; y++) //extracting the distance
+    {distanceBin += x[y];}
+    Serial.println(distanceBin);
+
+    int distance = toInteger(distanceBin);
+
+    Serial.print("Approximate distance from Rover : ");
+    Serial.print(distance);
+    Serial.println(" centimeters.");
+    //angle
+
+  String angleBin;
+
+  for (int y = 11; y < 16; y++) //extracting the angle
+    {angleBin += x[y];}
+  
+  int angle = toInteger(angleBin);
+
+ 
+    Serial.print("Approximate angle from Rover : ");
+    Serial.print(angle);
+    Serial.println(" degrees.");
+  
+  
+
   }
 
   //Distance
 
-  String distanceBin;
-  for (int y = 3; y < 11; y++) //extracting the distance
-    {distanceBin += x[y];}
+  // String distanceBin;
 
-  int distance = toInteger(distanceBin);
+  // for (int y = 3; y < 11; y++) //extracting the distance
+  //   {distanceBin += x[y];}
 
-  if (detectionMade)
-  {
-    Serial.print("Approximate distance from Rover : ");
-    Serial.println(distance + " centimeters.");
-  }
+  // int distance = toInteger(distanceBin);
+
+  // if (detectionMade)
+  // {
+  //   Serial.print("Approximate distance from Rover : ");
+  //   Serial.println(distance + " centimeters.");
+  // }
 
   String angleBin;
 
-  for (int y = 11; y < 16; y++) //extracting the distance
+  for (int y = 11; y < 16; y++) //extracting the angle
     {angleBin += x[y];}
   
   int angle = toInteger(angleBin);
@@ -116,7 +149,7 @@ void analyseData(String x)
   if (detectionMade)
   {
     Serial.print("Approximate angle from Rover : ");
-    Serial.println(distance + " degrees.");
+    Serial.println(angle + " degrees.");
   }
 
 
@@ -144,6 +177,11 @@ void loop()
   int example = SPI.transfer16(0xff);
   //convert to binary
   recievedData = toBinary(example);
+
+  //testing input for checking deconversion
+  //recievedData = "1001000000110011";
+
+
   Serial.println(recievedData);
   delay(1000);
   Serial.print("Processing data");
@@ -157,6 +195,5 @@ void loop()
 
   analyseData(recievedData);
 
-
-
+  //while(1);
 }
