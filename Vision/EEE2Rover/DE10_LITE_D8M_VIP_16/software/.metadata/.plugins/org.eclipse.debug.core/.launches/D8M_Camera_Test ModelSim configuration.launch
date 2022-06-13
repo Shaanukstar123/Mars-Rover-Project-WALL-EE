@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="com.altera.sbtgui.launch.modelsim.Nios2ModelsimLaunchConfiguration">
+<stringAttribute key="elfFile" value="C:\Users\Shaheen\Documents\Year2\Wall-EE\Wall-EE\Vision\EEE2Rover\DE10_LITE_D8M_VIP_16\software\D8M_Camera_Test\D8M_Camera_Test.elf"/>
+<stringAttribute key="modelSimPath" value="C:\win32aloem"/>
+<stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_ID" value="com.altera.debug.cdi.gdb.plugin.Nios2GdbCdiDebugger"/>
+<stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_START_MODE" value="run"/>
+<booleanAttribute key="org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN" value="true"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="D8M_Camera_Test.elf"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="D8M_Camera_Test"/>
+<stringAttribute key="spdPath" value="C:\Users\Shaheen\Documents\Year2\Wall-EE\Wall-EE\Vision\EEE2Rover\DE10_LITE_D8M_VIP_16\Qsys_tb.spd"/>
+</launchConfiguration>

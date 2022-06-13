@@ -901,52 +901,51 @@
 											<node nodeId="1372710005725" orientation="VERTICAL" divider="0.8051001821493625">
 												<node nodeId="1372710005727" orientation="HORIZONTAL" divider="0.7178845934919044">
 													<node nodeId="1372710005733" orientation="VERTICAL" divider="0.75">
-														<node nodeId="1653594267373" orientation="HORIZONTAL" divider="0.7317903335602451">
-															<leaf id="4" nodeId="1372710005735">
-																<placeholders>
-																	<placeholder>dock.single.Connections</placeholder>
-																	<placeholder>dock.single.System\ Contents</placeholder>
-																	<placeholder>dock.single.Assignments</placeholder>
-																	<placeholder>dock.single.Schematic</placeholder>
-																	<placeholder>dock.single.Clocks</placeholder>
-																	<placeholder>dock.single.Interface\ Requirements\ \-\ Alpha</placeholder>
-																	<placeholder>dock.single.Generation</placeholder>
-																	<placeholder>dock.single.Clock\ Settings</placeholder>
-																	<placeholder>dock.single.Instrumentation\ \-\ Beta</placeholder>
-																	<placeholder>dock.single.HDL\ Example</placeholder>
-																	<placeholder>dock.single.Clock\ Domains</placeholder>
-																	<placeholder>dock.single.Interface\ Requirements</placeholder>
-																	<placeholder>dock.single.Interconnect\ Requirements</placeholder>
-																	<placeholder>dock.single.Instrumentation</placeholder>
-																	<placeholder>dock.single.Instance\ Parameters</placeholder>
-																	<placeholder>dock.single.Domains</placeholder>
-																</placeholders>
-																<placeholder-map>
-																	<version>0</version>
-																	<format>dock.PlaceholderList</format>
-																	<entry>
-																		<key shared="false">
-																			<placeholder>dock.single.System\ Contents</placeholder>
-																		</key>
-																		<item key="convert" type="b">true</item>
-																		<item key="convert-keys" type="a"/>
-																	</entry>
-																	<entry>
-																		<key shared="false">
-																			<placeholder>dock.single.Address\ Map</placeholder>
-																		</key>
-																		<item key="convert" type="b">true</item>
-																		<item key="convert-keys" type="a"/>
-																	</entry>
-																	<entry>
-																		<key shared="false">
-																			<placeholder>dock.single.Interconnect\ Requirements</placeholder>
-																		</key>
-																		<item key="convert" type="b">true</item>
-																		<item key="convert-keys" type="a"/>
-																	</entry>
-																</placeholder-map>
-															</leaf>
+														<node nodeId="1653594267373" orientation="HORIZONTAL" divider="0.6746028781063673">
+															<node nodeId="1654743316464" orientation="VERTICAL" divider="0.25">
+																<leaf id="0" nodeId="1372710005735">
+																	<placeholders>
+																		<placeholder>dock.single.Connections</placeholder>
+																		<placeholder>dock.single.Assignments</placeholder>
+																		<placeholder>dock.single.Schematic</placeholder>
+																		<placeholder>dock.single.Clocks</placeholder>
+																		<placeholder>dock.single.Interface\ Requirements\ \-\ Alpha</placeholder>
+																		<placeholder>dock.single.Generation</placeholder>
+																		<placeholder>dock.single.Clock\ Settings</placeholder>
+																		<placeholder>dock.single.Instrumentation\ \-\ Beta</placeholder>
+																		<placeholder>dock.single.HDL\ Example</placeholder>
+																		<placeholder>dock.single.Clock\ Domains</placeholder>
+																		<placeholder>dock.single.Interface\ Requirements</placeholder>
+																		<placeholder>dock.single.Interconnect\ Requirements</placeholder>
+																		<placeholder>dock.single.Instrumentation</placeholder>
+																		<placeholder>dock.single.Instance\ Parameters</placeholder>
+																		<placeholder>dock.single.Domains</placeholder>
+																	</placeholders>
+																	<placeholder-map>
+																		<version>0</version>
+																		<format>dock.PlaceholderList</format>
+																		<entry>
+																			<key shared="false">
+																				<placeholder>dock.single.Address\ Map</placeholder>
+																			</key>
+																			<item key="convert" type="b">true</item>
+																			<item key="convert-keys" type="a"/>
+																		</entry>
+																		<entry>
+																			<key shared="false">
+																				<placeholder>dock.single.Interconnect\ Requirements</placeholder>
+																			</key>
+																			<item key="convert" type="b">true</item>
+																			<item key="convert-keys" type="a"/>
+																		</entry>
+																	</placeholder-map>
+																</leaf>
+																<leaf id="5" nodeId="1654743316463">
+																	<placeholders>
+																		<placeholder>dock.single.System\ Contents</placeholder>
+																	</placeholders>
+																</leaf>
+															</node>
 															<leaf id="1" nodeId="1653594267372">
 																<placeholders>
 																	<placeholder>dock.single.Parameters</placeholder>
@@ -993,7 +992,7 @@
 														</leaf>
 													</node>
 												</node>
-												<leaf id="0" nodeId="1372710005745">
+												<leaf id="4" nodeId="1372710005745">
 													<placeholders>
 														<placeholder>dock.single.Messages</placeholder>
 														<placeholder>dock.single.Generation\ Messages</placeholder>
@@ -1025,14 +1024,93 @@
 							</adjacent>
 							<children ignore="false">
 								<child>
-									<layout factory="predefined" placeholder="dock.single.Messages">
-										<replacement id="dockablesingle Messages"/>
-										<delegate id="delegate_ccontrol backup factory id">
-											<id>Messages</id>
-											<area/>
-										</delegate>
+									<layout factory="delegate_StackDockStationFactory">
+										<selected>0</selected>
+										<placeholders>
+											<version>0</version>
+											<format>dock.PlaceholderList</format>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.System\ Contents</placeholder>
+												</key>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.Address\ Map</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">0</item>
+												<item key="dock.id" type="i">0</item>
+												<item key="dock.placeholder" type="s">dock.single.Address\ Map</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.Interconnect\ Requirements</placeholder>
+												</key>
+												<item key="convert" type="b">true</item>
+												<item key="convert-keys" type="a">
+													<item type="s">index</item>
+													<item type="s">id</item>
+													<item type="s">placeholder</item>
+												</item>
+												<item key="dock.index" type="i">1</item>
+												<item key="dock.id" type="i">1</item>
+												<item key="dock.placeholder" type="s">dock.single.Interconnect\ Requirements</item>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.Assignments</placeholder>
+												</key>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.Connections</placeholder>
+												</key>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.Instance\ Parameters</placeholder>
+												</key>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.Instrumentation\ \-\ Beta</placeholder>
+												</key>
+											</entry>
+											<entry>
+												<key shared="false">
+													<placeholder>dock.single.Schematic</placeholder>
+												</key>
+											</entry>
+										</placeholders>
 									</layout>
-									<children ignore="false"/>
+									<children ignore="false">
+										<child>
+											<layout factory="predefined" placeholder="dock.single.Address\ Map">
+												<replacement id="dockablesingle Address Map"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>Address Map</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+										<child>
+											<layout factory="predefined" placeholder="dock.single.Interconnect\ Requirements">
+												<replacement id="dockablesingle Interconnect Requirements"/>
+												<delegate id="delegate_ccontrol backup factory id">
+													<id>Interconnect Requirements</id>
+													<area/>
+												</delegate>
+											</layout>
+											<children ignore="false"/>
+										</child>
+									</children>
 								</child>
 								<child>
 									<layout factory="predefined" placeholder="dock.single.Parameters">
@@ -1114,112 +1192,24 @@
 									<children ignore="false"/>
 								</child>
 								<child>
-									<layout factory="delegate_StackDockStationFactory">
-										<selected>0</selected>
-										<placeholders>
-											<version>0</version>
-											<format>dock.PlaceholderList</format>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.System\ Contents</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">0</item>
-												<item key="dock.id" type="i">0</item>
-												<item key="dock.placeholder" type="s">dock.single.System\ Contents</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.Address\ Map</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">1</item>
-												<item key="dock.id" type="i">1</item>
-												<item key="dock.placeholder" type="s">dock.single.Address\ Map</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.Interconnect\ Requirements</placeholder>
-												</key>
-												<item key="convert" type="b">true</item>
-												<item key="convert-keys" type="a">
-													<item type="s">index</item>
-													<item type="s">id</item>
-													<item type="s">placeholder</item>
-												</item>
-												<item key="dock.index" type="i">2</item>
-												<item key="dock.id" type="i">2</item>
-												<item key="dock.placeholder" type="s">dock.single.Interconnect\ Requirements</item>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.Assignments</placeholder>
-												</key>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.Connections</placeholder>
-												</key>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.Instance\ Parameters</placeholder>
-												</key>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.Instrumentation\ \-\ Beta</placeholder>
-												</key>
-											</entry>
-											<entry>
-												<key shared="false">
-													<placeholder>dock.single.Schematic</placeholder>
-												</key>
-											</entry>
-										</placeholders>
+									<layout factory="predefined" placeholder="dock.single.Messages">
+										<replacement id="dockablesingle Messages"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>Messages</id>
+											<area/>
+										</delegate>
 									</layout>
-									<children ignore="false">
-										<child>
-											<layout factory="predefined" placeholder="dock.single.System\ Contents">
-												<replacement id="dockablesingle System Contents"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>System Contents</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.Address\ Map">
-												<replacement id="dockablesingle Address Map"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>Address Map</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-										<child>
-											<layout factory="predefined" placeholder="dock.single.Interconnect\ Requirements">
-												<replacement id="dockablesingle Interconnect Requirements"/>
-												<delegate id="delegate_ccontrol backup factory id">
-													<id>Interconnect Requirements</id>
-													<area/>
-												</delegate>
-											</layout>
-											<children ignore="false"/>
-										</child>
-									</children>
+									<children ignore="false"/>
+								</child>
+								<child>
+									<layout factory="predefined" placeholder="dock.single.System\ Contents">
+										<replacement id="dockablesingle System Contents"/>
+										<delegate id="delegate_ccontrol backup factory id">
+											<id>System Contents</id>
+											<area/>
+										</delegate>
+									</layout>
+									<children ignore="false"/>
 								</child>
 							</children>
 						</root>
@@ -1910,11 +1900,11 @@
 										<property factory="SplitDockPlaceholderProperty">
 											<placeholder>dock.single.System\ Contents</placeholder>
 											<backup-path>
-												<node location="RIGHT" size="0.8" id="1372710005721"/>
-												<node location="TOP" size="0.75" id="1372710005725"/>
-												<node location="LEFT" size="0.75" id="1372710005727"/>
-												<node location="RIGHT" size="0.6666666666666667" id="1372710005729"/>
+												<node location="RIGHT" size="0.7781885397412199" id="1372710005721"/>
+												<node location="TOP" size="0.8051001821493625" id="1372710005725"/>
+												<node location="LEFT" size="0.7178845934919044" id="1372710005727"/>
 												<node location="TOP" size="0.75" id="1372710005733"/>
+												<node location="LEFT" size="0.6746028781063673" id="1653594267373"/>
 												<leaf id="1372710005735"/>
 											</backup-path>
 										</property>

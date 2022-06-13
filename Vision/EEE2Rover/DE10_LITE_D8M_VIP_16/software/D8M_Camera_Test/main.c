@@ -140,7 +140,7 @@ int main()
 
 
   usleep(2000);
-
+  int gainChanged;
 
   // MIPI Init
    if (!MIPI_Init()){
@@ -265,16 +265,21 @@ int main()
     		   //printf("\n");
     		   //Word has been received so adjust gain
     		   averageVal = (word & 0x00FFFFFF) >> 16; //Get average value
+    		   gainChanged = 0;
     		   //Adjust gain depending on average frame value, but dont adjust if within 10 of 128
-    		   if ((118 > averageVal) && (gain < 800 + GAIN_STEP)) {
+    		   if ((118 > averageVal) && (gain < 0x800 + GAIN_STEP)) {
     			   gain += GAIN_STEP;
     			   OV8865SetGain(gain);
+    			   gainChanged = 1;
     		   }
     		   if ((138 < averageVal) && (gain > GAIN_STEP)){
     			   gain -= GAIN_STEP;
     			   OV8865SetGain(gain);
+    			   gainChanged = 1;
     		   }
-    		   printf("Gain adjusted to %d, average:%d, value:%d\n", gain, averageVal, word);
+    		   if (gainChanged) {
+    		   printf("Gain adjusted to %x, average:%d, value:%d\n", gain, averageVal, word);
+    		   }
     		   usleep(10000);
     	   }
     	   //printf("%08x ", word);
@@ -297,12 +302,12 @@ int main()
        		   OV8865SetExposure(exposureTime);
        		   printf("\nExposure = %x ", exposureTime);
        	   	   break;}
-       	   case 't': {
+       	   case 'g': {
        		   gain += GAIN_STEP;
        		   OV8865SetGain(gain);
        		   printf("\nGain = %x ", gain);
        	   	   break;}
-       	   case 'g': {
+       	   case 'h': {
        		   gain -= GAIN_STEP;
        		   OV8865SetGain(gain);
        		   printf("\nGain = %x ", gain);
@@ -318,6 +323,9 @@ int main()
         	   OV8865_FOCUS_Move_to(current_focus);
         	   printf("\nFocus = %x ",current_focus);
        	   	   break;}
+       	   case 'i' : {
+       		   printf("Average val:%d\n", averageVal);
+       	   }
        }
 
 

@@ -183,7 +183,11 @@ Qsys u0 (
 		.eee_imgproc_0_conduit_custom_thresholdsig (), //                                 .thresholdsig
 		
 		.uart_0_rx_tx_rxd                          (ARDUINO_IO[1]),                          //                     uart_0_rx_tx.rxd
-		.uart_0_rx_tx_txd                          (ARDUINO_IO[0])                           //
+		.uart_0_rx_tx_txd                          (ARDUINO_IO[0]),                           //
+		.spi_0_external_MISO                       (ARDUINO_IO[5]),                       //                   spi_0_external.MISO
+		.spi_0_external_MOSI                       (ARDUINO_IO[2]),                       //                                 .MOSI
+		.spi_0_external_SCLK                       (ARDUINO_IO[6]),                       //                                 .SCLK
+		.spi_0_external_SS_n                       (ARDUINO_IO[7])                        //                                 .SS_n
 	);
 
 FpsMonitor uFps(
