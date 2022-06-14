@@ -2,7 +2,7 @@ const mqtt = require("mqtt");
 var client = mqtt.connect('mqtt://35.176.71.115');
 
 client.on('connect', function() {
-    client.subscribe("test");
+    client.subscribe("location");
     console.log("Subscribed Successfully")
 
 });
