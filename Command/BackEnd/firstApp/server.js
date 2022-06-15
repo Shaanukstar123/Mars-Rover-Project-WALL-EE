@@ -6,11 +6,15 @@ app = express();
 
 const mqtt = require("mqtt");
 var client = mqtt.connect('mqtt://35.176.71.115');
+
+//JSON variables
 var location ={
   x:0,
   y:0,
   objectDetected:false
 };
+var battery = {battery: 0};
+var direction = {direction: 0};
 
 // MongoDB URL connection string
 const dbURI = 'mongodb+srv://shaanu:<password>@cluster0.k6p9c.mongodb.net/?retryWrites=true&w=majority';
@@ -29,14 +33,25 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 
 client.on('connect', function() { //MQTT subscribe
-  client.subscribe("location");
+  client.subscribe("#");
   console.log("Subscribed Successfully")
+});
 
+client.on('message', function(topic,message){
+  if (topic =="location"){
+    location = JSON.parse(message)
+  }
+  if (topic =="battery"){
+    battery = JSON.parse(message);
+  }
+  if (topic =="location"){
+    location = JSON.parse(message); //updates global JSON variables
+  }
+  
 });
 
 app.get("/battery",(req,res)=>{
-  let randomNumber = Math.floor(Math.random() * 100);
-  res.json({percentage:randomNumber})
+  res.json(battery)
 })
 
 app.post("/rControl", (req, res) =>{
@@ -45,14 +60,6 @@ app.post("/rControl", (req, res) =>{
 } )
 
 app.get("/coordinates",(req,res)=>{
-  //let x = Math.floor((Math.random() * 234));
-  //let y = Math.floor((Math.random() * 355));
-  //let z = Math.floor((Math.random() * 2));
-  client.on('message', function(topic,message){
-    console.log(message.toString());
-    location = JSON.parse(message); //updates global location JSON
-  });
-
   console.log("Server Coords:", location);
   res.json(location)
 })
