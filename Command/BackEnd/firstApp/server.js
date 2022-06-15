@@ -9,11 +9,11 @@ var client = mqtt.connect('mqtt://35.176.71.115');
 
 //JSON variables
 var location ={
-  x:0,
-  y:0,
-  objectDetected:false
+  xcoord:0,
+  ycoord:0,
+  obstacle:0
 };
-var battery = {battery: 0};
+var battery = {percentage: 0};
 var direction = {direction: 0};
 
 // MongoDB URL connection string
@@ -56,7 +56,9 @@ app.get("/battery",(req,res)=>{
 
 app.post("/rControl", (req, res) =>{
   console.log(req.body)
+  client.publish('direction',JSON.stringify(req.body));
   res.json({"Received" : req.body.directionMove });
+  //console.log(req.body.directionMove);
 } )
 
 app.get("/coordinates",(req,res)=>{

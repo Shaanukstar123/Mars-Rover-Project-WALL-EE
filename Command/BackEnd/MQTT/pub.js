@@ -8,19 +8,20 @@ var location = {
 };
 var direction = {direction: 1};
 var battery = {battery: 0};
-
+var z;
 client.on("connect",function(){
     setInterval(function(){
+        let z = Math.floor((Math.random() * 2));
         i = i+1;
         location = {
-            x:i,
-            y:i+10,
-            objectDetected: false
+            xcoord:i,
+            ycoord:i+10,
+            obstacle: z
         };
 
         var random = Math.random()* 50;
         //setTimeout(() => {}, 1000);
-        battery = {battery: i};
+        battery = {percentage: i};
 
         console.log(location); //random value to publish (until I get some actual data)
         console.log(direction);
