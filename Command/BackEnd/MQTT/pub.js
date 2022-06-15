@@ -6,6 +6,8 @@ var location = {
     y: 200,
     objectDetected: false
 };
+var direction = {direction: 1};
+var battery = {battery: 0};
 
 client.on("connect",function(){
     setInterval(function(){
@@ -18,10 +20,15 @@ client.on("connect",function(){
 
         var random = Math.random()* 50;
         //setTimeout(() => {}, 1000);
-        console.log(location); //random value to publish (until I get some actual data)
-        
+        battery = {battery: i};
 
+        console.log(location); //random value to publish (until I get some actual data)
+        console.log(direction);
+        console.log(battery);
+
+        client.publish('Control',JSON.stringify(direction));
         client.publish('location',JSON.stringify(location)); //publishing to topic test
+        client.publish('battery',JSON.stringify(battery));
 
     },1000); //1 second interval between pubs
 });
