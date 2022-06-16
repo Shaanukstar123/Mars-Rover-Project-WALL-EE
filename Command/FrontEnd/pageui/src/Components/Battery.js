@@ -12,7 +12,7 @@ const Battery = () => {
 
   const whenClicked = async () => { 
     try{
-      const randomNumber = await fetch('http://35.176.71.115:8080/battery');
+      const randomNumber = await fetch('http://localhost:8080/battery');
       const data = await randomNumber.json();
       setBatteryLevel(data.percentage);
     }
