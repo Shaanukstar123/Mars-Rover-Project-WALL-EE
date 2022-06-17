@@ -3,12 +3,14 @@
 //MOTOR CONTROL
 //WIFI
 //MQTT CONNECTION
+//FPGA 
 
 //TODO:
-//FPGA (ready to implement)
 //OPTIC SENSOR (needs some testing but otherwise ready)
 //RADAR (waiting for component)
 //BATTERY (unresolved problems currently on hardware side)
+
+
 
 
 #include <string.h> 
@@ -22,14 +24,13 @@
 #include<HTTPClient.h>
 #include <WiFiUdp.h>
 #include <NTPClient.h>
-#include <WebSocketsClient.h> //gilmaimon/ArduinoWebsockets@^0.5.3 
-#include <PubSubClient.h>
 #include <Robojax_L298N_DC_motor.h> //DL from github
 
 //Gyroscope Header
-#include "gyro.h"
+//#include "gyro.h"
 #include "FPGAheader.h"
 #include "connection.h"
+#include "OpticSensor.h"
 
 //SPI STUFF
 #define SCK 18
@@ -205,16 +206,73 @@ void roverMovement()
   }
 }
 
+//OPTIC SENSOR STUFF
+byte frame[ADNS3080_PIXELS_X * ADNS3080_PIXELS_Y];
+
+void angleConversion() {
+  if (rover.angle < 0)
+  {rover.angle+=360;}
+
+  if (rover.angle >= 360)
+  {rover.angle-=360;}  }
+
+void angleCalc(){
+  mpu.getEvent(&acc, &g, &temp);
+  double radianspersec = g.gyro.z;
+  
+    if (abs(radianspersec) > 0.1){
+    double degrees = 1*radianspersec*180/3.14159;
+    rover.angle = rover.angle + degrees;
+    angleConversion();
+    }
+}
+
+void roverCoordUpdate(int dist)
+{
+  rover.X += dist*sin(rover.angle);
+  rover.Y += dist*cos(rover.angle);
+}
+
+void printCoordinates()
+{
+  Serial.print("X: ");
+Serial.println(rover.X);
+Serial.print("Y: ");
+Serial.println(rover.Y);
+Serial.println("Angle: " );
+Serial.println(rover.angle);
+}
+
+void opticMain()
+{
+int val = mousecam_read_reg(ADNS3080_PIXEL_SUM);
+  MD md;
+  mousecam_read_motion(&md);
+  for(int i=0; i<md.squal/4; i++)
+    Serial.print('*');
+  Serial.print(' ');
+  Serial.print((val*100)/351);
+  Serial.print(' ');
+  Serial.print(md.shutter); Serial.print(" (");
+  Serial.print((int)md.dx); Serial.print(',');
+  Serial.print((int)md.dy); Serial.println(')');
+
+  delay(100);
+
+    //distance_x = convTwosComp(md.dx);
+    distance_y = convTwosComp(md.dy);
+
+roverCoordUpdate(distance_y/25); //modified by /100 to approximate to 1cm per cm moved. //closer possible
+angleCalc();
+printCoordinates();
+}
+
 
 void setup() {
   
   mfrc522.PCD_Init();
   Serial.begin(115200); //opens serial connection to print to console
 
-  // mpu.begin();
-  // mpu.setGyroRange(MPU6050_RANGE_500_DEG);
-  // mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
-  // mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
   gyroSetup();
   
   rover.angle = 0;
@@ -222,10 +280,10 @@ void setup() {
 
   robot.begin();
 
+  opticSetup();
   initWifi();
   mqttConnect();
-  //initSocket();
-
+ 
   //FPGA side stuff
   pinMode(PIN_SS,OUTPUT);
   pinMode(PIN_MISO,INPUT);
@@ -251,8 +309,9 @@ void loop() {
 
   //FUNCTIONS FOR LOOP
   roverMovement();
+  opticMain();
   //analyseData("1000000000100000");
-//   angleCalc(rover.angle);
+  //angleCalc(rover.angle);
 
 // //ANGLE MEASUREMENT DEBUG
 // if (rover.angle != rover.anglePrev)
