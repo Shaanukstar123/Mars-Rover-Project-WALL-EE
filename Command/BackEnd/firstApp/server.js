@@ -4,9 +4,22 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 app = express();
 
+const mqtt = require("mqtt");
+var client = mqtt.connect('mqtt://35.176.71.115');
+
 app.use(cors());
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
+
+//JSON variables
+var location ={
+  xcoord:0,
+  ycoord:0,
+  obstacle:0
+};
+var battery = {percentage: 0};
+var direction = {direction: 0};
+
 
 // MongoDB Schemas and Models
 const roverSchema = new mongoose.Schema({
@@ -77,6 +90,27 @@ mongoose.connect(connection, { useNewUrlParser: true, UseUnifiedTopology: true})
   .catch((err) => console.log(err))
 ;
 
+
+//MQTT callback functions
+
+client.on('connect', function() { //MQTT subscribe
+  client.subscribe("#");
+  console.log("Subscribed Successfully")
+});
+
+client.on('message', function(topic,message){
+  if (topic =="battery"){
+    battery = JSON.parse(message);
+  }
+  if (topic =="location"){
+    location = JSON.parse(message); //updates global JSON variables
+  }
+  
+});
+
+
+
+// Routes
 app.get("/batteryMQTT",(req,res)=>{
   let randomNumber = Math.floor(Math.random() * 100);
 
@@ -121,7 +155,8 @@ app.get("/battery",(req,res)=>{
 
 
 app.post("/rControl", (req, res) =>{
-  console.log(req.body)
+  console.log(req.body);
+  client.publish('direction',JSON.stringify(req.body));
   res.json({"Received" : req.body.directionMove });
 } )
 
