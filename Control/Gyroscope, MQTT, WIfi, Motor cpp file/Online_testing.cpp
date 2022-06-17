@@ -73,6 +73,11 @@ class locationdata
   int BatteryPercentage;
 };
 
+//GYROSTUFF
+int angleprev = 0;
+Adafruit_MPU6050 mpu;
+sensors_event_t a, g, temp;
+
 locationdata rover; //create the rover object
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
