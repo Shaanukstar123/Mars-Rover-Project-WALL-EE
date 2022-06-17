@@ -88,79 +88,79 @@ void approximateLocation(int distance, int angle, String colour, int roverX, int
 }
 
 
-// void analyseData(String x)
-// {
-//   //int example = SPI.transfer16(0xff); //SPI input disabled for now
-//   //convert to binary
-//   //recievedData = toBinary(example);
+void analyseData(String x)
+{
+  //int example = SPI.transfer16(0xff); //SPI input disabled for now
+  //convert to binary
+  //recievedData = toBinary(example);
   
-//   String alienColour = "";
-//   //Identification
-//   String alienBin;
-//   for (int y = 0; y < 3; y++) //extracting the distance
-//     {alienBin += x[y];}
+  String alienColour = "";
+  //Identification
+  String alienBin;
+  for (int y = 0; y < 3; y++) //extracting the distance
+    {alienBin += x[y];}
 
-//   if (alienBin != "000")
-//   {
-//     if (alienBin == "001"){
-//       Serial.println("Red Alien detected.");
-//       alienColour = "Red";
-//     }
+  if (alienBin != "000")
+  {
+    if (alienBin == "001"){
+      Serial.println("Red Alien detected.");
+      alienColour = "Red";
+    }
 
-//     if (alienBin == "010") {
-//       Serial.println("Green Alien detected.");
-//       alienColour = "Green";
-//     }
+    if (alienBin == "010") {
+      Serial.println("Green Alien detected.");
+      alienColour = "Green";
+    }
 
-//     if (alienBin == "011"){
-//       Serial.println("Blue Alien detected.");
-//       alienColour = "Blue";
-//     }
+    if (alienBin == "011"){
+      Serial.println("Blue Alien detected.");
+      alienColour = "Blue";
+    }
 
-//     if (alienBin == "100"){
-//       Serial.println("Orange Alien detected.");
-//       alienColour = "Orange";
-//     }
+    if (alienBin == "100"){
+      Serial.println("Orange Alien detected.");
+      alienColour = "Orange";
+    }
 
-//     if (alienBin == "101"){
-//       Serial.println("Pink Alien detected.");
-//       alienColour = "Pink";
-//     }
+    if (alienBin == "101"){
+      Serial.println("Pink Alien detected.");
+      alienColour = "Pink";
+    }
 
-//     if (alienBin == "110") {
+    if (alienBin == "110") {
 
-//       Serial.println("Grey Alien detected.");
-//       alienColour = "Grey";
-//     }
+      Serial.println("Grey Alien detected.");
+      alienColour = "Grey";
+    }
 
-//     //Distance
-//     String distanceBin;
+    //Distance
+    String distanceBin;
   
-//   for (int y = 3; y < 11; y++) //extracting the distance
-//     {distanceBin += x[y];}
-//     Serial.println(distanceBin);
+  for (int y = 3; y < 11; y++) //extracting the distance
+    {distanceBin += x[y];}
+    Serial.println(distanceBin);
 
-//     int distance = toInteger(distanceBin);
+    int distance = toInteger(distanceBin);
 
-//     Serial.print("Approximate distance from Rover : ");
-//     Serial.print(distance);
-//     Serial.println(" centimeters.");
-//     //angle
+    Serial.print("Approximate distance from Rover : ");
+    Serial.print(distance);
+    Serial.println(" centimeters.");
+    //angle
 
-//   String angleBin;
+  String angleBin;
 
-//   for (int y = 11; y < 16; y++) //extracting the angle
-//     {angleBin += x[y];}
+  for (int y = 11; y < 16; y++) //extracting the angle
+    {angleBin += x[y];}
   
-//   int angle = toInteger(angleBin);
+  int angle = toInteger(angleBin);
 
-//     Serial.print("Approximate angle from Rover : ");
-//     Serial.print(angle);
-//     Serial.println(" degrees.");
+    Serial.print("Approximate angle from Rover : ");
+    Serial.print(angle);
+    Serial.println(" degrees.");
 
-//     approximateLocation(distance, angle, alienColour, rover.X, rover.Y, rover.angle);
-//   }
-// }
+    approximateLocation(distance, angle, alienColour, rover.X, rover.Y, rover.angle);
+  }
+}
 
 void roverMovement()
 {
