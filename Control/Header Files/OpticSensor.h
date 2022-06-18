@@ -5,6 +5,7 @@
 #include <Wire.h>
 #include <Arduino.h>
 #include "gyro.h"
+#include <SPI.h>
 
 // Adafruit_MPU6050 mpu;
 // sensors_event_t acc, g, temp;
@@ -202,6 +203,8 @@ int mousecam_frame_capture(byte *pdata)
 
 void opticSetup()
 {
+  //mousecam_init();
+
     pinMode(PIN_SS,OUTPUT);
     pinMode(PIN_MISO,INPUT);
     pinMode(PIN_MOSI,OUTPUT);
