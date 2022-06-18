@@ -28,8 +28,9 @@
 
 
 #include "FPGAheader.h"
-#include "connection.h"
+//#include "connection.h"
 #include "OpticSensor.h"
+#include "Radar.h"
 
 //SPI STUFF
 // #define SCK 18
@@ -66,6 +67,8 @@ class locationdata
   public: 
   int X;
   int Y;
+  double Xdoub;
+  double Ydoub; //for precise tracking of coordinates
   int angle;
   int anglePrev;
   int BatteryPercentage;
@@ -231,7 +234,7 @@ void angleCalc(){
   double radianspersec = g.gyro.z;
   
     if (abs(radianspersec) > 0.1){
-    double degrees = 1*radianspersec*180/3.14159;
+    double degrees = 0.1*radianspersec*180/3.14159;
     rover.angle = rover.angle + degrees;
     angleConversion();
     }
@@ -239,8 +242,13 @@ void angleCalc(){
 
 void roverCoordUpdate(int dist)
 {
-  rover.X += dist*sin(rover.angle);
-  rover.Y += dist*cos(rover.angle);
+  double xdisplacement = dist*sin(rover.angle);
+  double ydisplacement = dist*cos(rover.angle);
+  rover.Xdoub += xdisplacement/50;
+  rover.Ydoub += ydisplacement/50;
+  rover.X = rover.Xdoub;
+  rover.Y = rover.Ydoub;
+
 }
 
 void printCoordinates()
@@ -249,6 +257,10 @@ void printCoordinates()
 Serial.println(rover.X);
 Serial.print("Y: ");
 Serial.println(rover.Y);
+  Serial.print("Xdoub: ");
+Serial.println(rover.Xdoub);
+Serial.print("Ydoub: ");
+Serial.println(rover.Ydoub);
 Serial.println("Angle: " );
 Serial.println(rover.angle);
 }
@@ -267,15 +279,31 @@ int val = mousecam_read_reg(ADNS3080_PIXEL_SUM);
   Serial.print((int)md.dx); Serial.print(',');
   Serial.print((int)md.dy); Serial.println(')');
 
-  delay(100);
+  //delay(100);
 
     //distance_x = convTwosComp(md.dx);
     distance_y = convTwosComp(md.dy);
     Serial.println("Distance_y : " + String(distance_y));
 
-roverCoordUpdate(distance_y/20); //modified by /100 to approximate to 1cm per cm moved. //closer possible
+roverCoordUpdate(distance_y); //modified by /100 to approximate to 1cm per cm moved. //closer possible
 angleCalc();
 printCoordinates();
+}
+
+int track = 0;
+
+void roverDataTransfer()
+{
+  if (track >= 100)
+  {
+  String JSON = "{\n\t\"Angle\" : " + String(rover.angle) + "\n\t\"X-Coordinate\" : " 
+  + String(rover.X) + "\n\t\"Y-Coordinate\" : " + String(rover.Y) + "\n}";
+  
+  char* topic = "Rover Status";
+  pub(JSON, topic);
+  track = 0;
+  }
+  track++;
 }
 
 
@@ -296,6 +324,10 @@ void setup() {
   opticSetup();
   initWifi();
   mqttConnect();
+  servoSetup();
+
+  //servoDebug:
+  digitalWrite(32, HIGH);
  
   //FPGA side stuff
   // pinMode(PIN_SS,OUTPUT);
@@ -313,19 +345,30 @@ void setup() {
   //setting up rover initials
   rover.X = 0;
   rover.Y = 0; 
+  rover.Xdoub = 0;
+  rover.Ydoub = 0;
   rover.angle = 0;
 }
 
 void loop() {
+
   client.loop();
   wifi_check();
   
   //FUNCTIONS FOR LOOP
   //roverMovement();
-  //opticDebug(md);
+  
   opticMain();
+  //digitalWrite(5, HIGH);//disables the optic main after the function (it automatically goes into active mode) 
+  //digitalWrite(FPGACS, LOW);
+  //Get FPGA input here
   //analyseData("1000000000100000");
-  //angleCalc(rover.angle);
+  //digitalWrite(FPGACS, HIGH);
+  //angleCalc(rover.angle); //Done in opticMain().
+
+  //roverDataTransfer(); //sends the rover's current angle, x and y coordinates.
+  
+  //radarDetection(rover.X, rover.Y, rover.angle);
 
 // //ANGLE MEASUREMENT DEBUG
 // if (rover.angle != rover.anglePrev)
@@ -336,6 +379,7 @@ void loop() {
 //   Serial.println("");
 //   rover.anglePrev = rover.angle;
 // }
-  delay(1000);
+  delay(100);
+  
 }
 
