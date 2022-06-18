@@ -26,20 +26,19 @@
 #include <NTPClient.h>
 #include <Robojax_L298N_DC_motor.h> //DL from github
 
-//Gyroscope Header
-//#include "gyro.h"
+
 #include "FPGAheader.h"
 #include "connection.h"
 #include "OpticSensor.h"
 
 //SPI STUFF
-#define SCK 18
-#define MISO 19
-#define MOSI 23
-#define CS 5
+// #define SCK 18
+// #define MISO 19
+// #define MOSI 23
+// #define CS 5
 
-#define RST_PIN 4
-#define SS_PIN 2
+// #define RST_PIN 4
+// #define SS_PIN 2
 
 //MOTOR SETTINGS
 #define CHA 0
@@ -55,6 +54,8 @@ const int CCW = 2; // do not change
 const int CW  = 1; // do not change
 #define motor1 1 // do not change
 #define motor2 2 // do not change
+
+//Optic Sensor stuff
 
 Robojax_L298N_DC_motor robot(IN1, IN2, ENA, CHA,  IN3, IN4, ENB, CHB);
 
@@ -87,6 +88,8 @@ void approximateLocation(int distance, int angle, String colour, int roverX, int
 
   pub(JSON, topic);
 }
+
+
 
 
 void analyseData(String x)
@@ -207,6 +210,13 @@ void roverMovement()
 }
 
 //OPTIC SENSOR STUFF
+
+char asciiart(int k)
+{
+  static char foo[] = "WX86*3I>!;~:,`. ";
+  return foo[k>>4];
+}
+
 byte frame[ADNS3080_PIXELS_X * ADNS3080_PIXELS_Y];
 
 void angleConversion() {
@@ -261,8 +271,9 @@ int val = mousecam_read_reg(ADNS3080_PIXEL_SUM);
 
     //distance_x = convTwosComp(md.dx);
     distance_y = convTwosComp(md.dy);
+    Serial.println("Distance_y : " + String(distance_y));
 
-roverCoordUpdate(distance_y/25); //modified by /100 to approximate to 1cm per cm moved. //closer possible
+roverCoordUpdate(distance_y/20); //modified by /100 to approximate to 1cm per cm moved. //closer possible
 angleCalc();
 printCoordinates();
 }
@@ -274,6 +285,8 @@ void setup() {
   Serial.begin(115200); //opens serial connection to print to console
 
   gyroSetup();
+
+  mousecam_init();
   
   rover.angle = 0;
   rover.anglePrev = 0;
@@ -285,17 +298,17 @@ void setup() {
   mqttConnect();
  
   //FPGA side stuff
-  pinMode(PIN_SS,OUTPUT);
-  pinMode(PIN_MISO,INPUT);
-  pinMode(PIN_MOSI,OUTPUT);
-  pinMode(PIN_SCK,OUTPUT);
+  // pinMode(PIN_SS,OUTPUT);
+  // pinMode(PIN_MISO,INPUT);
+  // pinMode(PIN_MOSI,OUTPUT);
+  // pinMode(PIN_SCK,OUTPUT);
 
-  Serial.begin(115200);
+ 
 
-  SPI.begin();
-  SPI.setClockDivider(SPI_CLOCK_DIV32);
-  SPI.setDataMode(SPI_MODE3);
-  SPI.setBitOrder(MSBFIRST); //Setting up SPI bus
+  // SPI.begin();
+  // SPI.setClockDivider(SPI_CLOCK_DIV32);
+  // SPI.setDataMode(SPI_MODE3);
+  // SPI.setBitOrder(MSBFIRST); //Setting up SPI bus
 
   //setting up rover initials
   rover.X = 0;
@@ -306,9 +319,10 @@ void setup() {
 void loop() {
   client.loop();
   wifi_check();
-
+  
   //FUNCTIONS FOR LOOP
-  roverMovement();
+  //roverMovement();
+  //opticDebug(md);
   opticMain();
   //analyseData("1000000000100000");
   //angleCalc(rover.angle);
@@ -322,6 +336,6 @@ void loop() {
 //   Serial.println("");
 //   rover.anglePrev = rover.angle;
 // }
-  delay(100);
+  delay(1000);
 }
 
