@@ -25,40 +25,47 @@ unsigned long previousMillis = 0;
 unsigned long interval = 30000;
 const char* host_ip= "35.176.71.115";
 int host_port = 3000;
-WebSocketsClient webSocket;
 
 //MQTT Broker data:
 
 const char *broker = "35.176.71.115";
-char *topic = "test";
-char *topic2 = "epic";
 const char *mqtt_user ="marsrover";
 const char *mqtt_pass = "marsrover123";
 const int mqtt_port = 1883;
+
+//Json variables for Publishing
+StaticJsonDocument <256> location_msg;
+StaticJsonDocument <256> battery_msg;
+StaticJsonDocument <256> obstacle_msg;
+
+//Json variables for Subscribing
+StaticJsonDocument <256> RControl_msg;
+StaticJsonDocument<256> command_msg;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
 
 void callback(char *topic, byte *payload, unsigned int length) { //Data received
- Serial.print("Message arrived in topic: ");
- Serial.println(topic);
- Serial.print("Message:");
- for (int i = 0; i < length; i++) {
-     Serial.print((char) payload[i]);
- }
- Serial.println();
- Serial.println("-----------------------");
-}
+  Serial.print("Message arrived in topic: ");
+  Serial.println(topic);
+  //Serial.print("Message:");
+  //for (int i = 0; i < length; i++) {
 
-void pub(String message,char *topic){
-  client.publish(topic,"Message");
-  Serial.println("Message sent");
-}
+  deserializeJson(sub_msg,payload);
+  //auto num = sub_msg["something"];
+  char msg[128];
+  int num = 10;
+  num = sub_msg["something"];
+  serializeJson(sub_msg,msg);
+  Serial.println(msg);
+  Serial.println(num);
+  //}
+    //Serial.print((char) payload[i]);
+  //}
+  Serial.println();
+  Serial.println("-----------------------");
 
-void sub(char *topic){
-  Serial.println("Waiting for sub...");
-  client.subscribe(topic);
-}
+  }
 
 void mqttConnect(){
   client.setServer(broker,mqtt_port);
@@ -74,14 +81,18 @@ void mqttConnect(){
       Serial.println("Failed with state: ");
       Serial.print(client.state());
     }
-    pub("hello",topic);
-    sub(topic2);
+
+    //publishing and subscribing
+    client.subscribe("#"); //subscribe to all topics 
+    char msg_char[128];
+    serializeJson(pub_msg,msg_char);
+    client.publish("test",msg_char);
+    
+    
     
   }
-  
-  
-}
 
+}
 
 void initWifi(){
   WiFi.mode(WIFI_STA); //Connection Mode (Connecting to Access Point Mode)
@@ -92,8 +103,8 @@ void initWifi(){
     Serial.println("Name: "+WiFi.SSID(i));}
 
       //**Access Point Details**//
-  const char* ssid = "Shan-Wifi";
-  const char* password = "hotspot123";
+  const char* ssid = "Wokwi-GUEST";
+  const char* password = "";
 
 
   WiFi.begin(ssid,password);
@@ -106,26 +117,6 @@ void initWifi(){
   Serial.println(WiFi.localIP());
 
 }
-
-/*void webSocketEvent(WStype_t type, uint8_t * payload, size_t length){
-  if (type == WStype_TEXT){
-
-  }
-  webSocket.sendTXT("Hello there");
-  Serial.println("Message sent");
-
-} 
-
-void initSocket(){
-
-  webSocket.begin(host_ip, host_port, "/"); //address, port, URL route
-
-  webSocket.onEvent(webSocketEvent);
-  webSocket.setReconnectInterval(5000);
-
-}
-
- */ //Websockets Not used anymore. MQTT used instead
 
 
 void wifi_check(){
@@ -152,23 +143,6 @@ void setup() {
 void loop() {
   client.loop();
   wifi_check();
-  /*webSocket.loop();
-  if (mfrc522.PICC_IsNewCardPresent()){
-    if(mfrc522.PICC_ReadCardSerial()){
-
-      String idcard = "";
-      for (byte i = 0; i<mfrc522.uid.size;i++){
-        idcard +=(mfrc522.uid.uidByte[i]<0x10? "0": "") + String(mfrc522.uid.uidByte[i], HEX);
-
-      }
-      Serial.println("tag rfid :"+idcard);
-      
-      mfrc522.PICC_HaltA();
-      mfrc522.PCD_StopCrypto1();
-
-    }
-  }
-  delay(10); // this speeds up the simulation */
 }
 
 //Resources:
