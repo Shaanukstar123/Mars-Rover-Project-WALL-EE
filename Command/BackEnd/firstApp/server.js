@@ -20,6 +20,13 @@ var location ={
 var battery = {percentage: 0};
 var direction = {direction: 0};
 
+var alien = {
+  color:-1, // -1 means no new alien detected
+  xcoord:0,
+  ycoord:0
+}
+
+
 // MongoDB Schemas and Models
 const roverSchema = new mongoose.Schema({
   id: Number,
@@ -66,6 +73,11 @@ mongoose.connect(connection, { useNewUrlParser: true, UseUnifiedTopology: true})
       .catch((err) => console.log(err))
     ;
 
+    Alien.deleteMany({})
+      .then(console.log("Deleted Aliens Collection"))
+      .catch((err) => console.log(err))
+    ;
+
     new Battery({
       id: 732,
       percentage: 999
@@ -84,6 +96,7 @@ mongoose.connect(connection, { useNewUrlParser: true, UseUnifiedTopology: true})
   .catch((err) => console.log(err))
 ;
 
+
 //MQTT callback functions
 
 client.on('connect', function() { //MQTT subscribe
@@ -98,23 +111,46 @@ client.on('message', function(topic,message){
   if (topic =="location"){
     location = JSON.parse(message); //updates global JSON variables
   }
+  if (topic =="aliens"){
+    alien = JSON.parse(message);
+  }
   
 });
 
-//Routes
-app.get("/battery",(req,res)=>{
+
+
+// Routes
+app.get("/batteryMQTT",(req,res)=>{
   let randomNumber = Math.floor(Math.random() * 100);
 
   const filter = { id: 732 };
-  const update = battery; // global battery varaiable
+  const update = { percentage: randomNumber };
 
   Battery.findOneAndUpdate(filter, update, {returnOriginal: false})
     .then((obj) => res.json(obj))
     .catch((err) => console.log(err))
   ;
 
+});
 
-  console.log("Battery Level: ", battery.percentage );
+app.get("/battery",(req,res)=>{
+  const filter = { id: 732 };
+  const update = battery; //sets update to global battery var
+
+  Battery.findOneAndUpdate(filter, update, {returnOriginal: false})
+    .catch((err) => console.log(err))
+  ;
+  
+  Battery.findOne({ id: 732 }, 'percentage')
+    .then( function (result){
+      console.log("New data:", result);
+      return res.json(result);
+    })
+    .catch((err) => console.log(err))
+    
+  ;
+
+
   // const battery = new Battery({
   //   percentage: randomNumber,
   // });
@@ -126,24 +162,38 @@ app.get("/battery",(req,res)=>{
 
 
   //res.json({percentage:randomNumber})
-})
+});
+
+
 
 app.post("/rControl", (req, res) =>{
-  console.log(req.body)
+  console.log(req.body);
   client.publish('direction',JSON.stringify(req.body));
   res.json({"Received" : req.body.directionMove });
-  //console.log(req.body.directionMove);
 } )
 
-app.get("/coordinates",(req,res)=>{
 
+
+app.get("/coordinates",(req,res)=>{
   const filter = { id: 732 };
-  const update = location; //global location variable
+  const update = location;
 
   Rover.findOneAndUpdate(filter, update, {returnOriginal: false})
-    .then((obj) => res.json(obj))
     .catch((err) => console.log(err))
   ;
+
+ 
+  Rover.findOne({ id: 732 }, 'xcoord ycoord obstacle')
+    .then( function (result){
+      console.log("New data:", result);
+      return res.json(result);
+    })
+    .catch((err) => console.log(err))
+    
+  ;
+
+  //console.log(position);
+  //res.json(position);
 
   // const rover = new Rover({
   //   xcoord: x,
@@ -163,27 +213,35 @@ app.get("/coordinates",(req,res)=>{
 
   //console.log("Server Coords:", obj);
   
-})
+});
+
 
 app.get("/obstacles",(req,res)=>{
   let colors = ['red', 'green', 'blue', 'pink'];
+  console.log(alien.color);
+  if (alien.color!= -1){
+    
+    const alienObj = new Alien({
+      color: alien.color,
+      xcoord: alien.xcoord,
+      ycoord: alien.ycoord
+    });
+    alienObj.save()
+      .catch((err) => console.log(err))
+    ;
+    alien.color = -1; //resets to null alien
 
-  let x2 = Math.floor((Math.random() * 234));
-  let y2 = Math.floor((Math.random() * 355));
-  let colorRandom = colors[ Math.floor(Math.random() * colors.length)]
+  }
+  
 
 
-  const alienObj = new Alien({
-    color: colorRandom,
-    xcoord: x2,
-    ycoord: y2,
-  });
-
-  alienObj.save()
-    .then((obj) => res.json(obj))
+  Alien.find({}, 'color xcoord ycoord')
+    .then( function (result){
+      console.log("New Alien:", result)
+      return res.json(result);
+    })
     .catch((err) => console.log(err))
   ;
-
 
   // let alienObj = {
   //   color: colorRandom,
@@ -191,7 +249,7 @@ app.get("/obstacles",(req,res)=>{
   //   ycoorda : y2,
   // };
 
-  console.log("Server alienObj:", alienObj);
+  //console.log("Server alienObj:", alienObj);
 
 })
 
