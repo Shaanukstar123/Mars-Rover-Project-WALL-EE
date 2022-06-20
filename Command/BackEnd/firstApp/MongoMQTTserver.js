@@ -17,8 +17,23 @@ var location ={
   ycoord:0,
   obstacle:0
 };
+
+var obstacle = {
+  type: -1,
+  color: -1,
+  xcoord: 0,
+  ycoord: 0
+};
+
+var tempAlien = {
+  color: 0,
+  xcoord: 0,
+  ycoord: 0
+};
+
 var battery = {percentage: 0};
 var direction = {direction: 0};
+
 
 // MongoDB Schemas and Models
 const roverSchema = new mongoose.Schema({
@@ -66,6 +81,11 @@ mongoose.connect(connection, { useNewUrlParser: true, UseUnifiedTopology: true})
       .catch((err) => console.log(err))
     ;
 
+    Alien.deleteMany({})
+      .then(console.log("Deleted Aliens Collection"))
+      .catch((err) => console.log(err))
+    ;
+
     new Battery({
       id: 732,
       percentage: 999
@@ -84,6 +104,7 @@ mongoose.connect(connection, { useNewUrlParser: true, UseUnifiedTopology: true})
   .catch((err) => console.log(err))
 ;
 
+
 //MQTT callback functions
 
 client.on('connect', function() { //MQTT subscribe
@@ -101,12 +122,14 @@ client.on('message', function(topic,message){
   
 });
 
-//Routes
-app.get("/battery",(req,res)=>{
-  let randomNumber = Math.floor(Math.random() * 100);
+
+
+// Routes
+app.get("/batteryMQTT",(req,res)=>{ //The functions with MQTT indentifier endings push data onto DB
+  //let randomNumber = Math.floor(Math.random() * 100);
 
   const filter = { id: 732 };
-  const update = battery; // global battery varaiable
+  const update = battery;
 
   Battery.findOneAndUpdate(filter, update, {returnOriginal: false})
     .then((obj) => res.json(obj))
@@ -114,87 +137,91 @@ app.get("/battery",(req,res)=>{
   ;
 
 
-  console.log("Battery Level: ", battery.percentage );
-  // const battery = new Battery({
-  //   percentage: randomNumber,
-  // });
+  console.log(battery );
 
-  // battery.save()
-  //   .then((obj) => res.json(obj))
-  //   .catch((err) => console.log(err));
+});
+
+app.get("/battery",(req,res)=>{ //Retrieves data from DB
   
+  Battery.findOne({ id: 732 }, 'percentage')
+    .then( function (result){
+      console.log("New data:", result);
+      return res.json(result);
+    })
+    .catch((err) => console.log(err))
+    
+  ;
+});
 
 
-  //res.json({percentage:randomNumber})
-})
 
 app.post("/rControl", (req, res) =>{
-  console.log(req.body)
+  console.log(req.body);
   client.publish('direction',JSON.stringify(req.body));
   res.json({"Received" : req.body.directionMove });
-  //console.log(req.body.directionMove);
 } )
+
+app.get("/coordinatesMQTT",(req,res)=>{
+
+  const filter = { id: 732 };
+  const update = location;
+
+  Rover.findOneAndUpdate(filter, update, {returnOriginal: false})
+    .then((obj) => {
+      console.log(obj);
+      res.json(obj);
+    })
+    .catch((err) => console.log(err))
+  ;
+   
+});
+
+
 
 app.get("/coordinates",(req,res)=>{
 
-  const filter = { id: 732 };
-  const update = location; //global location variable
-
-  Rover.findOneAndUpdate(filter, update, {returnOriginal: false})
-    .then((obj) => res.json(obj))
+ 
+  Rover.findOne({ id: 732 }, 'xcoord ycoord obstacle')
+    .then( function (result){
+      console.log("New data:", result);
+      return res.json(result);
+    })
     .catch((err) => console.log(err))
+    
   ;
-
-  // const rover = new Rover({
-  //   xcoord: x,
-  //   ycoord: y,
-  //   obstacle: z
-  // });
-
-  // rover.save()
-  //   .then((obj) => res.json(obj))
-  //   .catch((err) => console.log(err));
   
-  // let obj = {
-  //   xcoord : x,
-  //   ycoord : y,
-  //   obstacle: z
-  // };
+});
 
-  //console.log("Server Coords:", obj);
-  
-})
-
-app.get("/obstacles",(req,res)=>{
+app.get("/obstaclesMQTT",(req,res)=>{
   let colors = ['red', 'green', 'blue', 'pink'];
 
   let x2 = Math.floor((Math.random() * 234));
   let y2 = Math.floor((Math.random() * 355));
   let colorRandom = colors[ Math.floor(Math.random() * colors.length)]
+  console.log("Colour: ");
+  console.log(colorRandom);
 
 
-  const alienObj = new Alien({
-    color: colorRandom,
-    xcoord: x2,
-    ycoord: y2,
-  });
+  const alienObj = tempAlien;
 
   alienObj.save()
     .then((obj) => res.json(obj))
     .catch((err) => console.log(err))
   ;
 
-
-  // let alienObj = {
-  //   color: colorRandom,
-  //   xcoorda : x2,
-  //   ycoorda : y2,
-  // };
-
-  console.log("Server alienObj:", alienObj);
-
 })
 
-// app.listen(8080, () => {
-//   console.log('Listening on port 8080');
-// })
+
+app.get("/obstacles",(req,res)=>{
+
+
+  Alien.find({}, 'color xcoord ycoord')
+    .then( function (result){
+      console.log("New Alien:", result)
+      return res.json(result);
+    })
+    .catch((err) => console.log(err))
+  ;
+
+
+})
