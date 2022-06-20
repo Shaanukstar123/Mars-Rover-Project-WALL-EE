@@ -72,7 +72,6 @@ const Autopilot = () => {
       );
     
       setIntervalId(0);
-      setAliens([]);
       return;
     }
 
@@ -90,11 +89,15 @@ const Autopilot = () => {
     setIntervalId(newIntervalId);
   }
 
+  const reset = () => {
+    setAliens([]);
+  }
+
 
 
 
   return (
-    <div className="d-flex flex-row justify-content-evenly align-items-center" style={{minHeight: "93vh", maxHeight:"100vh", border:"4px solid purple"}}>
+    <div className="d-flex flex-row justify-content-evenly align-items-center" style={{minHeight: "93vh", maxHeight:"100vh", border:"4px solid orange"}}>
       <div style={{border:"4px solid purple", height:"70vh", width:"45vw"}} id="johnCena">
         <Rover  Coordinates={coords}  />
         <AddObstacles Aliens={aliens} />
@@ -102,6 +105,7 @@ const Autopilot = () => {
 
       Autopilot
       <button type="button" className="btn btn-success" onClick={start} > {intervalId ? "STOP" : "Let's Explore with Dora"} </button>
+      <button type="button" className="btn btn-info" onClick={reset} > Reset </button>
     </div>
   )
 }
