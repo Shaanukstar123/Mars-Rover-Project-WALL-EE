@@ -18,7 +18,6 @@ var location ={
   obstacle:0
 };
 var battery = {percentage: 0};
-var direction = {direction: 0};
 
 var alien = {
   color:-1, // -1 means no new alien detected
@@ -150,25 +149,13 @@ app.get("/battery",(req,res)=>{
     
   ;
 
-
-  // const battery = new Battery({
-  //   percentage: randomNumber,
-  // });
-
-  // battery.save()
-  //   .then((obj) => res.json(obj))
-  //   .catch((err) => console.log(err));
-  
-
-
-  //res.json({percentage:randomNumber})
 });
 
 
 
 app.post("/rControl", (req, res) =>{
   console.log(req.body);
-  client.publish('direction',JSON.stringify(req.body));
+  client.publish('direction',JSON.stringify(req.body)); //publishes direction straight from front-end request without saving to var
   res.json({"Received" : req.body.directionMove });
 } )
 
@@ -185,44 +172,23 @@ app.get("/coordinates",(req,res)=>{
  
   Rover.findOne({ id: 732 }, 'xcoord ycoord obstacle')
     .then( function (result){
-      console.log("New data:", result);
+      //console.log("New data:", result);
       return res.json(result);
     })
     .catch((err) => console.log(err))
     
   ;
-
-  //console.log(position);
-  //res.json(position);
-
-  // const rover = new Rover({
-  //   xcoord: x,
-  //   ycoord: y,
-  //   obstacle: z
-  // });
-
-  // rover.save()
-  //   .then((obj) => res.json(obj))
-  //   .catch((err) => console.log(err));
-  
-  // let obj = {
-  //   xcoord : x,
-  //   ycoord : y,
-  //   obstacle: z
-  // };
-
-  //console.log("Server Coords:", obj);
   
 });
 
 
 app.get("/obstacles",(req,res)=>{
   let colors = ['red', 'green', 'blue', 'pink'];
-  console.log(alien.color);
+  //console.log(alien.color);
   if (alien.color!= -1){
     
     const alienObj = new Alien({
-      color: alien.color,
+      color: colors[alien.color],
       xcoord: alien.xcoord,
       ycoord: alien.ycoord
     });
@@ -243,16 +209,5 @@ app.get("/obstacles",(req,res)=>{
     .catch((err) => console.log(err))
   ;
 
-  // let alienObj = {
-  //   color: colorRandom,
-  //   xcoorda : x2,
-  //   ycoorda : y2,
-  // };
-
-  //console.log("Server alienObj:", alienObj);
 
 })
-
-// app.listen(8080, () => {
-//   console.log('Listening on port 8080');
-// })

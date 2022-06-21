@@ -23,7 +23,9 @@ client.on("connect",function(){
             ycoord:i+10,
             obstacle: z
         };
-        alien.color = i;
+        alien.color = 2;
+        alien.xcoord = i;
+        alien.ycoord = i;
 
         var random = Math.random()* 50;
         //setTimeout(() => {}, 1000);
