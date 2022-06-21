@@ -19,7 +19,7 @@ const Autopilot = () => {
   const fetchObstacleData = async () => {
     try{
 
-      const request = await fetch('http://localhost:8080/obstacles');
+      const request = await fetch('http://35.176.71.115:8080/obstacles');
       const alienObj = await request.json();
 
     
@@ -38,12 +38,13 @@ const Autopilot = () => {
     try{
       console.log('fetching..');
 
-      const request = await fetch('http://localhost:8080/coordinates');
+      const request = await fetch('http://35.176.71.115:8080/coordinates');
       const obj = await request.json();
 
       console.log("object is:", obj);
 
       setCoords(obj)
+  
 
       if(obj.obstacle === 1){
         fetchObstacleData();
@@ -76,7 +77,7 @@ const Autopilot = () => {
     }
 
   
-    const newIntervalId = setInterval(fetchCoordinateData, 200);
+    const newIntervalId = setInterval(fetchCoordinateData, 400);
 
     event.currentTarget.classList.remove(
       'btn-success',
