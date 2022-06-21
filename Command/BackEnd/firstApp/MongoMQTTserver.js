@@ -17,22 +17,13 @@ var location ={
   ycoord:0,
   obstacle:0
 };
-
-var obstacle = {
-  type: -1,
-  color: -1,
-  xcoord: 0,
-  ycoord: 0
-};
-
-var tempAlien = {
-  color: 0,
-  xcoord: 0,
-  ycoord: 0
-};
-
 var battery = {percentage: 0};
-var direction = {direction: 0};
+
+var alien = {
+  color:-1, // -1 means no new alien detected
+  xcoord:0,
+  ycoord:0
+}
 
 
 // MongoDB Schemas and Models
@@ -119,29 +110,35 @@ client.on('message', function(topic,message){
   if (topic =="location"){
     location = JSON.parse(message); //updates global JSON variables
   }
+  if (topic =="aliens"){
+    alien = JSON.parse(message);
+  }
   
 });
 
 
 
 // Routes
-app.get("/batteryMQTT",(req,res)=>{ //The functions with MQTT indentifier endings push data onto DB
-  //let randomNumber = Math.floor(Math.random() * 100);
+app.get("/batteryMQTT",(req,res)=>{
+  let randomNumber = Math.floor(Math.random() * 100);
 
   const filter = { id: 732 };
-  const update = battery;
+  const update = { percentage: randomNumber };
 
   Battery.findOneAndUpdate(filter, update, {returnOriginal: false})
     .then((obj) => res.json(obj))
     .catch((err) => console.log(err))
   ;
 
-
-  console.log(battery );
-
 });
 
-app.get("/battery",(req,res)=>{ //Retrieves data from DB
+app.get("/battery",(req,res)=>{
+  const filter = { id: 732 };
+  const update = battery; //sets update to global battery var
+
+  Battery.findOneAndUpdate(filter, update, {returnOriginal: false})
+    .catch((err) => console.log(err))
+  ;
   
   Battery.findOne({ id: 732 }, 'percentage')
     .then( function (result){
@@ -151,39 +148,31 @@ app.get("/battery",(req,res)=>{ //Retrieves data from DB
     .catch((err) => console.log(err))
     
   ;
+
 });
 
 
 
 app.post("/rControl", (req, res) =>{
   console.log(req.body);
-  client.publish('direction',JSON.stringify(req.body));
+  client.publish('direction',JSON.stringify(req.body)); //publishes direction straight from front-end request without saving to var
   res.json({"Received" : req.body.directionMove });
 } )
-
-app.get("/coordinatesMQTT",(req,res)=>{
-
-  const filter = { id: 732 };
-  const update = location;
-
-  Rover.findOneAndUpdate(filter, update, {returnOriginal: false})
-    .then((obj) => {
-      console.log(obj);
-      res.json(obj);
-    })
-    .catch((err) => console.log(err))
-  ;
-   
-});
 
 
 
 app.get("/coordinates",(req,res)=>{
+  const filter = { id: 732 };
+  const update = location;
+
+  Rover.findOneAndUpdate(filter, update, {returnOriginal: false})
+    .catch((err) => console.log(err))
+  ;
 
  
   Rover.findOne({ id: 732 }, 'xcoord ycoord obstacle')
     .then( function (result){
-      console.log("New data:", result);
+      //console.log("New data:", result);
       return res.json(result);
     })
     .catch((err) => console.log(err))
@@ -192,27 +181,24 @@ app.get("/coordinates",(req,res)=>{
   
 });
 
-app.get("/obstaclesMQTT",(req,res)=>{
-  let colors = ['red', 'green', 'blue', 'pink'];
-
-  let x2 = Math.floor((Math.random() * 234));
-  let y2 = Math.floor((Math.random() * 355));
-  let colorRandom = colors[ Math.floor(Math.random() * colors.length)]
-  console.log("Colour: ");
-  console.log(colorRandom);
-
-
-  const alienObj = tempAlien;
-
-  alienObj.save()
-    .then((obj) => res.json(obj))
-    .catch((err) => console.log(err))
-  ;
-
-})
-
 
 app.get("/obstacles",(req,res)=>{
+  let colors = ['red', 'green', 'blue', 'pink'];
+  //console.log(alien.color);
+  if (alien.color!= -1){
+    
+    const alienObj = new Alien({
+      color: colors[alien.color],
+      xcoord: alien.xcoord,
+      ycoord: alien.ycoord
+    });
+    alienObj.save()
+      .catch((err) => console.log(err))
+    ;
+    alien.color = -1; //resets to null alien
+
+  }
+  
 
 
   Alien.find({}, 'color xcoord ycoord')
