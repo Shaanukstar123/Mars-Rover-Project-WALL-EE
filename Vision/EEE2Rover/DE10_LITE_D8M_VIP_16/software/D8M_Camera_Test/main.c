@@ -141,6 +141,7 @@ int main()
 
   usleep(2000);
   int gainChanged;
+  int averageVal;
 
   // MIPI Init
    if (!MIPI_Init()){
@@ -203,7 +204,6 @@ int main()
         }
 
   while(1){
-	   int averageVal;
        // touch KEY0 to trigger Auto focus
 	   if((IORD(KEY_BASE,0)&0x03) == 0x02){
 
@@ -256,10 +256,12 @@ int main()
        //Read messages from the image processor and print them on the terminal
        while ((IORD(EEE_MESSAGE_BASE,EEE_IMGPROC_STATUS)>>8) & 0xff) { 	//Find out if there are words to read
            int word = IORD(EEE_MESSAGE_BASE,EEE_IMGPROC_MSG); 			//Get next word from message buffer
-    	   if (fwrite(&word, 4, 1, ser) != 1)
+    	   if (fwrite(&word, 4, 1, ser) != 1) {
     		   printf("Error writing to UART");
-           //if (word == EEE_IMGPROC_MSG_START)				//Newline on message identifier
-    	   //   printf("\n");
+    	   }
+           if (word == EEE_IMGPROC_MSG_START)	{			//Newline on message identifier
+    	      printf("\n");
+           }
     	   //If V followed by data recieved
     	   if ((word & 0xFF000000) == 0x56000000) {
     		   //printf("\n");
@@ -267,12 +269,12 @@ int main()
     		   averageVal = (word & 0x00FFFFFF) >> 16; //Get average value
     		   gainChanged = 0;
     		   //Adjust gain depending on average frame value, but dont adjust if within 10 of 128
-    		   if ((118 > averageVal) && (gain < 0x800 + GAIN_STEP)) {
+    		   if ((115 > averageVal) && (gain < 0x800 + GAIN_STEP)) {
     			   gain += GAIN_STEP;
     			   OV8865SetGain(gain);
     			   gainChanged = 1;
     		   }
-    		   if ((138 < averageVal) && (gain > GAIN_STEP)){
+    		   if ((125 < averageVal) && (gain > GAIN_STEP)){
     			   gain -= GAIN_STEP;
     			   OV8865SetGain(gain);
     			   gainChanged = 1;

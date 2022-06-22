@@ -195,8 +195,8 @@ wire red_detect, green_detect, blue_detect, lightgreen_detect, pink_detect, yell
 
 //For room
 assign red_detect = (Hue < 38) ? ((Saturation > 145) ? ((Value > 47) ? 1 : 0) : 0) : 0;
-assign green_detect = 0;
-//assign green_detect = (Hue > 96 && Hue < 224) ? ((Saturation > 100) ? ((Value > 5) ? 1 : 0) : 0) : 0;
+//assign green_detect = 0;
+assign green_detect = (Hue > 96 && Hue < 224) ? ((Saturation > 100) ? ((Value > 5) ? 1 : 0) : 0) : 0;
 assign blue_detect = 0;
 assign yellow_detect = 0;
 assign pink_detect = 0;
@@ -255,7 +255,7 @@ reg [10:0] tempCount; //Allow up to 128 detected pixels
 //Used for largest contour identification in bounds drawing
 //reg [10:0] tempMin [5:0];
 //reg [10:0] pixelWidth[5:0];
-reg [10:0] tempXMin [5:0]; //640
+//reg [10:0] tempXMin [5:0]; //640
 reg [10:0] tempXMax [5:0]; //640
 reg [10:0] tempPixelWidth [5:0]; //640
 //reg [1:0] pixelDetected [5:0]; 
@@ -291,7 +291,7 @@ always @(posedge clk) begin
 	if (x < pixelRange && in_valid) begin
 		for(i = 0; i < 6; i = i + 1) begin
 			pixelBuffer[i] = 0;
-			tempXMin[i] = IMAGE_W;
+			//tempXMin[i] = 50;
 			tempXMax[i] = 0;
 			tempPixelWidth[i] = 0;
 		end
@@ -315,9 +315,9 @@ always @(posedge clk) begin
 			//Mode filtering and contour detection
 			if (tempCount > 12) begin
 				//If no pixels have been detected in the current row yet, set min to first detected pixel
-				if (tempXMin[i] > x) begin
-					tempXMin[i] = x;
- 				end
+				// if (tempXMin[i] > x) begin
+				// 	tempXMin[i] = x;
+ 				// end
 				tempPixelWidth[i] = tempPixelWidth[i] + 1;
 				//Set x max to current pixel
 				tempXMax[i] = x;
@@ -327,11 +327,11 @@ always @(posedge clk) begin
 				//Ball no longer detected, reset longest contour detection
 				//If end of current detection
 				if (tempPixelWidth[i] > pixelWidth[i]) begin
-					xMin[i] = tempXMin[i];
+					xMin[i] = tempXMax[i]-tempPixelWidth[i];
 					xMax[i] = tempXMax[i];
 					pixelWidth[i] = tempPixelWidth[i];
 				end
-				tempXMin[i] = IMAGE_W;
+				//tempXMin[i] = 50;
 				// tempXMax[i] = pixelRange;
 				tempPixelWidth[i] = 0;
 				// xMin[i] = (tempPixelWidth[i] > pixelWidth[i]) ? tempXMin[i] : xMin[i];
@@ -560,7 +560,7 @@ always@(posedge clk) begin
 		//Simple low pass filter to prevent quick jumping around
 		for(i = 0; i < 6; i = i + 1) begin
 			if ((xMax[i] > xMin[i]) & (pixelWidth[i] > 40)) begin
-				left[i] <= xMin[i];
+				left[i] <= (left[i]+xMin[i])/2;
 				right[i] <= (right[i]+xMax[i])/2;
 			end
 		end
@@ -568,34 +568,6 @@ always@(posedge clk) begin
 	//Cycle through message writer states once started
 	if (msg_state != 2'b00) msg_state <= msg_state + 2'b01;
 end
-
-// //Send to ESP32
-// always@(posedge clk) begin
-// 	//Receive any data from the ESP32
-// 	if (SPI_read_valid) begin
-// 		SPI_read_ready = 1;
-// 		SPI_write_valid = 1;
-// 	end else begin
-// 		SPI_read_ready = 0;
-// 		SPI_write_valid = 0;
-// 		SPI_dataretain = 0;
-// 		SPI_dataout = 0;
-// 	end
-// 	//Recieved a command to output ball data
-// 	if (SPI_datain != 0) begin
-// 		SPI_dataretain = SPI_datain;
-// 		dataIndex = (SPI_dataretain-1)>>1;
-// 		//angleCalc = ((left[dataIndex]+pixelWidth[dataIndex])/20);
-// 		//SPI_dataout = ((SPI_dataretain % 2) == 1) ?  {dataIndex[2:0], pixelWidth[dataIndex][7:3]} : {pixelWidth[dataIndex][2:0], angleCalc[4:0]};
-// 		if((SPI_dataretain % 2) == 0) begin
-// 			//First half of packet
-// 			SPI_dataout = {dataIndex[2:0], 5'b10001};
-// 		end else begin
-// 			//Second half of packet
-// 			SPI_dataout = {dataIndex[2:0], 5'b11011};
-// 		end
-// 	end
-// end
 
 //Send to ESP32
 always@(posedge clk) begin
@@ -613,41 +585,26 @@ always@(posedge clk) begin
 	if (SPI_datain != 0) begin
 		SPI_dataretain = SPI_datain;
 		dataIndex = (SPI_dataretain-1)>>1;
-		angleCalc = ((left[dataIndex]+(pixelWidth[dataIndex]/2)/16));
+		angleCalc = ((left[dataIndex]+right[dataIndex])/32);
 		angleSlice = angleCalc[4:0];
 		//SPI_dataout = ((SPI_dataretain % 2) == 1) ?  {dataIndex[2:0], pixelWidth[dataIndex][7:3]} : {pixelWidth[dataIndex][2:0], angleCalc[4:0]};
 		if((SPI_dataretain % 2) == 0) begin
 			//First half of packet
 			if (pixelWidth[dataIndex[2:0]] > 60) begin
-				SPI_dataout = {dataIndex[2:0]+1, pixelWidth[dataIndex][7:3]};
+				SPI_dataout = {dataIndex[2:0]+1, pixelWidth[dataIndex][8:4]};
 			end else begin
 				SPI_dataout = 0;
 			end
 		end else begin
 			//Second half of packet
 			if (pixelWidth[dataIndex[2:0]] > 60) begin
-				SPI_dataout = {pixelWidth[dataIndex][2:0], angleSlice};
+				SPI_dataout = {pixelWidth[dataIndex][3:1], angleSlice};
 			end else begin
 				SPI_dataout = 0;
 			end
 		end
 	end
 end
-	// if (SPI_write_ready && (SPI_dataretain != 0)) begin
-	// 	dataIndex = (SPI_dataretain-1)>>1;
-	// 	//angleCalc = ((left[dataIndex]+pixelWidth[dataIndex])/20);
-	// 	//SPI_dataout = ((SPI_dataretain % 2) == 1) ?  {dataIndex[2:0], pixelWidth[dataIndex][7:3]} : {pixelWidth[dataIndex][2:0], angleCalc[4:0]};
-	// 	if((SPI_dataretain % 2) == 1) begin
-	// 		//First half of packet
-	// 		SPI_dataout = {SPI_dataretain[2:0], 5'b10001};
-	// 	end else begin
-	// 		//Second half of packet
-	// 		SPI_dataout = {dataIndex[2:0], 5'b11011};
-	// 	end
-	// end else begin
-	// 	SPI_dataretain = 0;
-	// 	SPI_write_valid = 0;
-	// end
 
 //Generate output messages for CPU
 reg [31:0] msg_buf_in; 
