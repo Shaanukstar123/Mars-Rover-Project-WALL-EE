@@ -34,6 +34,14 @@
    {
       datum _originalDeviceFamily
       {
+         value = "Cyclone V";
+         type = "String";
+      }
+   }
+   element Qsys
+   {
+      datum _originalDeviceFamily
+      {
          value = "MAX 10";
          type = "String";
       }
@@ -42,7 +50,7 @@
    {
       datum _originalDeviceFamily
       {
-         value = "Cyclone V";
+         value = "MAX 10";
          type = "String";
       }
    }
@@ -321,7 +329,23 @@
          type = "String";
       }
    }
-   element spi_0
+   element spi_rx_fifo
+   {
+      datum _sortIndex
+      {
+         value = "22";
+         type = "int";
+      }
+   }
+   element spi_tx_fifo
+   {
+      datum _sortIndex
+      {
+         value = "23";
+         type = "int";
+      }
+   }
+   element spislave_0
    {
       datum _sortIndex
       {
@@ -451,6 +475,11 @@
    type="conduit"
    dir="end" />
  <interface
+   name="eee_imgproc_0_conduit_spi"
+   internal="EEE_IMGPROC_0.conduit_SPI"
+   type="conduit"
+   dir="end" />
+ <interface
    name="i2c_opencores_camera_export"
    internal="i2c_opencores_camera.export"
    type="conduit"
@@ -483,8 +512,18 @@
  <interface name="reset" internal="clk_50.clk_in_reset" type="reset" dir="end" />
  <interface name="sdram_wire" internal="sdram.wire" type="conduit" dir="end" />
  <interface
-   name="spi_0_external"
-   internal="spi_0.external"
+   name="spi_rx_fifo_out"
+   internal="spi_rx_fifo.out"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="spi_tx_fifo_in"
+   internal="spi_tx_fifo.in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="spislave_0_export_0"
+   internal="spislave_0.export_0"
    type="conduit"
    dir="end" />
  <interface
@@ -902,7 +941,7 @@
   <parameter name="instruction_master_high_performance_paddr_size" value="0" />
   <parameter name="instruction_master_paddr_base" value="0" />
   <parameter name="instruction_master_paddr_size" value="0" />
-  <parameter name="internalIrqMaskSystemInfo" value="63" />
+  <parameter name="internalIrqMaskSystemInfo" value="31" />
   <parameter name="io_regionbase" value="0" />
   <parameter name="io_regionsize" value="0" />
   <parameter name="master_addr_map" value="false" />
@@ -1075,21 +1114,50 @@
   <parameter name="registerDataIn" value="true" />
   <parameter name="rowWidth" value="13" />
  </module>
- <module name="spi_0" kind="altera_avalon_spi" version="18.0" enabled="1">
-  <parameter name="avalonSpec" value="2.0" />
-  <parameter name="clockPhase" value="0" />
-  <parameter name="clockPolarity" value="0" />
-  <parameter name="dataWidth" value="16" />
-  <parameter name="disableAvalonFlowControl" value="false" />
-  <parameter name="inputClockRate" value="50000000" />
-  <parameter name="insertDelayBetweenSlaveSelectAndSClk" value="false" />
-  <parameter name="insertSync" value="false" />
-  <parameter name="lsbOrderedFirst" value="false" />
-  <parameter name="masterSPI" value="false" />
-  <parameter name="numberOfSlaves" value="1" />
-  <parameter name="syncRegDepth" value="2" />
-  <parameter name="targetClockRate" value="128000" />
-  <parameter name="targetSlaveSelectToSClkDelay" value="0.0" />
+ <module
+   name="spi_rx_fifo"
+   kind="altera_avalon_sc_fifo"
+   version="18.0"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="8" />
+  <parameter name="CHANNEL_WIDTH" value="0" />
+  <parameter name="EMPTY_LATENCY" value="3" />
+  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
+  <parameter name="ERROR_WIDTH" value="0" />
+  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="16" />
+  <parameter name="SYMBOLS_PER_BEAT" value="1" />
+  <parameter name="USE_ALMOST_EMPTY_IF" value="0" />
+  <parameter name="USE_ALMOST_FULL_IF" value="0" />
+  <parameter name="USE_FILL_LEVEL" value="0" />
+  <parameter name="USE_MEMORY_BLOCKS" value="1" />
+  <parameter name="USE_PACKETS" value="0" />
+  <parameter name="USE_STORE_FORWARD" value="0" />
+ </module>
+ <module
+   name="spi_tx_fifo"
+   kind="altera_avalon_sc_fifo"
+   version="18.0"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="8" />
+  <parameter name="CHANNEL_WIDTH" value="0" />
+  <parameter name="EMPTY_LATENCY" value="3" />
+  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
+  <parameter name="ERROR_WIDTH" value="0" />
+  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="16" />
+  <parameter name="SYMBOLS_PER_BEAT" value="1" />
+  <parameter name="USE_ALMOST_EMPTY_IF" value="0" />
+  <parameter name="USE_ALMOST_FULL_IF" value="0" />
+  <parameter name="USE_FILL_LEVEL" value="0" />
+  <parameter name="USE_MEMORY_BLOCKS" value="1" />
+  <parameter name="USE_PACKETS" value="0" />
+  <parameter name="USE_STORE_FORWARD" value="0" />
+ </module>
+ <module name="spislave_0" kind="spislave" version="18.0" enabled="1">
+  <parameter name="AUTO_CLOCK_SINK_CLOCK_RATE" value="50000000" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="MAX 10" />
+  <parameter name="SYNC_DEPTH" value="2" />
  </module>
  <module name="sw" kind="altera_avalon_pio" version="18.0" enabled="1">
   <parameter name="bitClearingEdgeCapReg" value="false" />
@@ -1140,15 +1208,6 @@
   <parameter name="useEopRegister" value="false" />
   <parameter name="useRelativePathForSimFile" value="false" />
  </module>
- <connection
-   kind="avalon"
-   version="18.0"
-   start="EEE_IMGPROC_0.avalon_master"
-   end="spi_0.spi_control_port">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
  <connection
    kind="avalon"
    version="18.0"
@@ -1342,6 +1401,11 @@
  <connection
    kind="avalon_streaming"
    version="18.0"
+   start="spislave_0.avalon_streaming_source"
+   end="spi_rx_fifo.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.0"
    start="TERASIC_AUTO_FOCUS_0.dout"
    end="EEE_IMGPROC_0.avalon_streaming_sink" />
  <connection
@@ -1349,6 +1413,11 @@
    version="18.0"
    start="alt_vip_vfb_0.dout"
    end="TERASIC_AUTO_FOCUS_0.din" />
+ <connection
+   kind="avalon_streaming"
+   version="18.0"
+   start="spi_tx_fifo.out"
+   end="spislave_0.avalon_streaming_sink" />
  <connection kind="clock" version="18.0" start="altpll_0.c2" end="sdram.clk" />
  <connection
    kind="clock"
@@ -1385,7 +1454,8 @@
  <connection kind="clock" version="18.0" start="clk_50.clk" end="mipi_pwdn_n.clk" />
  <connection kind="clock" version="18.0" start="clk_50.clk" end="nios2_gen2.clk" />
  <connection kind="clock" version="18.0" start="clk_50.clk" end="uart_0.clk" />
- <connection kind="clock" version="18.0" start="clk_50.clk" end="spi_0.clk" />
+ <connection kind="clock" version="18.0" start="clk_50.clk" end="spi_tx_fifo.clk" />
+ <connection kind="clock" version="18.0" start="clk_50.clk" end="spi_rx_fifo.clk" />
  <connection
    kind="clock"
    version="18.0"
@@ -1401,6 +1471,11 @@
    version="18.0"
    start="clk_50.clk"
    end="i2c_opencores_camera.clock" />
+ <connection
+   kind="clock"
+   version="18.0"
+   start="clk_50.clk"
+   end="spislave_0.clock_sink" />
  <connection
    kind="clock"
    version="18.0"
@@ -1442,12 +1517,15 @@
   <parameter name="irqNumber" value="4" />
  </connection>
  <connection
-   kind="interrupt"
+   kind="reset"
    version="18.0"
-   start="nios2_gen2.irq"
-   end="spi_0.irq">
-  <parameter name="irqNumber" value="5" />
- </connection>
+   start="clk_50.clk_reset"
+   end="spi_tx_fifo.clk_reset" />
+ <connection
+   kind="reset"
+   version="18.0"
+   start="clk_50.clk_reset"
+   end="spi_rx_fifo.clk_reset" />
  <connection
    kind="reset"
    version="18.0"
@@ -1463,6 +1541,11 @@
    version="18.0"
    start="clk_50.clk_reset"
    end="TERASIC_CAMERA_0.clock_reset_reset" />
+ <connection
+   kind="reset"
+   version="18.0"
+   start="clk_50.clk_reset"
+   end="spislave_0.clock_sink_reset" />
  <connection
    kind="reset"
    version="18.0"
@@ -1531,11 +1614,6 @@
    version="18.0"
    start="clk_50.clk_reset"
    end="uart_0.reset" />
- <connection
-   kind="reset"
-   version="18.0"
-   start="clk_50.clk_reset"
-   end="spi_0.reset" />
  <connection
    kind="reset"
    version="18.0"

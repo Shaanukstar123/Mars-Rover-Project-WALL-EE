@@ -29,13 +29,12 @@ module EEE_IMGPROC(
 	mode,
 
 	//VSPI interface
-	avalon_master_read,
-	avalon_master_write, //assert when putting out data
-	avalon_to_SPI, //data goes through here
-	avalon_from_SPI,
-	avalon_spi_addr,
-	avalon_spi_select,
-	avalon_master_waitrequest
+	SPI_dataout,
+	SPI_write_valid,
+	SPI_write_ready,
+	SPI_datain,
+	SPI_read_ready,
+	SPI_read_valid
 );
 
 
@@ -69,15 +68,19 @@ output								source_eop;
 // conduit export
 input                         mode; //externally connected to switch 0
 
-//SPI interface
-output	reg						avalon_master_write;
-output 	reg						avalon_master_read;
-output	reg [15:0]				avalon_to_SPI;
-input			[15:0]	avalon_from_SPI;
-output	reg [4:0]					avalon_spi_addr;
-output reg avalon_spi_select;
-input avalon_master_waitrequest;
+//SPI interface - write
+output reg [7:0] SPI_dataout;
+output reg SPI_write_valid;
+input SPI_write_ready;
+//Read
+input [7:0] SPI_datain;
+input SPI_read_valid;
+output reg SPI_read_ready;
+reg [7:0] SPI_dataretain, dataIndex;
+reg cycleNo;
 
+reg [15:0] angleCalc;
+reg [4:0] angleSlice;
 ////////////////////////////////////////////////////////////////////////
 //
 parameter IMAGE_W = 11'd640;
@@ -85,7 +88,6 @@ parameter IMAGE_H = 11'd480;
 parameter MESSAGE_BUF_MAX = 256;
 parameter MSG_INTERVAL = 6;
 parameter BB_COL_DEFAULT = 24'h00ff00;
-
 
 wire [7:0]   red, green, blue, gray;
 wire [7:0]   red_out, green_out, blue_out;
@@ -170,7 +172,7 @@ assign Value = maxVal; //(0-255)
 // ((outputHue < 300) ?  outputVal: zmSum[7:0]));
 
 //////////////////// Threshold sections
-wire red_detect, blue_detect, green_detect, orange_detect, pink_detect, gray_detect, blueOrGreen;
+wire red_detect, green_detect, blue_detect, lightgreen_detect, pink_detect, yellow_detect;
 ////////////////////
 //assign red_detect = ((compHue > 330) || (compHue < 35)) ? ((compSat > 150) ? ((compVal > 60) ? 1 : 0) : 0) : 0;
 // assign red_detect = ((Hue > 330) || (Hue < 25)) ? ((Saturation > 155) ? ((Value > 80) ? 1 : 0) : 0) : 0;X
@@ -179,141 +181,210 @@ wire red_detect, blue_detect, green_detect, orange_detect, pink_detect, gray_det
 // assign pink_detect = ((Hue > 330) || (Hue < 35)) ? ((Saturation > 135 && Saturation < 195) ? ((Value > 100) ? 1 : 0) : 0) : 0;
 // assign gray_detect = 0;
 //assign red_detect =  (Hue < 40) ? ((Saturation > 185) ? ((Value > 105) ? 1 : 0) : 0) : 0;
-assign red_detect =  ((Hue < 14) || (Hue > 350)) ? ((Saturation > 140) ? ((Value > 40) ? 1 : 0) : 0) : 0;
-assign green_detect =  (Hue > 45 && Hue < 95) ? ((Saturation > 70) ? ((Value > 35) ? 1 : 0) : 0) : 0;
-//assign green_detect =  (Hue > 45 && Hue < 130) ? ((Saturation > 35 && Saturation < 200) ? ((Value > 25) ? 1 : 0) : 0) : 0;
-assign blue_detect =  (Hue > 40 && Hue < 100) ? ((Saturation < 155) ? ((Value > 50) ? 1 : 0) : 0) : 0;
-//
-//assign blue_detect = 0;
+//assign red_detect =  ((Hue < 14) || (Hue > 350)) ? ((Saturation > 140) ? ((Value > 40) ? 1 : 0) : 0) : 0;
+//assign red_detect =  ((Hue < 16) || (Hue > 350)) ? ((Saturation > 60) ? ((Value > 30) ? 1 : 0) : 0) : 0;
+
+
+//For lab
+//assign red_detect =  (Hue < 30) ? ((Saturation > 224) ? ((Value > 75 && Value < 211) ? 1 : 0) : 0) : 0;
+//assign green_detect =  (Hue > 90 && Hue < 170) ? ((Saturation > 70) ? ((Value > 35) ? 1 : 0) : 0) : 0; //Needs checking
+// assign blue_detect =  (Hue > 175 && Hue < 220) ? ((Saturation > 50) ? ((Value > 25) ? 1 : 0) : 0) : 0; //Needs checking
+// assign yellow_detect = (Hue > 48 && Hue < 62) ? ((Saturation > 193) ? ((Value > 167) ? 1 : 0) : 0) : 0;
+// assign pink_detect = (Hue < 30) ? ((Saturation > 145) ? ((Value > 160) ? 1 : 0) : 0) : 0;
+// assign lightgreen_detect = (Hue > 82 && Hue < 136) ? ((Saturation > 136) ? ((Value > 49) ? 1 : 0) : 0) : 0;
+
+//For room
+assign red_detect = (Hue < 38) ? ((Saturation > 145) ? ((Value > 47) ? 1 : 0) : 0) : 0;
 //assign green_detect = 0;
-assign orange_detect = 0;
+assign green_detect = (Hue > 96 && Hue < 224) ? ((Saturation > 100) ? ((Value > 5) ? 1 : 0) : 0) : 0;
+assign blue_detect = 0;
+assign yellow_detect = 0;
 assign pink_detect = 0;
-assign gray_detect = 0;
-assign blueOrGreen = green_detect && blue_detect;
+assign lightgreen_detect = 0;
+
+//
 ////////////////////
 // assign newRed = (red_detect || pink_detect || gray_detect) ? 8'd255 : gray;
 // assign newGreen = (green_detect || gray_detect) ? 8'd255 : gray;
 // assign newBlue = (blue_detect || pink_detect) ? 8'd255 : gray;
 //Red = 0, Green = 1, Blue = 2, 3 = Orange, 4 = Pink, 5 = Gray
-localparam pixelRange = 31;
+localparam pixelRange = 32;
 wire detectionArray [5:0];
 //assign detectionArray = {red_detect, green_detect, blue_detect, orange_detect, pink_detect, gray_detect};
 assign detectionArray[0] = red_detect;
 assign detectionArray[1] = green_detect;
 assign detectionArray[2] = blue_detect;
-assign detectionArray[3] = orange_detect;
+assign detectionArray[3] = yellow_detect;
 assign detectionArray[4] = pink_detect;
-assign detectionArray[5] = gray_detect;
-reg [pixelRange-1:0] pixelBuffer [5:0]; //Shift reg 
-reg [9:0] xMin [5:0]; //640
-reg [9:0] xMax [5:0]; //640
-reg [8:0] yMin [5:0]; //480 may not be required
-reg [8:0] yMax [5:0]; //480 may not be required
-//Bounding boxes for next frame
-reg [9:0] left [5:0]; //640
-reg [9:0] right [5:0]; //640
-reg [8:0] top [5:0]; //480 may not be required
-reg [8:0] bottom [5:0]; //480 may not be required
-wire [9:0] xDistanceVector [5:0]; //Distance between xMin and xMax
-wire [8:0] yDistanceVector [5:0]; //Distance between yMin and yMax may not be required
+assign detectionArray[5] = lightgreen_detect;
+//reg [8:0] top [5:0]; //480 may not be required
+//reg [8:0] bottom [5:0]; //480 may not be required
+//wire [10:0] xDistanceVector [5:0]; //Distance between xMin and xMax
+//wire [10:0] xTempDistanceVector [5:0]; //Distance between xMin and xMax
+//wire [8:0] yDistanceVector [5:0]; //Distance between yMin and yMax may not be required
 //assign xDistanceVector = {((xMin[0] < xMax[0]) ? xMax[0]-xMin[0] : 0), ((xMin[1] < xMax[1]) ? xMax[1]-xMin[1] : 0), ((xMin[2] < xMax[2]) ? xMax[2]-xMin[2] : 0), ((xMin[3] < xMax[3]) ? xMax[3]-xMin[3] : 0), ((xMin[4] < xMax[4]) ? xMax[4]-xMin[4] : 0), ((xMin[5] < xMax[5]) ? xMax[5]-xMin[5] : 0)};
-assign xDistanceVector[0] = (xMin[0] < xMax[0]) ? xMax[0]-xMin[0] : 0;
-assign xDistanceVector[1] = (xMin[1] < xMax[1]) ? xMax[1]-xMin[1] : 0;
-assign xDistanceVector[2] = (xMin[2] < xMax[2]) ? xMax[2]-xMin[2] : 0;
-assign xDistanceVector[3] = (xMin[3] < xMax[3]) ? xMax[3]-xMin[3] : 0;
-assign xDistanceVector[4] = (xMin[4] < xMax[4]) ? xMax[4]-xMin[4] : 0;
-assign xDistanceVector[5] = (xMin[5] < xMax[5]) ? xMax[5]-xMin[5] : 0;
-//
-assign yDistanceVector[0] = (yMin[0] < yMax[0]) ? yMax[0]-yMin[0] : 0;
-assign yDistanceVector[1] = (yMin[1] < yMax[1]) ? yMax[1]-yMin[1] : 0;
-assign yDistanceVector[2] = (yMin[2] < yMax[2]) ? yMax[2]-yMin[2] : 0;
-assign yDistanceVector[3] = (yMin[3] < yMax[3]) ? yMax[3]-yMin[3] : 0;
-assign yDistanceVector[4] = (yMin[4] < yMax[4]) ? yMax[4]-yMin[4] : 0;
-assign yDistanceVector[5] = (yMin[5] < yMax[5]) ? yMax[5]-yMin[5] : 0;
+// assign xDistanceVector[0] = (xMin[0] < xMax[0]) ? (xMax[0]-xMin[0]) : 0;
+// assign xDistanceVector[1] = (xMin[1] < xMax[1]) ? (xMax[1]-xMin[1]) : 0;
+// assign xDistanceVector[2] = (xMin[2] < xMax[2]) ? (xMax[2]-xMin[2]) : 0;
+// assign xDistanceVector[3] = (xMin[3] < xMax[3]) ? (xMax[3]-xMin[3]) : 0;
+// assign xDistanceVector[4] = (xMin[4] < xMax[4]) ? (xMax[4]-xMin[4]) : 0;
+// assign xDistanceVector[5] = (xMin[5] < xMax[5]) ? (xMax[5]-xMin[5]) : 0;
+// //
+// assign xTempDistanceVector[0] = (tempXMin[0] < tempXMax[0]) ? (tempXMax[0]-tempXMin[0]) : 0;
+// assign xTempDistanceVector[1] = (tempXMin[1] < tempXMax[1]) ? (tempXMax[1]-tempXMin[1]) : 0;
+// assign xTempDistanceVector[2] = (tempXMin[2] < tempXMax[2]) ? (tempXMax[2]-tempXMin[2]) : 0;
+// assign xTempDistanceVector[3] = (tempXMin[3] < tempXMax[3]) ? (tempXMax[3]-tempXMin[3]) : 0;
+// assign xTempDistanceVector[4] = (tempXMin[4] < tempXMax[4]) ? (tempXMax[4]-tempXMin[4]) : 0;
+// assign xTempDistanceVector[5] = (tempXMin[5] < tempXMax[5]) ? (tempXMax[5]-tempXMin[5]) : 0;
+// //
+// assign yDistanceVector[0] = (yMin[0] < yMax[0]) ? yMax[0]-yMin[0] : 0;
+// assign yDistanceVector[1] = (yMin[1] < yMax[1]) ? yMax[1]-yMin[1] : 0;
+// assign yDistanceVector[2] = (yMin[2] < yMax[2]) ? yMax[2]-yMin[2] : 0;
+// assign yDistanceVector[3] = (yMin[3] < yMax[3]) ? yMax[3]-yMin[3] : 0;
+// assign yDistanceVector[4] = (yMin[4] < yMax[4]) ? yMax[4]-yMin[4] : 0;
+// assign yDistanceVector[5] = (yMin[5] < yMax[5]) ? yMax[5]-yMin[5] : 0;
 //assign yDistanceVector = {((yMin[0] < yMax[0]) ? yMax[0]-yMin[0] : 0), ((yMin[1] < yMax[1]) ? yMax[1]-yMin[1] : 0), ((yMin[2] < yMax[2]) ? yMax[2]-yMin[2] : 0), ((yMin[3] < yMax[3]) ? yMax[3]-yMin[3] : 0), ((yMin[4] < yMax[4]) ? yMax[4]-yMin[4] : 0), ((yMin[5] < yMax[5]) ? yMax[5]-yMin[5] : 0)};
 wire [23:0] colourCodes [5:0]; //Holds output colour codes for all balls
 assign colourCodes[0] = 24'hff0000; //Red
-assign colourCodes[1] = 24'h00ff00; //Green
-assign colourCodes[2] = 24'h0000ff; //Bluie
-assign colourCodes[3] = 24'hff8000; //Orange
+assign colourCodes[1] = 24'h00df00; //Green
+assign colourCodes[2] = 24'h0000ff; //Blue
+assign colourCodes[3] = 24'hffff00; //Yellow
 assign colourCodes[4] = 24'hff00ff; //Pink
-assign colourCodes[5] = 24'hffffff; //Gray (white)
-reg [6:0] tempCount; //Allow up to 128 detected pixels
+assign colourCodes[5] = 24'h00ff80; //Light green
+reg [10:0] tempCount; //Allow up to 128 detected pixels
+//Used for largest contour identification in bounds drawing
+//reg [10:0] tempMin [5:0];
+//reg [10:0] pixelWidth[5:0];
+//reg [10:0] tempXMin [5:0]; //640
+reg [10:0] tempXMax [5:0]; //640
+reg [10:0] tempPixelWidth [5:0]; //640
+//reg [1:0] pixelDetected [5:0]; 
+reg [pixelRange-1:0] pixelBuffer [5:0]; //Shift reg 
+reg [10:0] xMin [5:0]; //640
+reg [10:0] xMax [5:0]; 
+reg [10:0] pixelWidth [5:0]; //640
+//reg [8:0] yMin [5:0]; //480 may not be required
+//reg [8:0] yMax [5:0]; //480 may not be required
+//Bounding boxes for next frame
+reg [15:0] left [5:0]; //640
+reg [15:0] right [5:0]; //640
+
 //New implementation using detection as mode filter
-//This implementation allows looser requirements on the HSV thresholds
+//This implementation requires looser requirements on the HSV thresholds
 always @(posedge clk) begin
 	integer i;
 	integer j;
 	colourOutput = {gray, gray, gray};
 	//Reset all at start of frame
-	if (sop) begin
+	if (sop & in_valid) begin
 		for(i = 0; i < 6; i = i + 1) begin
-			xMin[i] = 640;
-			yMin[i] = 480;
+			xMin[i] = 0;
 			xMax[i] = 0;
-			yMax[i] = 0;
+			pixelWidth[i] = 0;
+			//yMin[i] = 0;
+			//yMax[i] = 0;
+			//Replace current xmin and xmax
+			//tempXMin[i] = IMAGE_W-11'h1;
 		end
 	end
 	//Reset buffer at start of line
-	if (x == 0) begin
+	if (x < pixelRange && in_valid) begin
 		for(i = 0; i < 6; i = i + 1) begin
 			pixelBuffer[i] = 0;
+			//tempXMin[i] = 50;
+			tempXMax[i] = 0;
+			tempPixelWidth[i] = 0;
 		end
 	end
-	//For each colour
-	for(i = 0; i < 6; i = i + 1) begin
-		//If a colour pixel was detected, add to buffers for that colour
-		tempCount = 0;
-		if(detectionArray[i] == 1) begin
-			pixelBuffer[i][0] = 1;
-		end
-		//Count how many detected pixels 1s in buffer, if at least half the pixelrange is detected consider the pixel detected (mode filtering)
-		tempCount = 0;
-		for(j = 0; j < pixelRange; j = j + 1) begin
-			if(pixelBuffer[i][j] == 1) begin
-				tempCount = tempCount + 1;
+	if ((x > pixelRange) && (x < IMAGE_W-1) && (y < IMAGE_H) && (in_valid)) begin
+		//For each colour
+		for(i = 0; i < 6; i = i + 1) begin
+			//If a colour pixel was detected, add to buffers for that colour
+			if(detectionArray[i] == 1) begin
+				pixelBuffer[i][0] = 1;
 			end
+			//Count how many detected pixels 1s in buffer, if at least half the pixelrange is detected consider the pixel detected (mode filtering)
+			tempCount = 0;
+			for(j = 0; j < pixelRange; j = j + 1) begin
+				if(pixelBuffer[i][j] == 1) begin
+					tempCount = tempCount + 1;
+				end
+			end
+			//Shift all buffers by 1 (shift register)
+			pixelBuffer[i] = pixelBuffer[i]*2;
+			//Mode filtering and contour detection
+			if (tempCount > 12) begin
+				//If no pixels have been detected in the current row yet, set min to first detected pixel
+				// if (tempXMin[i] > x) begin
+				// 	tempXMin[i] = x;
+ 				// end
+				tempPixelWidth[i] = tempPixelWidth[i] + 1;
+				//Set x max to current pixel
+				tempXMax[i] = x;
+				//Colour output
+				colourOutput = colourCodes[i];
+			end else begin
+				//Ball no longer detected, reset longest contour detection
+				//If end of current detection
+				if (tempPixelWidth[i] > pixelWidth[i]) begin
+					xMin[i] = tempXMax[i]-tempPixelWidth[i];
+					xMax[i] = tempXMax[i];
+					pixelWidth[i] = tempPixelWidth[i];
+				end
+				//tempXMin[i] = 50;
+				// tempXMax[i] = pixelRange;
+				tempPixelWidth[i] = 0;
+				// xMin[i] = (tempPixelWidth[i] > pixelWidth[i]) ? tempXMin[i] : xMin[i];
+				// xMax[i] = (tempPixelWidth[i] > pixelWidth[i]) ? tempXMax[i] : xMax[i];
+				// pixelWidth[i] = (tempPixelWidth[i] > pixelWidth[i]) ? tempPixelWidth[i] : pixelWidth[i]; 
+				// //tempXMin[i] = IMAGE_W-1'b1;
+				//tempXMax[i] = pixelRange;
+				//tempPixelWidth[i] = 0;
+				// tempMin[i] = 11'd0;
+				// pixelWidth[i] = 11'd0;
+			end
+			//Should only draw at end of frame as y keeps changing
+			//If the current coordinate is an xMin, xMax, yMin or yMax of another ball, colour accordingly
 		end
-		//Shift all buffers by 1 (shift register)
-		pixelBuffer[i] = pixelBuffer[i]*2;
-		//Mode filtering
-		if (tempCount > (pixelRange/2)) begin
-			xMin[i] = (xMin[i] > x) ? x : xMin[i];
-			xMax[i] = (xMax[i] < x) ? x : xMax[i];
-			yMin[i] = (yMin[i] > y) ? y : yMin[i];
-			yMax[i] = (yMax[i] < y) ? y : yMax[i];
-			//Colour output depending on the mode filtering
-			colourOutput = colourCodes[i];
-		end 
-	end
-	//Should only draw at end of frame as y keeps changing
-	//If the current coordinate is an xMin, xMax, yMin or yMax of another ball, colour accordingly
-	for(i = 0; i < 6; i = i + 1) begin
-		if (((left[i] == x) || (right[i] == x)) || ((top[i] == y) || (bottom[i] == y))) begin
-			//The difference between the two coordinates must be at least 40 to be considered
-			colourOutput = ((xDistanceVector[i] > 40) && (yDistanceVector[i] > 40)) ? colourCodes[i] : gray;  
+		// //Should only draw at end of frame as y keeps changing
+		// //If the current coordinate is an xMin, xMax, yMin or yMax of another ball, colour accordingly
+		for(i = 0; i < 6; i = i + 1) begin
+			if ((left[i] == x) ^ (right[i] == x)) begin
+				colourOutput = colourCodes[i];
+			end
 		end
 	end
 end
 
 //SPI communication, constantly need to read status register to know if ready to transmit
-always @(posedge clk) begin
-	//Read from status register
-	avalon_spi_addr <= 2;
-	avalon_master_read <= 1;
-	avalon_master_write <= 0;
-	if (avalon_from_SPI[6] == 1) begin //If TRDY is set to 1, can transmit data
-		avalon_master_read <= 0;
-		avalon_spi_addr <= 1; //txdata address
-		avalon_master_write <= 1;
-		if ((x % 2) == 0) begin
-			avalon_to_SPI <= 16'b0011100110010001; //test data
-		end else begin
-			avalon_to_SPI <= 16'b0111100110011001;
-		end
-	end
-
-end 
+// always @(posedge clk) begin
+// 	if(cycleNo == 0) begin
+// 		avalon_master_chipselect = 1;
+// 		//Read and write are active low
+// 		//Read from status register
+// 		avalon_spi_addr = 2; //status register address
+// 		avalon_master_read = 1;
+// 		avalon_master_write = 0;
+// 		avalon_to_SPI = 16'b0;
+// 	end
+// 	//Will receive data on next clock cycle
+// 	if (avalon_from_SPI[6] == 1) begin //If TRDY is set to 1, can transmit data
+// 		//Needs to remain for two clock cycles
+// 		if(cycleNo == 0) begin
+// 			cycleNo = 1;
+// 		end else begin
+// 			cycleNo = 0;
+// 		end
+// 		avalon_master_read = 0;
+// 		avalon_master_write = 1;
+// 		avalon_spi_addr = 1; //txdata address
+// 		avalon_to_SPI = 16'b0011100110010001;
+// 	end
+// 	// avalon_master_read = 1;
+// 	// avalon_master_write = 0;
+// 	// avalon_spi_addr = 1; //txdata address
+// 	// avalon_to_SPI = 16'b0011100110010001;
+// end 
 
 
 // reg [8:0] hueDataBuffer [4:0]; //Store the last 5 pixel Hues
@@ -457,10 +528,15 @@ always@(posedge clk) begin
 		if (x == IMAGE_W-1) begin
 			x <= 11'h0;
 			y <= y + 11'h1;
+			//On every new line communicate detection data to ESP32
+			// if (y < 7) begin
+			// 	if (xDistanceVector[y-1] > 40 && xDistanceVector[y-1] > 40) begin
+			// 	end
+			// end
 		end
 		else begin
 			x <= x + 11'h1;
-			//Sample every 4 bits
+			//Sample every 4 pixels
 			if((x % 4) == 0) begin 
 				runningValueTotal <= runningValueTotal + Value;
 			end
@@ -472,31 +548,64 @@ reg [1:0] msg_state;
 reg [7:0] frame_count;
 always@(posedge clk) begin
 	integer i;
+	//At end of frame
 	if (eop & in_valid & packet_video) begin  //Ignore non-video packets
 		//Start message writer FSM once every MSG_INTERVAL frames, if there is room in the FIFO
 		frame_count <= frame_count - 1;
-		//Calculate average value of the frame
 		if (frame_count == 0 && msg_buf_size < MESSAGE_BUF_MAX - 3) begin
 			msg_state <= 2'b01;
 			frame_count <= MSG_INTERVAL-1;
 		end
-
 		//Save all bounding boxes to show next frame
+		//Simple low pass filter to prevent quick jumping around
 		for(i = 0; i < 6; i = i + 1) begin
-			left[i] = xMin[i];
-			right[i] = xMax[i];
-			top[i] = yMin[i];
-			bottom[i] = yMax[i];
-		end 
-
-		//Calculate distance and angles
-	end
-	
+			if ((xMax[i] > xMin[i]) & (pixelWidth[i] > 40)) begin
+				left[i] <= (left[i]+xMin[i])/2;
+				right[i] <= (right[i]+xMax[i])/2;
+			end
+		end
+	end 
 	//Cycle through message writer states once started
 	if (msg_state != 2'b00) msg_state <= msg_state + 2'b01;
-
 end
-	
+
+//Send to ESP32
+always@(posedge clk) begin
+	//Receive any data from the ESP32
+	if (SPI_read_valid) begin
+		SPI_read_ready = 1;
+		SPI_write_valid = 1;
+	end else begin
+		SPI_read_ready = 0;
+		SPI_write_valid = 0;
+		SPI_dataretain = 0;
+		SPI_dataout = 0;
+	end
+	//Recieved a command to output ball data
+	if (SPI_datain != 0) begin
+		SPI_dataretain = SPI_datain;
+		dataIndex = (SPI_dataretain-1)>>1;
+		angleCalc = ((left[dataIndex]+right[dataIndex])/32);
+		angleSlice = angleCalc[4:0];
+		//SPI_dataout = ((SPI_dataretain % 2) == 1) ?  {dataIndex[2:0], pixelWidth[dataIndex][7:3]} : {pixelWidth[dataIndex][2:0], angleCalc[4:0]};
+		if((SPI_dataretain % 2) == 0) begin
+			//First half of packet
+			if (pixelWidth[dataIndex[2:0]] > 60) begin
+				SPI_dataout = {dataIndex[2:0]+1, pixelWidth[dataIndex][8:4]};
+			end else begin
+				SPI_dataout = 0;
+			end
+		end else begin
+			//Second half of packet
+			if (pixelWidth[dataIndex[2:0]] > 60) begin
+				SPI_dataout = {pixelWidth[dataIndex][3:1], angleSlice};
+			end else begin
+				SPI_dataout = 0;
+			end
+		end
+	end
+end
+
 //Generate output messages for CPU
 reg [31:0] msg_buf_in; 
 wire [31:0] msg_buf_out;
@@ -506,7 +615,6 @@ wire [7:0] msg_buf_size;
 wire msg_buf_empty;
 
 `define RED_BOX_MSG_ID "RBB" //this is a macro
-
 //Use to communicate with the NIOS processor
 always@(*) begin	//Write words to FIFO as state machine advances
 	case(msg_state)

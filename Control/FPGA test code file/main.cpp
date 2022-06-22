@@ -185,7 +185,7 @@ void loop()
   Serial.println(recievedData);
   delay(1000);
   Serial.print("Processing data");
-
+  Serial.print("Hi!");
   for (int x = 0; x < 5; x++)
   {
     delay(500);

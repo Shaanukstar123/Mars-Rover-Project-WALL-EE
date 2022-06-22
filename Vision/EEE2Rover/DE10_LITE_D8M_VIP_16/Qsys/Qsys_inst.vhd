@@ -34,6 +34,16 @@
 			sdram_wire_dqm                            : out   std_logic_vector(1 downto 0);                     -- dqm
 			sdram_wire_ras_n                          : out   std_logic;                                        -- ras_n
 			sdram_wire_we_n                           : out   std_logic;                                        -- we_n
+			spi_rx_fifo_out_data                      : out   std_logic_vector(7 downto 0);                     -- data
+			spi_rx_fifo_out_valid                     : out   std_logic;                                        -- valid
+			spi_rx_fifo_out_ready                     : in    std_logic                     := 'X';             -- ready
+			spi_tx_fifo_in_data                       : in    std_logic_vector(7 downto 0)  := (others => 'X'); -- data
+			spi_tx_fifo_in_valid                      : in    std_logic                     := 'X';             -- valid
+			spi_tx_fifo_in_ready                      : out   std_logic;                                        -- ready
+			spislave_0_export_0_mosi                  : in    std_logic                     := 'X';             -- mosi
+			spislave_0_export_0_nss                   : in    std_logic                     := 'X';             -- nss
+			spislave_0_export_0_miso                  : inout std_logic                     := 'X';             -- miso
+			spislave_0_export_0_sclk                  : in    std_logic                     := 'X';             -- sclk
 			sw_external_connection_export             : in    std_logic_vector(9 downto 0)  := (others => 'X'); -- export
 			terasic_auto_focus_0_conduit_vcm_i2c_sda  : inout std_logic                     := 'X';             -- vcm_i2c_sda
 			terasic_auto_focus_0_conduit_clk50        : in    std_logic                     := 'X';             -- clk50
@@ -44,10 +54,9 @@
 			terasic_camera_0_conduit_end_PIXCLK       : in    std_logic                     := 'X';             -- PIXCLK
 			uart_0_rx_tx_rxd                          : in    std_logic                     := 'X';             -- rxd
 			uart_0_rx_tx_txd                          : out   std_logic;                                        -- txd
-			spi_0_external_MISO                       : out   std_logic;                                        -- MISO
-			spi_0_external_MOSI                       : in    std_logic                     := 'X';             -- MOSI
-			spi_0_external_SCLK                       : in    std_logic                     := 'X';             -- SCLK
-			spi_0_external_SS_n                       : in    std_logic                     := 'X'              -- SS_n
+			eee_imgproc_0_conduit_spi_new_signal      : out   std_logic_vector(7 downto 0);                     -- new_signal
+			eee_imgproc_0_conduit_spi_new_signal_1    : out   std_logic;                                        -- new_signal_1
+			eee_imgproc_0_conduit_spi_new_signal_2    : in    std_logic                     := 'X'              -- new_signal_2
 		);
 	end component Qsys;
 
@@ -87,6 +96,16 @@
 			sdram_wire_dqm                            => CONNECTED_TO_sdram_wire_dqm,                            --                                 .dqm
 			sdram_wire_ras_n                          => CONNECTED_TO_sdram_wire_ras_n,                          --                                 .ras_n
 			sdram_wire_we_n                           => CONNECTED_TO_sdram_wire_we_n,                           --                                 .we_n
+			spi_rx_fifo_out_data                      => CONNECTED_TO_spi_rx_fifo_out_data,                      --                  spi_rx_fifo_out.data
+			spi_rx_fifo_out_valid                     => CONNECTED_TO_spi_rx_fifo_out_valid,                     --                                 .valid
+			spi_rx_fifo_out_ready                     => CONNECTED_TO_spi_rx_fifo_out_ready,                     --                                 .ready
+			spi_tx_fifo_in_data                       => CONNECTED_TO_spi_tx_fifo_in_data,                       --                   spi_tx_fifo_in.data
+			spi_tx_fifo_in_valid                      => CONNECTED_TO_spi_tx_fifo_in_valid,                      --                                 .valid
+			spi_tx_fifo_in_ready                      => CONNECTED_TO_spi_tx_fifo_in_ready,                      --                                 .ready
+			spislave_0_export_0_mosi                  => CONNECTED_TO_spislave_0_export_0_mosi,                  --              spislave_0_export_0.mosi
+			spislave_0_export_0_nss                   => CONNECTED_TO_spislave_0_export_0_nss,                   --                                 .nss
+			spislave_0_export_0_miso                  => CONNECTED_TO_spislave_0_export_0_miso,                  --                                 .miso
+			spislave_0_export_0_sclk                  => CONNECTED_TO_spislave_0_export_0_sclk,                  --                                 .sclk
 			sw_external_connection_export             => CONNECTED_TO_sw_external_connection_export,             --           sw_external_connection.export
 			terasic_auto_focus_0_conduit_vcm_i2c_sda  => CONNECTED_TO_terasic_auto_focus_0_conduit_vcm_i2c_sda,  --     terasic_auto_focus_0_conduit.vcm_i2c_sda
 			terasic_auto_focus_0_conduit_clk50        => CONNECTED_TO_terasic_auto_focus_0_conduit_clk50,        --                                 .clk50
@@ -97,9 +116,8 @@
 			terasic_camera_0_conduit_end_PIXCLK       => CONNECTED_TO_terasic_camera_0_conduit_end_PIXCLK,       --                                 .PIXCLK
 			uart_0_rx_tx_rxd                          => CONNECTED_TO_uart_0_rx_tx_rxd,                          --                     uart_0_rx_tx.rxd
 			uart_0_rx_tx_txd                          => CONNECTED_TO_uart_0_rx_tx_txd,                          --                                 .txd
-			spi_0_external_MISO                       => CONNECTED_TO_spi_0_external_MISO,                       --                   spi_0_external.MISO
-			spi_0_external_MOSI                       => CONNECTED_TO_spi_0_external_MOSI,                       --                                 .MOSI
-			spi_0_external_SCLK                       => CONNECTED_TO_spi_0_external_SCLK,                       --                                 .SCLK
-			spi_0_external_SS_n                       => CONNECTED_TO_spi_0_external_SS_n                        --                                 .SS_n
+			eee_imgproc_0_conduit_spi_new_signal      => CONNECTED_TO_eee_imgproc_0_conduit_spi_new_signal,      --        eee_imgproc_0_conduit_spi.new_signal
+			eee_imgproc_0_conduit_spi_new_signal_1    => CONNECTED_TO_eee_imgproc_0_conduit_spi_new_signal_1,    --                                 .new_signal_1
+			eee_imgproc_0_conduit_spi_new_signal_2    => CONNECTED_TO_eee_imgproc_0_conduit_spi_new_signal_2     --                                 .new_signal_2
 		);
 
