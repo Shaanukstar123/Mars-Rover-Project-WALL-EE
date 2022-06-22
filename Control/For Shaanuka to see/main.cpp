@@ -210,7 +210,7 @@ void analyseData(String x)
 
 void roverMovement() //DONE
 {
-  sub("direction");
+  //sub("direction");
   //Serial.println("Subbed to Commands");
   //Serial.println("roverCommand = " + roverCommand);
   if (roverCommand == "{\"directionMove\":\"B\"}") // bwd
@@ -552,6 +552,7 @@ void setup() {
   opticSetup();
   initWifi();
   mqttConnect();
+  sub("#");
   //USensorSetup();
 
 //initialising object array

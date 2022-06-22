@@ -45,12 +45,16 @@ void callback(char *topic, byte *payload, unsigned int length) { //Data received
  String command = "";
  for (int i = 0; i < length; i++) {
      Serial.print((char) payload[i]);
-     command+= (char) payload[i];
+     //command+= (char) payload[i];
+      if (topic =="direction"){
+        command+= (char) payload[i];
+      }
  }
  roverCommand = command;
 
  Serial.println();
  Serial.println("-----------------------");
+
 }
 
 void pub(String message,char *topic){
