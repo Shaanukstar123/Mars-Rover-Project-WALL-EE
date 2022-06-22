@@ -33,6 +33,15 @@ const char *mqtt_user ="marsrover";
 const char *mqtt_pass = "marsrover123";
 const int mqtt_port = 1883;
 
+//Json variables for Publishing
+StaticJsonDocument <256> location_msg;
+StaticJsonDocument <256> battery_msg;
+StaticJsonDocument <256> obstacle_msg;
+
+//Json variables for Subscribing
+StaticJsonDocument <256> RControl_msg;
+StaticJsonDocument<256> command_msg;
+String command = "";
 String roverCommand = "";
 
 WiFiClient espClient;
@@ -42,8 +51,21 @@ void callback(char *topic, byte *payload, unsigned int length) { //Data received
  Serial.print("Message arrived in topic: ");
  Serial.println(topic);
  Serial.print("Message:");
- String command = "";
- for (int i = 0; i < length; i++) {
+ deserializeJson(RControl_msg,payload);
+ command = RControl["directionMove"];
+ //auto num = sub_msg["something"];
+ //char msg[128];
+ //int num = 10;
+ //num = sub_msg["something"];
+ //serializeJson(sub_msg,msg);
+ Serial.println(command);
+ //Serial.println(num);
+//}
+  //Serial.print((char) payload[i]);
+//}
+Serial.println();
+Serial.println("-----------------------");
+ /*for (int i = 0; i < length; i++) {
      Serial.print((char) payload[i]);
      //command+= (char) payload[i];
       if (topic =="direction"){
@@ -54,7 +76,7 @@ void callback(char *topic, byte *payload, unsigned int length) { //Data received
 
  Serial.println();
  Serial.println("-----------------------");
-
+*/
 }
 
 void pub(String message,char *topic){
