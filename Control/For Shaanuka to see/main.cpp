@@ -213,6 +213,7 @@ void roverMovement() //DONE
   //sub("direction");
   //Serial.println("Subbed to Commands");
   //Serial.println("roverCommand = " + roverCommand);
+  Serial.println(roverCommand);
   if (roverCommand == "{\"directionMove\":\"B\"}") // bwd
   {
    //Serial.println("backwards!");
@@ -501,34 +502,6 @@ void batteryPercent(int example){
     pub(JSON, topic);
 }
 
-void getTarget() //get Target and decode
-{
-  sub("Target"); //test format: "{t:1,x:010,y:010}"
-  if (roverCommand[4] == '1'){
-    String xstring = "";
-    String ystring = "";
-
-    for (int i = 8; i < 11; i++){
-      xstring+=roverCommand[i];
-      ystring+=roverCommand[i+6];
-      }
-
-    int xcoord;
-    int ycoord;
-  
-    for (int j = 0; j < 3; j++) { //Decimal conversion
-      xcoord = int(xstring[0])*pow(10, 2-j);
-      ycoord = int(ystring[0])*pow(10, 2-j);
-      }
-    rover.targetX = xcoord;
-    rover.targetY = ycoord;
-    rover.targetCoord = 1;
-    // DEBUG
-    // Serial.println(xcoord);
-    // Serial.println(ycoord);
-  }
-}
-
 void halt() //stops the rover
 {
       robot.brake(1);
@@ -581,82 +554,6 @@ void setup() {
   rover.autoMode = false;
 }
 
-int Lavoid;
-int Ravoid;
-
-void LavoidSequence()
-{
-    int targetangle;
-    int targetx;
-    int targety;
- 
-    switch (Lavoid)
-    {
-    case 0: break; //skip
-
-    case 1: 
-        targetangle = rover.angle -90;
-        Lavoid++;
-    case 2:
-        robot.rotate(motor1, 30, CCW); //Left
-        robot.rotate(motor2, 30, CCW);
-        if (rover.angle <= targetangle){
-        halt();
-        Lavoid++;}
-    case 3:
-        targetx = rover.X + 20*sin(rover.angle);
-        targety = rover.Y + 20*cos(rover.angle);
-        Lavoid++;
-    case 4:
-        robot.rotate(motor1, 30, CW);
-        robot.rotate(motor2, 30, CCW);
-        if (withinFive(rover.X, targetx) && withinFive(rover.Y, targety))
-        {halt(); Lavoid++;}
-    case 5:
-        targetangle = rover.angle +90;
-        Lavoid++;
-    case 6: 
-        robot.rotate(motor1, 30, CW); //Right
-        robot.rotate(motor2, 30, CW);
-        if (rover.angle >= targetangle)
-        {
-        halt();
-        Lavoid++;}
-    case 7:
-        targetx = rover.X + 30*sin(rover.angle);
-        targety = rover.Y + 30*cos(rover.angle);
-        Lavoid++;
-    case 8:
-        robot.rotate(motor1, 30, CW);
-        robot.rotate(motor2, 30, CCW); //FWD
-        if (withinFive(rover.X, targetx) && withinFive(rover.Y, targety))
-        {halt(); Lavoid++;
-        targetangle = rover.angle +90;}
-    case 9: 
-        robot.rotate(motor1, 30, CW); //Right
-        robot.rotate(motor2, 30, CW);
-        if (rover.angle >= targetangle){
-            halt();
-            Lavoid++;
-        }
-    case 10:
-        targetx = rover.X + 30*sin(rover.angle);
-        targety = rover.Y + 30*cos(rover.angle);
-        Lavoid++;
-    case 11:
-        robot.rotate(motor1, 30, CW);
-        robot.rotate(motor2, 30, CCW); //FWD
-        if (withinFive(rover.X, targetx) && withinFive(rover.Y, targety))
-        {halt(); Lavoid++;}
-    case 12:
-    robot.rotate(motor1, 30, CCW); //Left
-    robot.rotate(motor2, 30, CCW);
-    if (rover.angle <= targetangle){
-        halt();
-        Lavoid = 0;}
-
-    }
-}
 
 // void detect() //All the operations of the rover to do with information, detection.
 // {
@@ -683,39 +580,7 @@ void loop() {
   opticMain();
   radarDetection(rover.X, rover.Y, rover.angle);
 
-    if (rover.autoMode)
-    {
-      if (!rover.detection && Lavoid == 0)
-      {
-        //fwd
-      }
-      if (rover.detection)
-      {
-        Lavoid = 1;
-      }
 
-      if (rover.walldetection)
-      {
-        if (rover.X + 30 > 300)
-        {
-            //left Uturn
-        }
-
-        if (rover.X - 30 < 0)
-        {
-            //right Uturn
-        }
-      }
-
-    }
-
-    LavoidSequence(); // will always skip unless not 0. Then it will start its processes.
-
-
-    
-  
-  
-  
   //analyseData("0000000000100000");
   //angleCalc(rover.angle);
   //printCoordinates();
