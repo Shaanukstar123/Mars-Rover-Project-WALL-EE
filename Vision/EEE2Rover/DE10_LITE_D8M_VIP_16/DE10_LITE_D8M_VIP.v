@@ -192,7 +192,7 @@ Qsys u0 (
 //		.spi_0_external_SCLK                       (ARDUINO_IO[6]),                       //                                 .SCLK
 //		.spi_0_external_SS_n                       (ARDUINO_IO[7])                        //                                 .SS_n
 		.spislave_0_export_0_mosi                  (ARDUINO_IO[2]),                  //              spislave_0_export_0.mosi
-      .spislave_0_export_0_nss                   (ARDUINO_IO[7]),                   //                                 .nss
+      .spislave_0_export_0_nss                   (ARDUINO_IO[11]),                   //                                 .nss
       .spislave_0_export_0_miso                  (ARDUINO_IO[5]),                  //                                 .miso
       .spislave_0_export_0_sclk                  (ARDUINO_IO[6]),                  //                                 .sclk
       .spi_rx_fifo_out_data                      (SPI_datain),                      //                  spi_rx_fifo_out.data

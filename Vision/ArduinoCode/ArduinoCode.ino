@@ -5,7 +5,7 @@
 
 #define Testinput 2
 
-#define PIN_SS        5
+#define PIN_SS        4
 #define PIN_MISO      19
 #define PIN_MOSI      23
 #define PIN_SCK       18
@@ -16,6 +16,7 @@ uint8_t spi_reg;
 uint16_t spi_returnval;
 String recievedData;
 byte incomingByte = 0;
+
 //For each ball
 void grabBallData(int ballCode) {
   //Ask for the two packets ball data
@@ -32,7 +33,7 @@ void grabBallData(int ballCode) {
   SPI.endTransaction();
   //convert to binary
   int dataIn = (packet1 << 8) + (packet2);
-  if (dataIn != 0) {
+  if (dataIn != 0 && dataIn != 65535) {
     recievedData = toBinary(dataIn);
     Serial.print(ballCode);
     Serial.print(" : ");
@@ -40,16 +41,15 @@ void grabBallData(int ballCode) {
     analyseData(recievedData);
   }
 }
-//vspi default pins SCLK = 18, MISO = 19, MOSI = 23, SS = 5 
-void setup() {
 
-  Serial.begin(115200);
+double distanceCalc(int width)
+{
+  double a = 68.23;
+  double b = 0.9923;
 
-  // Setup SPI stuff
-  pinMode(PIN_SS, OUTPUT);
-  SPI.begin();
-  spi_returnval = 0;
-  Serial.println("Start");
+  double powerVar = pow(b, width);
+
+  return a*powerVar;
 }
 
 //Needs to be 16 bits
@@ -108,7 +108,7 @@ void analyseData(String x)
   for (int y = 0; y < 3; y++) //extracting the distance
     {alienBin += x[y];}
 
-  if (not (alienBin == "000" or alienBin == "111"))
+  if (alienBin != "000")
   {
     detectionMade == true;
     if (alienBin == "001")
@@ -131,7 +131,7 @@ void analyseData(String x)
     if (alienBin == "100")
     {
       //orange 
-      Serial.println("Orange Alien detected.");
+      Serial.println("Yellow Alien detected.");
     }
 
     if (alienBin == "101")
@@ -143,9 +143,13 @@ void analyseData(String x)
     if (alienBin == "110")
     {
       //grey
-      Serial.println("Grey Alien detected.");
+      Serial.println("Light Green Alien detected.");
     }
-
+    if (alienBin == "111")
+    {
+      //building
+      Serial.println("Building detected.");
+    }
     //Distance
     String distanceBin = "";
   
@@ -153,8 +157,8 @@ void analyseData(String x)
     {distanceBin += x[y];}
     distanceBin += "0"; //Needs a trailing zero as the data from the FPGA removes the LSB
     Serial.println(distanceBin);
-
-    int distance = toInteger(distanceBin);
+    int pixelWidth = toInteger(distanceBin);
+    int distance = distanceCalc(pixelWidth);
 
     Serial.print("Approximate distance from Rover : ");
     Serial.print(distance);
@@ -198,7 +202,7 @@ void analyseData(String x)
     {angleBin += x[y];}
   
   int angle = toInteger(angleBin);
-
+  angle = (70*angle)/32;
   if (detectionMade)
   {
     Serial.print("Approximate angle from Rover : ");
@@ -208,6 +212,18 @@ void analyseData(String x)
 
 }
 
+//vspi default pins SCLK = 18, MISO = 19, MOSI = 23, SS = 5 
+void setup() {
+
+  Serial.begin(115200);
+
+  // Setup SPI stuff
+  pinMode(PIN_SS, OUTPUT);
+  SPI.begin();
+  spi_returnval = 0;
+  Serial.println("Start");
+}
+
 void loop()
 {
   //Ask for data for each ball
@@ -215,6 +231,9 @@ void loop()
     delay(20);
     grabBallData(x);
   }
+  //Building
+  delay(20);
+  grabBallData(14);
 //  if (Serial.available() > 0) {
 //    // read the incoming byte:
 //    incomingByte = Serial.parseInt();
