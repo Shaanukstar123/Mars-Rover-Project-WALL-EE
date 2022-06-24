@@ -11,3 +11,4 @@ const Obstacle = (props) => {
 
 //<img src={red} alt={props.Alien.color} style={{border:"4px solid white", position:"relative", top: `${props.Alien.xcoorda}px`, left: `${props.Alien.ycoorda}px`}} />
 export default Obstacle
+

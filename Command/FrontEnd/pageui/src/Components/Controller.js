@@ -16,7 +16,7 @@ const Controller = () => {
     const data = await randomNumber.json();
 
     console.log("Mouse Down Ended: S");
-    console.log(data);
+    //console.log(data);
   }
 
   const mouseClickControl = async (evt) => {
@@ -32,7 +32,7 @@ const Controller = () => {
     const data = await randomNumber.json();
 
     console.log("Mouse Down Started: ", evt.target.id);
-    console.log(data);
+    //console.log(data);
   }
 
 
@@ -48,8 +48,11 @@ const Controller = () => {
 
 
 
+
     </div>
   )
 }
 
 export default Controller
+
+
