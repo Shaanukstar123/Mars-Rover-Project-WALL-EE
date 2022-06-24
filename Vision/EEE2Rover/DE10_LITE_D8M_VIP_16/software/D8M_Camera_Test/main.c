@@ -24,7 +24,7 @@
 #define EXPOSURE_INIT 0x002000
 #define EXPOSURE_STEP 0x100
 #define GAIN_INIT 0x080
-#define GAIN_STEP 0x010
+#define GAIN_STEP 0x5
 #define DEFAULT_LEVEL 3
 
 #define MIPI_REG_PHYClkCtl		0x0056
@@ -269,12 +269,12 @@ int main()
     		   averageVal = (word & 0x00FFFFFF) >> 16; //Get average value
     		   gainChanged = 0;
     		   //Adjust gain depending on average frame value, but dont adjust if within 10 of 128
-    		   if ((115 > averageVal) && (gain < 0x800 + GAIN_STEP)) {
+    		   if ((105 > averageVal) && (gain < 0x800 + GAIN_STEP)) {
     			   gain += GAIN_STEP;
     			   OV8865SetGain(gain);
     			   gainChanged = 1;
     		   }
-    		   if ((125 < averageVal) && (gain > GAIN_STEP)){
+    		   if ((115 < averageVal) && (gain > GAIN_STEP)){
     			   gain -= GAIN_STEP;
     			   OV8865SetGain(gain);
     			   gainChanged = 1;
@@ -282,9 +282,8 @@ int main()
     		   if (gainChanged) {
     		   printf("Gain adjusted to %x, average:%d, value:%d\n", gain, averageVal, word);
     		   }
-    		   usleep(10000);
+    		   usleep(100);
     	   }
-    	   //printf("%08x ", word);
        }
 
        //Update the bounding box colour
