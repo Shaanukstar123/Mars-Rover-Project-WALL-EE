@@ -14,7 +14,7 @@
 		.clk_sdram_clk                             (<connected-to-clk_sdram_clk>),                             //                        clk_sdram.clk
 		.clk_vga_clk                               (<connected-to-clk_vga_clk>),                               //                          clk_vga.clk
 		.d8m_xclkin_clk                            (<connected-to-d8m_xclkin_clk>),                            //                       d8m_xclkin.clk
-		.eee_imgproc_0_conduit_mode_new_signal     (<connected-to-eee_imgproc_0_conduit_mode_new_signal>),     //       eee_imgproc_0_conduit_mode.new_signal
+		.eee_imgproc_0_conduit_mode_1_new_signal   (<connected-to-eee_imgproc_0_conduit_mode_1_new_signal>),   //     eee_imgproc_0_conduit_mode_1.new_signal
 		.i2c_opencores_camera_export_scl_pad_io    (<connected-to-i2c_opencores_camera_export_scl_pad_io>),    //      i2c_opencores_camera_export.scl_pad_io
 		.i2c_opencores_camera_export_sda_pad_io    (<connected-to-i2c_opencores_camera_export_sda_pad_io>),    //                                 .sda_pad_io
 		.i2c_opencores_mipi_export_scl_pad_io      (<connected-to-i2c_opencores_mipi_export_scl_pad_io>),      //        i2c_opencores_mipi_export.scl_pad_io
@@ -33,6 +33,16 @@
 		.sdram_wire_dqm                            (<connected-to-sdram_wire_dqm>),                            //                                 .dqm
 		.sdram_wire_ras_n                          (<connected-to-sdram_wire_ras_n>),                          //                                 .ras_n
 		.sdram_wire_we_n                           (<connected-to-sdram_wire_we_n>),                           //                                 .we_n
+		.spi_rx_fifo_out_data                      (<connected-to-spi_rx_fifo_out_data>),                      //                  spi_rx_fifo_out.data
+		.spi_rx_fifo_out_valid                     (<connected-to-spi_rx_fifo_out_valid>),                     //                                 .valid
+		.spi_rx_fifo_out_ready                     (<connected-to-spi_rx_fifo_out_ready>),                     //                                 .ready
+		.spi_tx_fifo_in_data                       (<connected-to-spi_tx_fifo_in_data>),                       //                   spi_tx_fifo_in.data
+		.spi_tx_fifo_in_valid                      (<connected-to-spi_tx_fifo_in_valid>),                      //                                 .valid
+		.spi_tx_fifo_in_ready                      (<connected-to-spi_tx_fifo_in_ready>),                      //                                 .ready
+		.spislave_0_export_0_mosi                  (<connected-to-spislave_0_export_0_mosi>),                  //              spislave_0_export_0.mosi
+		.spislave_0_export_0_nss                   (<connected-to-spislave_0_export_0_nss>),                   //                                 .nss
+		.spislave_0_export_0_miso                  (<connected-to-spislave_0_export_0_miso>),                  //                                 .miso
+		.spislave_0_export_0_sclk                  (<connected-to-spislave_0_export_0_sclk>),                  //                                 .sclk
 		.sw_external_connection_export             (<connected-to-sw_external_connection_export>),             //           sw_external_connection.export
 		.terasic_auto_focus_0_conduit_vcm_i2c_sda  (<connected-to-terasic_auto_focus_0_conduit_vcm_i2c_sda>),  //     terasic_auto_focus_0_conduit.vcm_i2c_sda
 		.terasic_auto_focus_0_conduit_clk50        (<connected-to-terasic_auto_focus_0_conduit_clk50>),        //                                 .clk50
@@ -42,6 +52,9 @@
 		.terasic_camera_0_conduit_end_LVAL         (<connected-to-terasic_camera_0_conduit_end_LVAL>),         //                                 .LVAL
 		.terasic_camera_0_conduit_end_PIXCLK       (<connected-to-terasic_camera_0_conduit_end_PIXCLK>),       //                                 .PIXCLK
 		.uart_0_rx_tx_rxd                          (<connected-to-uart_0_rx_tx_rxd>),                          //                     uart_0_rx_tx.rxd
-		.uart_0_rx_tx_txd                          (<connected-to-uart_0_rx_tx_txd>)                           //                                 .txd
+		.uart_0_rx_tx_txd                          (<connected-to-uart_0_rx_tx_txd>),                          //                                 .txd
+		.eee_imgproc_0_conduit_spi_new_signal      (<connected-to-eee_imgproc_0_conduit_spi_new_signal>),      //        eee_imgproc_0_conduit_spi.new_signal
+		.eee_imgproc_0_conduit_spi_new_signal_1    (<connected-to-eee_imgproc_0_conduit_spi_new_signal_1>),    //                                 .new_signal_1
+		.eee_imgproc_0_conduit_spi_new_signal_2    (<connected-to-eee_imgproc_0_conduit_spi_new_signal_2>)     //                                 .new_signal_2
 	);
 

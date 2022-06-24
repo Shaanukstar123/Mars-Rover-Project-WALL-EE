@@ -15,7 +15,13 @@
 			clk_sdram_clk                             : out   std_logic;                                        -- clk
 			clk_vga_clk                               : out   std_logic;                                        -- clk
 			d8m_xclkin_clk                            : out   std_logic;                                        -- clk
-			eee_imgproc_0_conduit_mode_new_signal     : in    std_logic                     := 'X';             -- new_signal
+			eee_imgproc_0_conduit_mode_1_new_signal   : in    std_logic                     := 'X';             -- new_signal
+			eee_imgproc_0_conduit_spi_dataout         : out   std_logic_vector(7 downto 0);                     -- dataout
+			eee_imgproc_0_conduit_spi_valid           : out   std_logic;                                        -- valid
+			eee_imgproc_0_conduit_spi_ready           : in    std_logic                     := 'X';             -- ready
+			eee_imgproc_0_conduit_spi_datain          : in    std_logic_vector(7 downto 0)  := (others => 'X'); -- datain
+			eee_imgproc_0_conduit_spi_read_ready      : out   std_logic;                                        -- read_ready
+			eee_imgproc_0_conduit_spi_read_valid      : in    std_logic                     := 'X';             -- read_valid
 			i2c_opencores_camera_export_scl_pad_io    : inout std_logic                     := 'X';             -- scl_pad_io
 			i2c_opencores_camera_export_sda_pad_io    : inout std_logic                     := 'X';             -- sda_pad_io
 			i2c_opencores_mipi_export_scl_pad_io      : inout std_logic                     := 'X';             -- scl_pad_io
@@ -34,6 +40,16 @@
 			sdram_wire_dqm                            : out   std_logic_vector(1 downto 0);                     -- dqm
 			sdram_wire_ras_n                          : out   std_logic;                                        -- ras_n
 			sdram_wire_we_n                           : out   std_logic;                                        -- we_n
+			spi_rx_fifo_out_data                      : out   std_logic_vector(7 downto 0);                     -- data
+			spi_rx_fifo_out_valid                     : out   std_logic;                                        -- valid
+			spi_rx_fifo_out_ready                     : in    std_logic                     := 'X';             -- ready
+			spi_tx_fifo_in_data                       : in    std_logic_vector(7 downto 0)  := (others => 'X'); -- data
+			spi_tx_fifo_in_valid                      : in    std_logic                     := 'X';             -- valid
+			spi_tx_fifo_in_ready                      : out   std_logic;                                        -- ready
+			spislave_0_export_0_mosi                  : in    std_logic                     := 'X';             -- mosi
+			spislave_0_export_0_nss                   : in    std_logic                     := 'X';             -- nss
+			spislave_0_export_0_miso                  : inout std_logic                     := 'X';             -- miso
+			spislave_0_export_0_sclk                  : in    std_logic                     := 'X';             -- sclk
 			sw_external_connection_export             : in    std_logic_vector(9 downto 0)  := (others => 'X'); -- export
 			terasic_auto_focus_0_conduit_vcm_i2c_sda  : inout std_logic                     := 'X';             -- vcm_i2c_sda
 			terasic_auto_focus_0_conduit_clk50        : in    std_logic                     := 'X';             -- clk50

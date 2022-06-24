@@ -1,6 +1,6 @@
-14:37:27 **** Incremental Build of configuration Nios II for project D8M_Camera_Test_bsp ****
-make all 
-obj/alt_sys_init.d:63: *** missing separator.  Stop.
+16:44:26 **** Clean-only build of configuration Nios II for project D8M_Camera_Test_bsp ****
+make clean 
+[BSP clean complete]
 
-14:37:27 Build Finished (took 309ms)
+16:44:26 Build Finished (took 420ms)
 

@@ -73,7 +73,9 @@ module DE10_LITE_D8M_VIP(
 	input 		          		MIPI_PIXEL_HS,
 	input 		          		MIPI_PIXEL_VS,
 	output		          		MIPI_REFCLK,
-	output		          		MIPI_RESET_n
+	output		          		MIPI_RESET_n,
+	//SPI
+	input spi_rx_valid
 );
 
 
@@ -88,6 +90,11 @@ wire  [23:0]  disp_data;
 wire  [7 :0]  mVGA_R;
 wire  [7 :0]  mVGA_G;
 wire  [7 :0]  mVGA_B; 
+
+//SPI
+wire [7:0] SPI_dataout, SPI_datain;
+wire SPI_write_ready, SPI_read_ready;
+wire SPI_write_valid, SPI_read_valid;
 
 
 
@@ -176,10 +183,33 @@ Qsys u0 (
 		.altpll_0_locked_conduit_export            (),            				//          altpll_0_locked_conduit.export
 		.altpll_0_phasedone_conduit_export         (),         					//       altpll_0_phasedone_conduit.export		
 		
-		.eee_imgproc_0_conduit_mode_new_signal     (SW[0]),
+		.eee_imgproc_0_conduit_mode_1_new_signal     (SW[0]),
 		
 		.uart_0_rx_tx_rxd                          (ARDUINO_IO[1]),                          //                     uart_0_rx_tx.rxd
-		.uart_0_rx_tx_txd                          (ARDUINO_IO[0])                           //
+		.uart_0_rx_tx_txd                          (ARDUINO_IO[0]),                           //
+//		.spi_0_external_MISO                       (ARDUINO_IO[5]),                       //                   spi_0_external.MISO
+//		.spi_0_external_MOSI                       (ARDUINO_IO[2]),                       //                                 .MOSI
+//		.spi_0_external_SCLK                       (ARDUINO_IO[6]),                       //                                 .SCLK
+//		.spi_0_external_SS_n                       (ARDUINO_IO[7])                        //                                 .SS_n
+		.spislave_0_export_0_mosi                  (ARDUINO_IO[2]),                  //              spislave_0_export_0.mosi
+      .spislave_0_export_0_nss                   (ARDUINO_IO[11]),                   //                                 .nss
+      .spislave_0_export_0_miso                  (ARDUINO_IO[5]),                  //                                 .miso
+      .spislave_0_export_0_sclk                  (ARDUINO_IO[6]),                  //                                 .sclk
+      .spi_rx_fifo_out_data                      (SPI_datain),                      //                  spi_rx_fifo_out.data
+      .spi_rx_fifo_out_valid                     (SPI_read_valid),                     //                                 .valid
+      .spi_rx_fifo_out_ready                     (SPI_read_ready),                     //                                 .ready
+      .spi_tx_fifo_in_data                       (SPI_dataout),                       //                   spi_tx_fifo_in.data
+      .spi_tx_fifo_in_valid                      (SPI_write_valid),                      //                                 .valid
+      .spi_tx_fifo_in_ready                      (SPI_write_ready),
+		.eee_imgproc_0_conduit_spi_dataout         (SPI_dataout),         //        eee_imgproc_0_conduit_spi.dataout
+      .eee_imgproc_0_conduit_spi_valid           (SPI_write_valid),           //                                 .valid
+      .eee_imgproc_0_conduit_spi_ready           (SPI_write_ready),           //                                 .ready
+	   .eee_imgproc_0_conduit_spi_datain          (SPI_datain),          //                                 .datain
+	   .eee_imgproc_0_conduit_spi_read_ready      (SPI_read_ready),      //                                 .read_ready
+	   .eee_imgproc_0_conduit_spi_read_valid      (SPI_read_valid)
+		
+		//                                 .ready
+    
 	);
 
 FpsMonitor uFps(

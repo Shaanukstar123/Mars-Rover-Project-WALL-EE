@@ -18,7 +18,7 @@
       }
       datum sopceditor_expanded
       {
-         value = "0";
+         value = "1";
          type = "boolean";
       }
    }
@@ -26,7 +26,31 @@
    {
       datum _originalDeviceFamily
       {
+         value = "MAX 10";
+         type = "String";
+      }
+   }
+   element Qsys
+   {
+      datum _originalDeviceFamily
+      {
          value = "Cyclone V";
+         type = "String";
+      }
+   }
+   element Qsys
+   {
+      datum _originalDeviceFamily
+      {
+         value = "MAX 10";
+         type = "String";
+      }
+   }
+   element Qsys
+   {
+      datum _originalDeviceFamily
+      {
+         value = "MAX 10";
          type = "String";
       }
    }
@@ -55,7 +79,7 @@
       }
       datum sopceditor_expanded
       {
-         value = "0";
+         value = "1";
          type = "boolean";
       }
    }
@@ -76,7 +100,7 @@
       }
       datum sopceditor_expanded
       {
-         value = "0";
+         value = "1";
          type = "boolean";
       }
    }
@@ -89,7 +113,7 @@
       }
       datum sopceditor_expanded
       {
-         value = "0";
+         value = "1";
          type = "boolean";
       }
    }
@@ -102,12 +126,12 @@
       }
       datum megawizard_uipreferences
       {
-         value = "{output_directory=F:\\Ed\\Stuff\\EEE2Rover\\DE10_LITE_D8M_VIP_16, output_language=VERILOG}";
+         value = "{output_directory=C:\\Users\\Shaheen\\Documents\\Year2\\Wall-EE\\Wall-EE\\Vision\\EEE2Rover\\DE10_LITE_D8M_VIP_16, output_language=VERILOG}";
          type = "String";
       }
       datum sopceditor_expanded
       {
-         value = "0";
+         value = "1";
          type = "boolean";
       }
    }
@@ -120,7 +144,7 @@
       }
       datum sopceditor_expanded
       {
-         value = "0";
+         value = "1";
          type = "boolean";
       }
    }
@@ -305,6 +329,30 @@
          type = "String";
       }
    }
+   element spi_rx_fifo
+   {
+      datum _sortIndex
+      {
+         value = "22";
+         type = "int";
+      }
+   }
+   element spi_tx_fifo
+   {
+      datum _sortIndex
+      {
+         value = "23";
+         type = "int";
+      }
+   }
+   element spislave_0
+   {
+      datum _sortIndex
+      {
+         value = "21";
+         type = "int";
+      }
+   }
    element sw
    {
       datum _sortIndex
@@ -416,8 +464,19 @@
  <interface name="clk_vga" internal="altpll_0.c3" type="clock" dir="start" />
  <interface name="d8m_xclkin" internal="altpll_0.c4" type="clock" dir="start" />
  <interface
+   name="eee_imgproc_0_conduit_custom"
+   internal="EEE_IMGPROC_0.conduit_custom" />
+ <interface
    name="eee_imgproc_0_conduit_mode"
-   internal="EEE_IMGPROC_0.conduit_mode"
+   internal="EEE_IMGPROC_0.conduit_mode" />
+ <interface
+   name="eee_imgproc_0_conduit_mode_1"
+   internal="EEE_IMGPROC_0.conduit_mode_1"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="eee_imgproc_0_conduit_spi"
+   internal="EEE_IMGPROC_0.conduit_SPI"
    type="conduit"
    dir="end" />
  <interface
@@ -453,6 +512,21 @@
  <interface name="reset" internal="clk_50.clk_in_reset" type="reset" dir="end" />
  <interface name="sdram_wire" internal="sdram.wire" type="conduit" dir="end" />
  <interface
+   name="spi_rx_fifo_out"
+   internal="spi_rx_fifo.out"
+   type="avalon_streaming"
+   dir="start" />
+ <interface
+   name="spi_tx_fifo_in"
+   internal="spi_tx_fifo.in"
+   type="avalon_streaming"
+   dir="end" />
+ <interface
+   name="spislave_0_export_0"
+   internal="spislave_0.export_0"
+   type="conduit"
+   dir="end" />
+ <interface
    name="sw_external_connection"
    internal="sw.external_connection"
    type="conduit"
@@ -472,7 +546,13 @@
    internal="uart_0.external_connection"
    type="conduit"
    dir="end" />
- <module name="EEE_IMGPROC_0" kind="EEE_IMGPROC" version="1.0" enabled="1" />
+ <module name="EEE_IMGPROC_0" kind="EEE_IMGPROC" version="1.0" enabled="1">
+  <parameter name="BB_COL_DEFAULT" value="65280" />
+  <parameter name="IMAGE_H" value="480" />
+  <parameter name="IMAGE_W" value="640" />
+  <parameter name="MESSAGE_BUF_MAX" value="256" />
+  <parameter name="MSG_INTERVAL" value="6" />
+ </module>
  <module
    name="TERASIC_AUTO_FOCUS_0"
    kind="TERASIC_AUTO_FOCUS"
@@ -1034,6 +1114,51 @@
   <parameter name="registerDataIn" value="true" />
   <parameter name="rowWidth" value="13" />
  </module>
+ <module
+   name="spi_rx_fifo"
+   kind="altera_avalon_sc_fifo"
+   version="18.0"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="8" />
+  <parameter name="CHANNEL_WIDTH" value="0" />
+  <parameter name="EMPTY_LATENCY" value="3" />
+  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
+  <parameter name="ERROR_WIDTH" value="0" />
+  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="16" />
+  <parameter name="SYMBOLS_PER_BEAT" value="1" />
+  <parameter name="USE_ALMOST_EMPTY_IF" value="0" />
+  <parameter name="USE_ALMOST_FULL_IF" value="0" />
+  <parameter name="USE_FILL_LEVEL" value="0" />
+  <parameter name="USE_MEMORY_BLOCKS" value="1" />
+  <parameter name="USE_PACKETS" value="0" />
+  <parameter name="USE_STORE_FORWARD" value="0" />
+ </module>
+ <module
+   name="spi_tx_fifo"
+   kind="altera_avalon_sc_fifo"
+   version="18.0"
+   enabled="1">
+  <parameter name="BITS_PER_SYMBOL" value="8" />
+  <parameter name="CHANNEL_WIDTH" value="0" />
+  <parameter name="EMPTY_LATENCY" value="3" />
+  <parameter name="ENABLE_EXPLICIT_MAXCHANNEL" value="false" />
+  <parameter name="ERROR_WIDTH" value="0" />
+  <parameter name="EXPLICIT_MAXCHANNEL" value="0" />
+  <parameter name="FIFO_DEPTH" value="16" />
+  <parameter name="SYMBOLS_PER_BEAT" value="1" />
+  <parameter name="USE_ALMOST_EMPTY_IF" value="0" />
+  <parameter name="USE_ALMOST_FULL_IF" value="0" />
+  <parameter name="USE_FILL_LEVEL" value="0" />
+  <parameter name="USE_MEMORY_BLOCKS" value="1" />
+  <parameter name="USE_PACKETS" value="0" />
+  <parameter name="USE_STORE_FORWARD" value="0" />
+ </module>
+ <module name="spislave_0" kind="spislave" version="18.0" enabled="1">
+  <parameter name="AUTO_CLOCK_SINK_CLOCK_RATE" value="50000000" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="MAX 10" />
+  <parameter name="SYNC_DEPTH" value="2" />
+ </module>
  <module name="sw" kind="altera_avalon_pio" version="18.0" enabled="1">
   <parameter name="bitClearingEdgeCapReg" value="false" />
   <parameter name="bitModifyingOutReg" value="false" />
@@ -1276,6 +1401,11 @@
  <connection
    kind="avalon_streaming"
    version="18.0"
+   start="spislave_0.avalon_streaming_source"
+   end="spi_rx_fifo.in" />
+ <connection
+   kind="avalon_streaming"
+   version="18.0"
    start="TERASIC_AUTO_FOCUS_0.dout"
    end="EEE_IMGPROC_0.avalon_streaming_sink" />
  <connection
@@ -1283,6 +1413,11 @@
    version="18.0"
    start="alt_vip_vfb_0.dout"
    end="TERASIC_AUTO_FOCUS_0.din" />
+ <connection
+   kind="avalon_streaming"
+   version="18.0"
+   start="spi_tx_fifo.out"
+   end="spislave_0.avalon_streaming_sink" />
  <connection kind="clock" version="18.0" start="altpll_0.c2" end="sdram.clk" />
  <connection
    kind="clock"
@@ -1319,6 +1454,8 @@
  <connection kind="clock" version="18.0" start="clk_50.clk" end="mipi_pwdn_n.clk" />
  <connection kind="clock" version="18.0" start="clk_50.clk" end="nios2_gen2.clk" />
  <connection kind="clock" version="18.0" start="clk_50.clk" end="uart_0.clk" />
+ <connection kind="clock" version="18.0" start="clk_50.clk" end="spi_tx_fifo.clk" />
+ <connection kind="clock" version="18.0" start="clk_50.clk" end="spi_rx_fifo.clk" />
  <connection
    kind="clock"
    version="18.0"
@@ -1334,6 +1471,11 @@
    version="18.0"
    start="clk_50.clk"
    end="i2c_opencores_camera.clock" />
+ <connection
+   kind="clock"
+   version="18.0"
+   start="clk_50.clk"
+   end="spislave_0.clock_sink" />
  <connection
    kind="clock"
    version="18.0"
@@ -1378,6 +1520,16 @@
    kind="reset"
    version="18.0"
    start="clk_50.clk_reset"
+   end="spi_tx_fifo.clk_reset" />
+ <connection
+   kind="reset"
+   version="18.0"
+   start="clk_50.clk_reset"
+   end="spi_rx_fifo.clk_reset" />
+ <connection
+   kind="reset"
+   version="18.0"
+   start="clk_50.clk_reset"
    end="i2c_opencores_mipi.clock_reset" />
  <connection
    kind="reset"
@@ -1389,6 +1541,11 @@
    version="18.0"
    start="clk_50.clk_reset"
    end="TERASIC_CAMERA_0.clock_reset_reset" />
+ <connection
+   kind="reset"
+   version="18.0"
+   start="clk_50.clk_reset"
+   end="spislave_0.clock_sink_reset" />
  <connection
    kind="reset"
    version="18.0"

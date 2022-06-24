@@ -1,5 +1,5 @@
 IP Upgrade report for DE10_LITE_D8M_VIP
-Tue May 24 13:41:32 2022
+Tue May 31 22:55:33 2022
 Quartus Prime Version 18.0.0 Build 614 04/24/2018 SJ Lite Edition
 
 
@@ -35,7 +35,7 @@ refer to the applicable agreement for further details.
 +----------------------------------------------------------------------------+
 ; IP Upgrade Summary                                                         ;
 +------------------------------+---------------------------------------------+
-; IP Components Upgrade Status ; Passed - Tue May 24 13:41:32 2022           ;
+; IP Components Upgrade Status ; Passed - Tue May 31 22:55:33 2022           ;
 ; Quartus Prime Version        ; 18.0.0 Build 614 04/24/2018 SJ Lite Edition ;
 ; Revision Name                ; DE10_LITE_D8M_VIP                           ;
 ; Top-level Entity Name        ; DE10_LITE_D8M_VIP                           ;
@@ -43,32 +43,28 @@ refer to the applicable agreement for further details.
 +------------------------------+---------------------------------------------+
 
 
-+------------------------------------------------------------------------------------------------------------------------------------------+
-; Successfully Upgraded IP Components                                                                                                      ;
-+-------------+----------------+---------+-----------------------------+---------------------------+-----------------------------+---------+
-; Entity Name ; Component Name ; Version ; Original Source File        ; Generation File Path      ; New Source File             ; Message ;
-+-------------+----------------+---------+-----------------------------+---------------------------+-----------------------------+---------+
-; MSG_FIFO    ; FIFO           ; 16.0    ; ip/EEE_IMGPROC/MSG_FIFO.qip ; ip/EEE_IMGPROC/MSG_FIFO.v ; ip/EEE_IMGPROC/MSG_FIFO.qip ;         ;
-; Qsys        ; Qsys           ; N/A     ; Qsys.qsys                   ; Qsys.qsys                 ;                             ;         ;
-+-------------+----------------+---------+-----------------------------+---------------------------+-----------------------------+---------+
++------------------------------------------------------------------------------------------------------------------+
+; Successfully Upgraded IP Components                                                                              ;
++-------------+----------------+---------+----------------------+----------------------+-----------------+---------+
+; Entity Name ; Component Name ; Version ; Original Source File ; Generation File Path ; New Source File ; Message ;
++-------------+----------------+---------+----------------------+----------------------+-----------------+---------+
+; Qsys        ; Qsys           ; N/A     ; Qsys.qsys            ; Qsys.qsys            ;                 ;         ;
++-------------+----------------+---------+----------------------+----------------------+-----------------+---------+
 
 
 +---------------------+
 ; IP Upgrade Messages ;
 +---------------------+
-Info (11902): Backing up file "ip/EEE_IMGPROC/MSG_FIFO.v" to "ip/EEE_IMGPROC/MSG_FIFO.BAK.v"
-Info (11837): Started upgrading IP component FIFO with file "ip/EEE_IMGPROC/MSG_FIFO.v"
 Info (11902): Backing up file "Qsys.qsys" to "Qsys.BAK.qsys"
 Info (11837): Started upgrading IP component Qsys with file "Qsys.qsys"
-Info: 2022.05.24.13:41:32 Info: Starting to upgrade the IP cores in the Platform Designer system
-Info: 2022.05.24.13:41:32 Info: Finished upgrading the ip cores
-Info (11131): Completed upgrading IP component FIFO with file "ip/EEE_IMGPROC/MSG_FIFO.v"
+Info: 2022.05.31.22:55:33 Info: Starting to upgrade the IP cores in the Platform Designer system
+Info: 2022.05.31.22:55:33 Info: Finished upgrading the ip cores
 Info (11131): Completed upgrading IP component Qsys with file "Qsys.qsys"
 Info (23030): Evaluation of Tcl script c:/intelfpga_lite/18.0/quartus/common/tcl/internal/ip_regen/ip_regen.tcl was successful
 Info: Quartus Prime Shell was successful. 0 errors, 0 warnings
-    Info: Peak virtual memory: 4852 megabytes
-    Info: Processing ended: Tue May 24 13:41:32 2022
-    Info: Elapsed time: 00:01:01
-    Info: Total CPU time (on all processors): 00:01:57
+    Info: Peak virtual memory: 4867 megabytes
+    Info: Processing ended: Tue May 31 22:55:33 2022
+    Info: Elapsed time: 00:00:28
+    Info: Total CPU time (on all processors): 00:00:59
 
 
