@@ -1,0 +1,10 @@
+.jcena{
+  border: 4px solid pink;
+}
+
+.jcena :hover{
+  transform: scale(1.5);
+}
+
+
+
