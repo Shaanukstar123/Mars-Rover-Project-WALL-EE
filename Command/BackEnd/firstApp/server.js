@@ -13,18 +13,29 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 //JSON variables
 var location ={
-  xcoord:0,
-  ycoord:0,
-  obstacle:0
+  obstacle:1,
+  xcoord:100,
+  ycoord:100
 };
 var battery = {percentage: 0};
 
 var alien = {
-  color: 1, // -1 means no new alien detected
+  color:-1, // -1 means no new alien detected. Default value
   xcoorda:0,
   ycoorda:0
 }
 
+var fan = {
+  is_new : 0, // 0 if variable not changed, 1 if new fan is detected
+  xcoord : -1,
+  ycoord : -1
+};
+
+var building = {
+  is_new : 0, 
+  xcoord : -1,
+  ycoord : -1
+};
 
 // MongoDB Schemas and Models
 const roverSchema = new mongoose.Schema({
@@ -36,36 +47,28 @@ const roverSchema = new mongoose.Schema({
 
 const Rover = mongoose.model('coordinates', roverSchema);
 
-const batterySchema = new mongoose.Schema({
-  id: Number,
-  percentage: Number,
-});
-
-const Battery = mongoose.model("batterylevels", batterySchema);
 
 const alienSchema = new mongoose.Schema({
-  color: String,
-  xcoord: Number,
-  ycoord: Number,
+  color : String,
+  xcoorda: Number,
+  ycoorda: Number,
 });
-
-const Alien = mongoose.model("obstacles", alienSchema);
 
 const fanSchema = new mongoose.Schema({
-  color: String,
+  is_new: Number,
   xcoord: Number,
   ycoord: Number,
 });
-
-const Fan = mongoose.model("obstacles", alienSchema);
 
 const buildingSchema = new mongoose.Schema({
-  color: String,
+  is_new: Number,
   xcoord: Number,
   ycoord: Number,
 });
 
-const Building = mongoose.model("obstacles", alienSchema);
+const Alien = mongoose.model("aliens", alienSchema);
+const Fan = mongoose.model("fans", fanSchema);
+const Building = mongoose.model("buildings", buildingSchema);
 
 
 //Connection  String
@@ -76,10 +79,6 @@ mongoose.connect(connection, { useNewUrlParser: true, UseUnifiedTopology: true})
   .then(app.listen(8080, () => {
     console.log('Listening on port 8080');
 
-    Battery.deleteMany({})
-      .then(console.log("Deleted Battery Collection"))
-      .catch((err) => console.log(err))
-    ;
 
     Rover.deleteMany({})
       .then(console.log("Deleted Rover Collection"))
@@ -90,27 +89,22 @@ mongoose.connect(connection, { useNewUrlParser: true, UseUnifiedTopology: true})
       .then(console.log("Deleted Aliens Collection"))
       .catch((err) => console.log(err))
     ;
-    
+
     Fan.deleteMany({})
-    .then(console.log("Deleted Fan Collection"))
+    .then(console.log("Deleted Aliens Collection"))
     .catch((err) => console.log(err))
     ;
 
     Building.deleteMany({})
-    .then(console.log("Deleted Building Collection"))
+    .then(console.log("Deleted Aliens Collection"))
     .catch((err) => console.log(err))
     ;
 
-    new Battery({
-      id: 732,
-      percentage: 999
-    }).save();
-
     new Rover({
       id: 732,
-      xcoord: 250,
-      ycoord: 250,
-      obstacle: 1
+      xcoord: 0,
+      ycoord: 0,
+      obstacle: 0 // 1 when obstacle detected
     }).save();
 
 
@@ -137,13 +131,21 @@ client.on('message', function(topic,message){
   if (topic =="aliens"){
     alien = JSON.parse(message);
   }
+  if (topic =="fans"){
+    fan = JSON.parse(message);
+  }
+  if (topic =="buildings"){
+    building = JSON.parse(message);
+  }
   
 });
+
+
 
 // Routes
 
 app.get("/battery",(req,res)=>{
-  return res.json(battery);
+  res.json(battery);
 });
 
 app.post("/rControl", (req, res) =>{
@@ -153,6 +155,7 @@ app.post("/rControl", (req, res) =>{
 } )
 
 
+
 app.get("/coordinates",(req,res)=>{
   const filter = { id: 732 };
   const update = location;
@@ -160,6 +163,7 @@ app.get("/coordinates",(req,res)=>{
   Rover.findOneAndUpdate(filter, update, {returnOriginal: false})
     .catch((err) => console.log(err))
   ;
+
  
   Rover.findOne({ id: 732 }, 'xcoord ycoord obstacle')
     .then( function (result){
@@ -167,43 +171,95 @@ app.get("/coordinates",(req,res)=>{
       return res.json(result);
     })
     .catch((err) => console.log(err))
+    
   ;
   
 });
 
+
 app.get("/obstacles",(req,res)=>{
   let colors = ["red", "green", "blue", "pink"];
   //console.log(alien.color);
-  if (alien.color == -2){
-    //Fan Stuff
-  }
-
-  if (alien.color == -3){
-    //Building Stuff
-  }
-
-  else if (alien.color!= -1){
-
+  if (alien.color!==-1){
     const alienObj = new Alien({
       color: colors[alien.color],
-      xcoord: alien.xcoord,
-      ycoord: alien.ycoord
+      xcoorda: alien.xcoorda,
+      ycoorda: alien.ycoorda
     });
+
     alienObj.save()
+      .then( function (result){
+        console.log("Updated in database")
+      })
       .catch((err) => console.log(err))
     ;
-    alien.color = -1; //resets to null alien
+    console.log("Sent to db: ",alienObj);
+    alien.color = 1; //resets to null alien
 
   }
   
-
-  Alien.find({}, 'color xcoord ycoord')
+  Alien.find({}, 'color xcoorda ycoorda')
     .then( function (result){
       console.log("New Alien:", result)
       return res.json(result);
     })
     .catch((err) => console.log(err))
   ;
+})
 
+app.get("/fans",(req,res)=>{
+  if (fan.is_new!==0){
+    
+    const fanObj = new Fan({
+      xcoord: fan.xcoord,
+      ycoord: fan.ycoord
+    });
 
+    fanObj.save()
+      .then( function (result){
+        console.log("Updated in database")
+      })
+      .catch((err) => console.log(err))
+    ;
+    console.log("Sent to db: ",fanObj);
+    fan.is_new = 0; //resets to null fan
+
+  }
+  
+  Fan.find({}, 'xcoord ycoord')
+    .then( function (result){
+      console.log("New Fan:", result)
+      return res.json(result);
+    })
+    .catch((err) => console.log(err))
+  ;
+})
+
+app.get("/buildings",(req,res)=>{
+  //console.log(alien.color);
+  if (building.is_new!==0){
+    
+    const buildingObj = new Building({
+      xcoord: building.xcoord,
+      ycoord: building.ycoord
+    });
+
+    buildingObj.save()
+      .then( function (result){
+        console.log("Updated in database")
+      })
+      .catch((err) => console.log(err))
+    ;
+    console.log("Sent to db: ",buildingObj);
+    building.is_new = 0; //resets to null building
+
+  }
+  
+  Building.find({}, 'xcoord ycoord')
+    .then( function (result){
+      console.log("New Building:", result)
+      return res.json(result);
+    })
+    .catch((err) => console.log(err))
+  ;
 })
