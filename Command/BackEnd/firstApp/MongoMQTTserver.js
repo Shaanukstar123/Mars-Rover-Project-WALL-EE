@@ -13,16 +13,16 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 //JSON variables
 var location ={
-  xcoord:0,
-  ycoord:0,
-  obstacle:0
+  obstacle:1,
+  xcoord:100,
+  ycoord:100
 };
 var battery = {percentage: 0};
 
 var alien = {
-  color:-1, // -1 means no new alien detected
-  xcoord:0,
-  ycoord:0
+  color:0, // -1 means no new alien detected
+  xcoorda:400,
+  ycoorda:400
 }
 
 
@@ -45,8 +45,8 @@ const Battery = mongoose.model("batterylevels", batterySchema);
 
 const alienSchema = new mongoose.Schema({
   color: String,
-  xcoord: Number,
-  ycoord: Number,
+  xcoorda: Number,
+  ycoorda: Number,
 });
 
 const Alien = mongoose.model("obstacles", alienSchema);
@@ -183,25 +183,28 @@ app.get("/coordinates",(req,res)=>{
 
 
 app.get("/obstacles",(req,res)=>{
-  let colors = ['red', 'green', 'blue', 'pink'];
+  let colors = ["red", "green", "blue", "pink"];
   //console.log(alien.color);
-  if (alien.color!= -1){
+  if (alien.color!==-1){
     
     const alienObj = new Alien({
       color: colors[alien.color],
-      xcoord: alien.xcoord,
-      ycoord: alien.ycoord
+      xcoorda: alien.xcoorda,
+      ycoorda: alien.ycoorda
     });
+
     alienObj.save()
+      .then( function (result){
+        console.log("Updated in database")
+      })
       .catch((err) => console.log(err))
     ;
-    alien.color = -1; //resets to null alien
+    console.log("Sent to db: ",alienObj);
+    alien.color = 1; //resets to null alien
 
   }
   
-
-
-  Alien.find({}, 'color xcoord ycoord')
+  Alien.find({}, 'color xcoorda ycoorda')
     .then( function (result){
       console.log("New Alien:", result)
       return res.json(result);
