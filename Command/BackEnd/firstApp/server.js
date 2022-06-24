@@ -20,9 +20,9 @@ var location ={
 var battery = {percentage: 0};
 
 var alien = {
-  color:-1, // -1 means no new alien detected
-  xcoord:0,
-  ycoord:0
+  color: 1, // -1 means no new alien detected
+  xcoorda:0,
+  ycoorda:0
 }
 
 
@@ -51,6 +51,21 @@ const alienSchema = new mongoose.Schema({
 
 const Alien = mongoose.model("obstacles", alienSchema);
 
+const fanSchema = new mongoose.Schema({
+  color: String,
+  xcoord: Number,
+  ycoord: Number,
+});
+
+const Fan = mongoose.model("obstacles", alienSchema);
+
+const buildingSchema = new mongoose.Schema({
+  color: String,
+  xcoord: Number,
+  ycoord: Number,
+});
+
+const Building = mongoose.model("obstacles", alienSchema);
 
 
 //Connection  String
@@ -66,7 +81,6 @@ mongoose.connect(connection, { useNewUrlParser: true, UseUnifiedTopology: true})
       .catch((err) => console.log(err))
     ;
 
-
     Rover.deleteMany({})
       .then(console.log("Deleted Rover Collection"))
       .catch((err) => console.log(err))
@@ -75,6 +89,16 @@ mongoose.connect(connection, { useNewUrlParser: true, UseUnifiedTopology: true})
     Alien.deleteMany({})
       .then(console.log("Deleted Aliens Collection"))
       .catch((err) => console.log(err))
+    ;
+    
+    Fan.deleteMany({})
+    .then(console.log("Deleted Fan Collection"))
+    .catch((err) => console.log(err))
+    ;
+
+    Building.deleteMany({})
+    .then(console.log("Deleted Building Collection"))
+    .catch((err) => console.log(err))
     ;
 
     new Battery({
@@ -116,49 +140,17 @@ client.on('message', function(topic,message){
   
 });
 
-
-
 // Routes
-app.get("/batteryMQTT",(req,res)=>{
-  let randomNumber = Math.floor(Math.random() * 100);
-
-  const filter = { id: 732 };
-  const update = { percentage: randomNumber };
-
-  Battery.findOneAndUpdate(filter, update, {returnOriginal: false})
-    .then((obj) => res.json(obj))
-    .catch((err) => console.log(err))
-  ;
-
-});
 
 app.get("/battery",(req,res)=>{
-  const filter = { id: 732 };
-  const update = battery; //sets update to global battery var
-
-  Battery.findOneAndUpdate(filter, update, {returnOriginal: false})
-    .catch((err) => console.log(err))
-  ;
-  
-  Battery.findOne({ id: 732 }, 'percentage')
-    .then( function (result){
-      console.log("New data:", result);
-      return res.json(result);
-    })
-    .catch((err) => console.log(err))
-    
-  ;
-
+  return res.json(battery);
 });
-
-
 
 app.post("/rControl", (req, res) =>{
   console.log(req.body);
   client.publish('direction',JSON.stringify(req.body)); //publishes direction straight from front-end request without saving to var
   res.json({"Received" : req.body.directionMove });
 } )
-
 
 
 app.get("/coordinates",(req,res)=>{
@@ -168,7 +160,6 @@ app.get("/coordinates",(req,res)=>{
   Rover.findOneAndUpdate(filter, update, {returnOriginal: false})
     .catch((err) => console.log(err))
   ;
-
  
   Rover.findOne({ id: 732 }, 'xcoord ycoord obstacle')
     .then( function (result){
@@ -176,17 +167,23 @@ app.get("/coordinates",(req,res)=>{
       return res.json(result);
     })
     .catch((err) => console.log(err))
-    
   ;
   
 });
 
-
 app.get("/obstacles",(req,res)=>{
-  let colors = ['red', 'green', 'blue', 'pink'];
+  let colors = ["red", "green", "blue", "pink"];
   //console.log(alien.color);
-  if (alien.color!= -1){
-    
+  if (alien.color == -2){
+    //Fan Stuff
+  }
+
+  if (alien.color == -3){
+    //Building Stuff
+  }
+
+  else if (alien.color!= -1){
+
     const alienObj = new Alien({
       color: colors[alien.color],
       xcoord: alien.xcoord,
@@ -199,7 +196,6 @@ app.get("/obstacles",(req,res)=>{
 
   }
   
-
 
   Alien.find({}, 'color xcoord ycoord')
     .then( function (result){
