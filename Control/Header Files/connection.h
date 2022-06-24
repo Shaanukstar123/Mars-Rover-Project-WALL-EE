@@ -52,13 +52,13 @@ void callback(char *topic, byte *payload, unsigned int length) { //Data received
  Serial.println(topic);
  Serial.print("Message:");
  deserializeJson(RControl_msg,payload);
- command = RControl["directionMove"];
+ //command = RControl_msg["directionMove"];
  //auto num = sub_msg["something"];
- //char msg[128];
+ char msg[128];
  //int num = 10;
  //num = sub_msg["something"];
- //serializeJson(sub_msg,msg);
- Serial.println(command);
+ serializeJson(RControl_msg,msg);
+ Serial.println(msg);
  //Serial.println(num);
 //}
   //Serial.print((char) payload[i]);
