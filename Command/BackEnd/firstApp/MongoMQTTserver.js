@@ -13,16 +13,16 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 //JSON variables
 var location ={
-  xcoord:0,
-  ycoord:0,
-  obstacle:0
+  obstacle:1,
+  xcoord:100,
+  ycoord:100
 };
 var battery = {percentage: 0};
 
 var alien = {
-  color:-1, // -1 means no new alien detected
-  xcoord:0,
-  ycoord:0
+  color:2, // -1 means no new alien detected
+  xcoorda:150,
+  ycoorda:150
 }
 
 
@@ -185,7 +185,7 @@ app.get("/coordinates",(req,res)=>{
 app.get("/obstacles",(req,res)=>{
   let colors = ['red', 'green', 'blue', 'pink'];
   //console.log(alien.color);
-  if (alien.color!= -1){
+  if (alien.color!==-1){
     
     const alienObj = new Alien({
       color: colors[alien.color],
@@ -193,18 +193,20 @@ app.get("/obstacles",(req,res)=>{
       ycoord: alien.ycoord
     });
     alienObj.save()
+      .then( function (result){
+        console.log("New Alien:", result)
+      })
       .catch((err) => console.log(err))
     ;
+    console.log(alien);
     alien.color = -1; //resets to null alien
 
   }
   
-
-
   Alien.find({}, 'color xcoord ycoord')
     .then( function (result){
       console.log("New Alien:", result)
-      return res.json(result);
+      return res.json(alien);
     })
     .catch((err) => console.log(err))
   ;
