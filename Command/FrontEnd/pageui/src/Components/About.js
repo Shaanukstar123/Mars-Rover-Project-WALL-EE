@@ -1,36 +1,258 @@
 import './About.css'
+import { useState, useEffect } from "react";
+import Rover from './Rover';
+import AddObstacles from './AddObstacles';
+import one from './static/1.png'
+import two from './static/2.png'
+import three from './static/3.png'
+
 
 const About = () => {
 
-  const clickZ = () => {
-    alert('hi');
-    console.log('hi');
+
+  const [aliens, setAliens] = useState([]);
+
+  const [intervalId, setIntervalId] = useState(0);
+
+  const [coords, setCoords] = useState({
+    xcoord:590,
+    ycoord:90
+  });
+
+  const [batteryLevel, setBatteryLevel] = useState();
+
+  const [imgSrc, setImgSrc] = useState('');
+
+
+  const fetchObstacleData = async () => {
+    try{
+
+      const request = await fetch('http://35.176.71.115:8080/obstacles');
+      const alienObj = await request.json();
+
+    
+      console.log("Alien location: " , alienObj);
+      setAliens(alienObj);
+      //setAliens((aliens) => [...aliens, alienObj]);
+
+    }
+    
+    catch(err){
+      console.log(err);
+    }
+
+  
   };
 
+  const fetchCoordinateData = async () => {
+    try{
+      console.log('fetching..');
+
+      const request = await fetch('http://35.176.71.115:8080/coordinates');
+      const obj = await request.json();
+
+      setCoords(obj)
+  
+      if(obj.obstacle === 1){
+        fetchObstacleData();
+      }
+
+      console.log("object is:", obj);
+    }
+
+    catch(err){
+      console.log(err);
+    }
+  
+  };
+
+  const start = (event) => {
+
+    console.log("start called");
+    if(intervalId) {
+      clearInterval(intervalId);
+      
+      event.currentTarget.classList.remove(
+        'blur-sm',
+      );
+
+      // event.currentTarget.classList.add(
+      //   'hover:blur-sm',
+      // );
+    
+      setIntervalId(0);
+      return;
+    }
+
+  
+    const newIntervalId = setInterval(fetchCoordinateData, 500);
+
+    // event.currentTarget.classList.remove(
+    //   'hover:blur-sm',
+    // );
+
+    event.currentTarget.classList.add(
+      'blur-sm',
+    );
+
+    setIntervalId(newIntervalId);
+  }
+
+  const startclicket = (evt) =>{
+    start(evt);
+    mouseClickControl(evt);
+  }
+
+  const endclicket = (evt) =>{
+    start(evt);
+    mouseLeaveControl(evt);
+  }
+
+  const mouseLeaveControl = async (evt) => {
+    evt.preventDefault();
+   
+    await fetch('http://35.176.71.115:8080/rControl', {
+      method: "POST",
+      headers: {
+        'Content-type': "application/json"
+      },
+      body: JSON.stringify({'directionMove': "S"})
+    });
+
+    //const data = await randomNumber.json();
+
+    console.log("Mouse Down Ended: S");
+    //console.log(data);
+  }
+
+  const mouseClickControl = async (evt) => {
+    evt.preventDefault();
+
+
+    await fetch('http://35.176.71.115:8080/rControl', {
+      method: "POST",
+      headers: {
+        'Content-type': "application/json"
+      },
+      body: JSON.stringify({'directionMove': evt.target.id})
+    });
+    //const data = await randomNumber.json();
+
+    console.log("Mouse Down Started: ", evt.target.id);
+    //console.log(data);
+  }
+
+
+  const whenClicked = async () => { 
+    try{
+      console.log("batteryclick");
+
+      const randomNumber = await fetch('http://35.176.71.115:8080/battery');
+      const data = await randomNumber.json();
+      setBatteryLevel(data.percentage);
+    }
+    catch(err){
+      console.log(err);
+    }
+
+  };
+
+  const effectz = () => {
+    let logo = one;
+    
+    if(batteryLevel >= 70) {
+      logo = three;
+    }
+
+    else if(batteryLevel >= 40){
+      logo = two;
+    }
+
+    return logo;
+  };
+
+  // Same principle as below hook but this is called when page is loaded first time
+  useEffect(() => {
+    whenClicked();
+  }, []);
+
+  // This function is called immediately after the render of setBatteryLevel
+  //  so it contains the latest batteryLevel and then it re-renders the image based on new level
+  // but React is so fast that you don't notice the delay between the 2 renderings.
+  useEffect(function() {
+    setImgSrc(effectz());
+  }, [batteryLevel]);
+
+
+
   return (
-    <main className="w-screen h-screen">
+    <main className="w-screen h-screen flex flex-row justify-center">
 
    
-    <div className="grid grid-cols-2 gap-10 rounded-sm mt-10 h-5/6">
+    <div className="grid grid-cols-3 gap-8 rounded-sm mt-10 h-5/6 w-11/12">
 
-        <div className="col-span-2 h-full rounded-lg bg-slate-200 hover:shadow-2xl  transition ease-in-out delay-100 flex flex-row justify-center" onClick={clickZ} >
-          <h1 className="text-4xl font-extrabold lg:text-6xl flex flex-col justify-center">
-            <span className="border-2 border-green-100"> AutoPilot </span>
+        <div className="flex flex-col justify-between items-center h-full col-span-2 row-span-2 rounded-lg bg-slate-200" >
+
+          <h1 className="text-3xl font-extrabold flex flex-row justify-start w-full">
+            <span className=""> AutoPilot </span>
           </h1>
+
+          <div className="h-5/6 w-4/6 relative border-dashed border-2 border-orange-500 bg-cyan-500">
+            <Rover  Coordinates={coords}  />
+            <AddObstacles Aliens={aliens} />
+          </div>
+          
+
+    
         </div>
 
-        <div className="h-full rounded-lg bg-slate-100 hover:bg-gradient-to-br from-sky-500 to-indigo-500 hover:scale-110 flex flex-row justify-center transition ease-in-out delay-100 ">
-          <h1 className="text-4xl font-extrabold lg:text-6xl flex flex-col justify-center">
-            <span className="border-2 border-green-100"> TouristMode </span>
+
+
+        <div className="h-full rounded-lg bg-slate-200 flex flex-col justify-between ">
+
+          <h1 className="text-3xl font-extrabold flex flex-col content-center justify-center">
+            <span className=""> TouristMode </span>
           </h1>
+          
+          <div className="h-auto w-auto flex flex-row justify-around">
+            <button type="button" className="btn btn-primary btn-lg " id="F" onMouseUp={endclicket}  onMouseDown={startclicket}> F </button>
+            <button type="button" className="btn btn-secondary btn-lg" id="B" onMouseUp={endclicket}  onMouseDown={startclicket} > B </button>
+            <button type="button" className="btn btn-danger btn-lg" id="R" onMouseUp={endclicket}  onMouseDown={startclicket} > R </button>
+            <button type="button" className="btn btn-success btn-lg" id="L" onMouseUp={endclicket}  onMouseDown={startclicket} > L </button>
+          </div>
+          
+
+          <div className="h-auto w-auto flex flex-row justify-center">
+            <button type="button" className="btn btn-info btn-lg" onClick={start} > {intervalId ? "STOP" : "AutoPilot"} </button>
+          </div>
+          
+  
         </div>
 
 
-        <div className="h-full rounded-lg bg-slate-100 hover:scale-110 flex flex-row justify-center transition ease-in-out delay-100  hover:bg-gradient-to-tr from-green-400 to-blue-500">
-          <h1 className="text-4xl font-extrabold lg:text-6xl flex flex-col justify-center">
-            <span className="border-2 border-green-100"> Battery </span>
+
+
+        <div className="h-full rounded-lg bg-slate-200 flex flex-col justify-between hover:bg-gradient-to-tr from-green-400 to-blue-500">
+
+          <h1 className="text-3xl font-extrabold flex flex-col content-center justify-center ">
+            <span className=""> Battery </span>
           </h1>
+
+          <div className="d-flex flex-row justify-content-evenly align-items-center" >
+
+            <div className="p-2 mr-5 text-3xl" > {`${batteryLevel} %`}  </div>
+            <img src={imgSrc} className="App-logo" alt="logo" />
+
+
+            <button className="bg-sky-500 hover:bg-sky-700 px-5 py-2 text-sm  rounded-lg font-semibold text-white" onClick={whenClicked}>
+              Check Health
+            </button>
+
+          </div>
+
         </div>
+      
+
 
 
       </div>
@@ -44,73 +266,6 @@ export default About
 
 
 
-// export default function Modal() {
-//   const [showModal, setShowModal] = React.useState(false);
 
-//   return (
-//     <>
-//       <button
-//         classNameName="bg-pink-500 text-white active:bg-pink-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-//         type="button"
-//         onClick={() => setShowModal(true)}
-//       >
-//         Open regular modal
-//       </button>
-//       {showModal ? (
-//         <>
-//           <div
-//             classNameName="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none"
-//           >
-//             <div classNameName="relative w-auto my-6 mx-auto max-w-3xl">
-//               {/*content*/}
-//               <div classNameName="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
-//                 {/*header*/}
-//                 <div classNameName="flex items-start justify-between p-5 border-b border-solid border-slate-200 rounded-t">
-//                   <h3 classNameName="text-3xl font-semibold">
-//                     Modal Title
-//                   </h3>
-//                   <button
-//                     classNameName="p-1 ml-auto bg-transparent border-0 text-black opacity-5 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
-//                     onClick={() => setShowModal(false)}
-//                   >
-//                     <span classNameName="bg-transparent text-black opacity-5 h-6 w-6 text-2xl block outline-none focus:outline-none">
-//                       ×
-//                     </span>
-//                   </button>
-//                 </div>
-//                 {/*body*/}
-//                 <div classNameName="relative p-6 flex-auto">
-//                   <p classNameName="my-4 text-slate-500 text-lg leading-relaxed">
-//                     I always felt like I could do anything. That’s the main
-//                     thing people are controlled by! Thoughts- their perception
-//                     of themselves! They're slowed down by their perception of
-//                     themselves. If you're taught you can’t do anything, you
-//                     won’t do anything. I was taught I could do everything.
-//                   </p>
-//                 </div>
-//                 {/*footer*/}
-//                 <div classNameName="flex items-center justify-end p-6 border-t border-solid border-slate-200 rounded-b">
-//                   <button
-//                     classNameName="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-//                     type="button"
-//                     onClick={() => setShowModal(false)}
-//                   >
-//                     Close
-//                   </button>
-//                   <button
-//                     classNameName="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-//                     type="button"
-//                     onClick={() => setShowModal(false)}
-//                   >
-//                     Save Changes
-//                   </button>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-//           <div classNameName="opacity-25 fixed inset-0 z-40 bg-black"></div>
-//         </>
-//       ) : null}
-//     </>
-//   );
-// }
+
+

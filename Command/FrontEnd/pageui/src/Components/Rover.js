@@ -5,7 +5,7 @@ const Rover = (props) => {
 
   return (
     <>
-      <img src={rover} alt="circle" style={{border:"4px solid white", position:"relative", top: `${props.Coordinates.xcoord}px`, left: `${props.Coordinates.ycoord}px`}} /> 
+      <img src={rover} alt="circle" style={{position:"relative", top: `${props.Coordinates.xcoord}px`, left: `${props.Coordinates.ycoord}px`}} /> 
     </>
 
   )

@@ -3,7 +3,7 @@
 const Obstacle = (props) => {
   
   return (
-    <div style={{borderRadius:"50%", position:"relative", top: `${props.Alien.xcoorda}px`, left: `${props.Alien.ycoorda}px`, backgroundColor: `${props.color}`, height:'20px', width:'20px' }}>
+    <div style={{borderRadius:"50%", position:"relative", top: `${props.Alien.xcoorda}px`, left: `${props.Alien.ycoorda}px`, backgroundColor: `${props.color}`, height:'15px', width:'15px' }}>
 
     </div>
   )

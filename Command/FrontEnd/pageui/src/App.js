@@ -10,7 +10,7 @@ function App() {
   return (
   <Router> 
 
-    <body>
+    <div>
       <Navbar />
 
       <Routes>
@@ -24,7 +24,7 @@ function App() {
 
       </Routes>
 
-    </body>
+    </div>
 
   </Router>
   );
