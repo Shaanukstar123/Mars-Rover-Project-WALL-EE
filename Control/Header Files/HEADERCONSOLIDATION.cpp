@@ -1,18 +1,3 @@
-//CURRENTLY SUPPORTS:
-//GYROSCOPE
-//MOTOR CONTROL
-//WIFI
-//MQTT CONNECTION
-//FPGA 
-
-//TODO:
-//OPTIC SENSOR (needs some testing but otherwise ready)
-//RADAR (waiting for component)
-//BATTERY (unresolved problems currently on hardware side)
-
-
-
-
 #include <string.h> 
 #include <Arduino.h>
 #include <stdint.h>
@@ -116,6 +101,7 @@ class locationdata
   bool detection; //1 if yes, 0 if no
   bool walldetection;
   bool avoiding;
+  bool coordinateMode;
   //step tracker for avoid/automatic mode
   int avoidStep; //Tracks the steps of avoidance;
   int autoStep;
@@ -532,24 +518,18 @@ void USensorFunction(int &RoverX, int &RoverY, int &RoverAngle, bool FPGA_detect
 {
   float duration_us;
   float distance_cm;
-  // generate 10-microsecond pulse to TRIG pin
   digitalWrite(TRIG_PIN, HIGH);
   delayMicroseconds(10);
   digitalWrite(TRIG_PIN, LOW);
-  // measure duration of pulse from ECHO pin
   duration_us = pulseIn(ECHO_PIN, HIGH);
-  // calculate the distance
   distance_cm = 0.017 * duration_us;
 
   int xlocation = RoverX - distance_cm * sin(RoverAngle*3.14159/180); //minus due to how the coords work
   int ylocation = RoverY + distance_cm * cos(RoverAngle*3.14159/180);
 
-  // print the value to Serial Monitor (DEBUG)
-  Serial.print("distance: ");
-  Serial.print(distance_cm);
-  Serial.println(" cm");
+  rover.walldetection = 0;
 
-    rover.walldetection = 0;
+  Serial.println(distance_cm);
 
   if (xlocation >500 || ylocation > 300 || xlocation < 0 || ylocation < 0)
   {
@@ -557,8 +537,6 @@ void USensorFunction(int &RoverX, int &RoverY, int &RoverAngle, bool FPGA_detect
     rover.detection = 0;
     rover.walldetection = 1;
   }
- //mapObjects(xlocation, ylocation);
-
 
   if (distance_cm < 20 && !(xlocation >500 || ylocation > 300 || xlocation < 0 || ylocation < 0))
   {
@@ -586,7 +564,6 @@ void USensorFunction(int &RoverX, int &RoverY, int &RoverAngle, bool FPGA_detect
 
   else 
   {rover.detection = 0;}
-  
   //Degug, X and Y of the object
   Serial.println("X: " + String(xlocation));
   Serial.println("Y: " + String(ylocation));
@@ -594,18 +571,13 @@ void USensorFunction(int &RoverX, int &RoverY, int &RoverAngle, bool FPGA_detect
 
 void automaticMode()
 {
-  sub("Autonomous");
   String mode = roverCommand;
   if(mode == "{\n\"mode\" : 1\n}")
-  {
-  rover.autoMode = true;
-  Serial.println("AutoMode enabled");
-  }
+  {rover.autoMode = true;
+  Serial.println("AutoMode enabled");}
   else 
-  {
-  rover.autoMode = false;
-  Serial.println("AutoMode disabled");
-  }
+  {rover.autoMode = false;
+  Serial.println("AutoMode disabled");}
 }
 
 void roverDataTransfer()
@@ -623,12 +595,8 @@ void batteryPercent(int example){
 }
 
 void halt() //stops the rover
-{
-      robot.brake(1);
-      robot.brake(2);
-}
-
-
+  {robot.brake(1);
+  robot.brake(2);}
 
 int sweep(int step)
 {
@@ -701,28 +669,46 @@ int returnClosestElement() //rover.x and rover.y
 
 void getCoordinates() //Grabs coordinates from the MQTT server and adds them to the vector
 {
-  //anatomy of this is {coords:000000}
-  String command = "";
-  for (int i = 1; i < 7; i++){
+  //anatomy of this is {"coords":"+030-0201"} 
+  String command = "";//2345678901234567890
+  for (int i = 2; i < 8; i++){
     command += roverCommand[i];
   }
+  Serial.println(command);
   if (command == "coords")
   {
+    Serial.println("Recieved Command");
     String xcoords = "";
     String ycoords = "";
     int x;
     int y;
-    for (int i = 8; i < 11; i++)
+    for (int i = 12; i < 15; i++)
     {
       xcoords+=roverCommand[i];
     }
-    for (int i = 11; i < 14; i++)
+    Serial.println(xcoords);
+    for (int i = 16; i < 19; i++)
     {
       ycoords+=roverCommand[i];
     }
+    Serial.println(ycoords);
+    if (roverCommand[19] == '1')
+    {
+      rover.coordinateMode = 1;
+    }
+    Serial.println(roverCommand[20] );
+    if (roverCommand[19] != '1')
+    {
+      rover.coordinateMode = 0;
+    }
+
     x = (int(xcoords[0])*100) + (int(xcoords[1])*10) + int(xcoords[2]);
     y = (int(ycoords[0])*100) + (int(ycoords[1])*10) + int(ycoords[2]);
     Coordinate newCoord;
+    if (roverCommand[11] == '-')
+    {x = -x;}
+    if (roverCommand[15] == '-')
+    {y = -y;}
     newCoord.x = x;
     newCoord.y = y;
 
@@ -784,17 +770,17 @@ Serial.println(targetY);
 void setup() {
    Serial.begin(115200);
    //CONNECTION SETUP
-  // mfrc522.PCD_Init();
-  // initWifi();
-  // mqttConnect();
-  // sub("#");
+  mfrc522.PCD_Init();
+  initWifi();
+  mqttConnect();
+  sub("#");
     
   //COMPONENT SETUP
   mousecam_init(); //OPTIC SENSOR
   opticSetup();
   gyroSetup();
   robot.begin();
-  // USensorSetup();
+  USensorSetup();
   
   //FPGA SETUP STUFF
   // pinMode(PIN_SS,OUTPUT);
@@ -816,14 +802,14 @@ void setup() {
 
 
   //DEBUG FOR COORD MODE:
-  Coordinate ega;
-  ega.x = 10;
-  ega.y = 10;
-  CoordinateVector.push_back(ega);
-  Coordinate egb;
-  egb.x = -10;
-  egb.y = -10;
-  CoordinateVector.push_back(egb);
+  // Coordinate ega;
+  // ega.x = 10;
+  // ega.y = 10;
+  // CoordinateVector.push_back(ega);
+  // Coordinate egb;
+  // egb.x = -10;
+  // egb.y = -10;
+  // CoordinateVector.push_back(egb);
 }
 
 
@@ -847,19 +833,41 @@ void detect() //All the operations of the rover to do with information, detectio
 int loopcount = 0;
 int stepchecker = 0; //DEBUG FOR ROVERGOTO SEQUENCES
 void loop() {
-  // client.loop();
-  // wifi_check();
+  client.loop();
+  wifi_check();
   // roverMovement(); //Wifi connection dependent
   //roverDatatransfaer
  
   
   opticMain();
-  // USensorFunction(rover.X, rover.Y, rover.angle, rover.fpga_detection);
+  USensorFunction(rover.X, rover.Y, rover.angle, rover.fpga_detection);
   //radarDetection(rover.X, rover.Y, rover.angle);
-  if (CoordinateVector.size() != 0)
-  roverGoto(CoordinateVector[returnClosestElement()].x, CoordinateVector[returnClosestElement()].y);
-  
-  deleteElements();
+
+  //Coordinate Mode
+  // if (CoordinateVector.size() != 0)
+  // roverGoto(CoordinateVector[returnClosestElement()].x, CoordinateVector[returnClosestElement()].y);
+  // deleteElements();
+
+  // if (rover.detection && !rover.avoiding) //Replace with Joshua's later
+  // {
+  //   rover.avoiding = 1;
+  //   rover.avoidStep = 1;
+  // }
+
+  // if (rover.avoiding)
+  // {
+  //   roverAvoid();
+  // }
+
+  getCoordinates();
+
+  if (rover.coordinateMode == 1)
+  {
+    if (CoordinateVector.size() != 0)
+    {roverGoto(CoordinateVector[returnClosestElement()].x, CoordinateVector[returnClosestElement()].y);}
+    deleteElements();
+    if (CoordinateVector.size() == 0) {rover.coordinateMode = 0;}
+  }
 
   
 
