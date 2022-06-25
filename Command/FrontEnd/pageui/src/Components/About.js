@@ -85,7 +85,7 @@ const About = () => {
     }
 
   
-    const newIntervalId = setInterval(fetchCoordinateData, 500);
+    const newIntervalId = setInterval(fetchCoordinateData, 800);
 
     // event.currentTarget.classList.remove(
     //   'hover:blur-sm',

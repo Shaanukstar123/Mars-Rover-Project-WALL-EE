@@ -78,7 +78,7 @@ const Autopilot = () => {
     }
 
   
-    const newIntervalId = setInterval(fetchCoordinateData, 500);
+    const newIntervalId = setInterval(fetchCoordinateData, 700);
 
     event.currentTarget.classList.remove(
       'btn-success',
