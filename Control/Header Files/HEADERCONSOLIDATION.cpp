@@ -141,7 +141,7 @@ void approximateLocation(int distance, int angle, String colour, int roverX, int
 
 
   String JSON = "{\n\tcolour : \"" + colour + "\"\n\tX-Coordinate : " + String(alienX) + "\n\tY-Coordinate : " + String(alienY) + "\n}";
-  char topic[] = "aliens";
+  char *topic = "aliens";
 
   pub(JSON, topic);
 }
@@ -222,43 +222,44 @@ void analyseData(String x)
 }
 
 void roverMovement() //DONE
-{
-  int speed = 90;
-  Serial.println(roverCommand);
-  if (roverCommand == "{\"directionMove\":\"B\"}") // bwd
-  {
-   //Serial.println("backwards!");
-   robot.rotate(motor1, speed, CCW);
-   robot.rotate(motor2, speed-5, CW);
-  }
+{ if centralCommand["mode"] ==1 {
+    int speed = 90;
+    //Serial.println(roverCommand);
+    if (roverCommand["mode"] == "B") // bwd
+    {
+    //Serial.println("backwards!");
+    robot.rotate(motor1, speed, CCW);
+    robot.rotate(motor2, speed-5, CW);
+    }
 
-  if (roverCommand == "{\"directionMove\":\"F\"}") //fwd
-  {
-   //Serial.println("forwards!");
-   robot.rotate(motor1, speed, CW);
-   robot.rotate(motor2, speed-5, CCW);
-  }
+    if (roverCommand["mode"] == "F") //fwd
+    {
+    //Serial.println("forwards!");
+    robot.rotate(motor1, speed, CW);
+    robot.rotate(motor2, speed-5, CCW);
+    }
 
-  if (roverCommand == "{\"directionMove\":\"R\"}") //cw
-  {
-   //Serial.println("turn Clockwise!");
-   robot.rotate(motor1, speed, CW);
-   robot.rotate(motor2, speed-5, CW);
-  }
+    if (roverCommand["mode"] == "R") //cw
+    {
+    //Serial.println("turn Clockwise!");
+    robot.rotate(motor1, speed, CW);
+    robot.rotate(motor2, speed-5, CW);
+    }
 
-  if (roverCommand == "{\"directionMove\":\"L\"}")  //ccw
-  {
-   //Serial.println("turning counter clockwise!");
-   robot.rotate(motor1, speed, CCW);
-   robot.rotate(motor2, speed-5, CCW);
-  }
+    if (roverCommand["mode"] == "L")  //ccw
+    {
+    //Serial.println("turning counter clockwise!");
+    robot.rotate(motor1, speed, CCW);
+    robot.rotate(motor2, speed-5, CCW);
+    }
 
-  if (roverCommand == "{\"directionMove\":\"S\"}") 
-  {
-   //Serial.println("brake!");
-   robot.brake(motor1);
-   robot.brake(motor2);
-  }
+    if (roverCommand["mode"] == "S") 
+    {
+    //Serial.println("brake!");
+    robot.brake(motor1);
+    robot.brake(motor2);
+    }
+}
 
 
 }
@@ -571,13 +572,15 @@ void USensorFunction(int &RoverX, int &RoverY, int &RoverAngle, bool FPGA_detect
 
 void automaticMode()
 {
-  String mode = roverCommand;
-  if(mode == "{\n\"mode\" : 1\n}")
-  {rover.autoMode = true;
-  Serial.println("AutoMode enabled");}
-  else 
-  {rover.autoMode = false;
-  Serial.println("AutoMode disabled");}
+  String mode = centralCommand["mode"];
+  if(centralCommand["mode"] == 3){
+    {rover.autoMode = true;
+    Serial.println("AutoMode enabled");}
+  }
+  else{ 
+    {rover.autoMode = false;
+    Serial.println("AutoMode disabled");}
+  }
 }
 
 void roverDataTransfer()
@@ -670,45 +673,45 @@ int returnClosestElement() //rover.x and rover.y
 void getCoordinates() //Grabs coordinates from the MQTT server and adds them to the vector
 {
   //anatomy of this is {"coords":"+030-0201"} 
-  String command = "";//2345678901234567890
-  for (int i = 2; i < 8; i++){
+  /*String command = "";//2345678901234567890
+  /for (int i = 2; i < 8; i++){
     command += roverCommand[i];
   }
-  Serial.println(command);
-  if (command == "coords")
+  Serial.println(command);*/
+  if (centralCommand["mode"] == 2)
   {
     Serial.println("Recieved Command");
-    String xcoords = "";
-    String ycoords = "";
+    //String xcoords = "";
+    //String ycoords = "";
     int x;
     int y;
-    for (int i = 12; i < 15; i++)
+    /*for (int i = 12; i < 15; i++)
     {
       xcoords+=roverCommand[i];
-    }
-    Serial.println(xcoords);
-    for (int i = 16; i < 19; i++)
+    }*/
+    //Serial.println(xcoords);
+    /*for (int i = 16; i < 19; i++)
     {
       ycoords+=roverCommand[i];
-    }
-    Serial.println(ycoords);
-    if (roverCommand[19] == '1')
+    }*/
+    //Serial.println(ycoords);
+    if (centralCommand["mode"] == 2)
     {
       rover.coordinateMode = 1;
     }
-    Serial.println(roverCommand[20] );
-    if (roverCommand[19] != '1')
+    //Serial.println(roverCommand[20] );
+    if (centralCommand["mode"] !=2)
     {
       rover.coordinateMode = 0;
     }
 
-    x = (int(xcoords[0])*100) + (int(xcoords[1])*10) + int(xcoords[2]);
-    y = (int(ycoords[0])*100) + (int(ycoords[1])*10) + int(ycoords[2]);
+    x = coordinates["xcoord"];//(int(xcoords[0])*100) + (int(xcoords[1])*10) + int(xcoords[2]);
+    y = coordinates["ycoord"];//(int(ycoords[0])*100) + (int(ycoords[1])*10) + int(ycoords[2]);
     Coordinate newCoord;
-    if (roverCommand[11] == '-')
-    {x = -x;}
-    if (roverCommand[15] == '-')
-    {y = -y;}
+    //if (roverCommand[11] == '-')
+    //{x = -x;}
+    //if (roverCommand[15] == '-')
+    //{y = -y;}
     newCoord.x = x;
     newCoord.y = y;
 

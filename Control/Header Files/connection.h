@@ -36,13 +36,18 @@ const int mqtt_port = 1883;
 //Json variables for Publishing
 StaticJsonDocument <256> location_msg;
 StaticJsonDocument <256> battery_msg;
-StaticJsonDocument <256> obstacle_msg;
+StaticJsonDocument <256> aliens;
+StaticJsonDocument <256> fans;
+StaticJsonDocument <256> buildings;
 
 //Json variables for Subscribing
-StaticJsonDocument <256> RControl_msg;
-StaticJsonDocument<256> command_msg;
-String command = "";
-String roverCommand = "";
+StaticJsonDocument<256> centralCommand;
+StaticJsonDocument <256> rControl;
+StaticJsonDocument<256> coordinates;
+bool autoMode = false; //true if autopilot is on
+
+//String command = "";
+//String roverCommand = "";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -51,14 +56,29 @@ void callback(char *topic, byte *payload, unsigned int length) { //Data received
  Serial.print("Message arrived in topic: ");
  Serial.println(topic);
  Serial.print("Message:");
- deserializeJson(RControl_msg,payload);
+ if (topic =="centralCommand"){
+  deserializeJson(centralCommand,payload);
+ }
+  if (centralCommand["mode"] == 1:){
+    if (topic =="direction"){
+      deserializeJson(rControl,payload);
+    }}
+
+  if (centralCommand["mode"] == 2:){
+    if (topic =="coordinates"){
+      deserializeJson(coordinates,payload);
+    }}
+
+  if (centralCommand["mode"] == 3:)
+    autoMode = true;
+
  //command = RControl_msg["directionMove"];
  //auto num = sub_msg["something"];
- char msg[128];
+ //char msg[128];
  //int num = 10;
  //num = sub_msg["something"];
- serializeJson(RControl_msg,msg);
- Serial.println(msg);
+ //serializeJson(RControl_msg,msg);
+ //Serial.println(msg);
  //Serial.println(num);
 //}
   //Serial.print((char) payload[i]);
