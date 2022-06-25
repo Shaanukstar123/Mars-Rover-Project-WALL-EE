@@ -5,7 +5,8 @@ const Controller = () => {
 
   const mouseLeaveControl = async (evt) => {
     evt.preventDefault();
-    const randomNumber = await fetch('http://35.176.71.115:8080/rControl', {
+
+    await fetch('http://35.176.71.115:8080/rControl', {
       method: "POST",
       headers: {
         'Content-type': "application/json"
@@ -13,7 +14,7 @@ const Controller = () => {
       body: JSON.stringify({'directionMove': "S"})
     });
 
-    const data = await randomNumber.json();
+    //await randomNumber.json();
 
     console.log("Mouse Down Ended: S");
     //console.log(data);
@@ -22,14 +23,14 @@ const Controller = () => {
   const mouseClickControl = async (evt) => {
     evt.preventDefault();
 
-    const randomNumber = await fetch('http://35.176.71.115:8080/rControl', {
+    await fetch('http://35.176.71.115:8080/rControl', {
       method: "POST",
       headers: {
         'Content-type': "application/json"
       },
       body: JSON.stringify({'directionMove': evt.target.id})
     });
-    const data = await randomNumber.json();
+    //const data = await randomNumber.json();
 
     console.log("Mouse Down Started: ", evt.target.id);
     //console.log(data);
