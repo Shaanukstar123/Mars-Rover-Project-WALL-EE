@@ -34,6 +34,7 @@ const char *mqtt_pass = "marsrover123";
 const int mqtt_port = 1883;
 
 //Json variables for Publishing
+
 StaticJsonDocument <256> location;
 StaticJsonDocument <256> battery;
 StaticJsonDocument <256> aliens;
@@ -56,6 +57,7 @@ void callback(char *topic, byte *payload, unsigned int length) { //Data received
  Serial.print("Message arrived in topic: ");
  Serial.println(topic);
  Serial.print("Message:");
+
  char msg[128];
  if (*topic==*"centralCommand"){
   deserializeJson(centralCommand,payload);
@@ -81,6 +83,7 @@ void callback(char *topic, byte *payload, unsigned int length) { //Data received
 
   if (centralCommand["mode"] == 3)
    { autoMode = true;}
+
 
  //command = RControl_msg["directionMove"];
  //auto num = sub_msg["something"];
