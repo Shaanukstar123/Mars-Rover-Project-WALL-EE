@@ -73,7 +73,7 @@ const About = () => {
       clearInterval(intervalId);
       
       event.currentTarget.classList.remove(
-        'blur-sm',
+        'animate-pulse',
       );
 
       // event.currentTarget.classList.add(
@@ -92,10 +92,14 @@ const About = () => {
     // );
 
     event.currentTarget.classList.add(
-      'blur-sm',
+      'animate-pulse',
     );
 
     setIntervalId(newIntervalId);
+  }
+
+  const reset = () => {
+    setAliens([]);
   }
 
   const startclicket = (evt) =>{
@@ -186,12 +190,12 @@ const About = () => {
 
 
   return (
-    <main className="w-screen h-screen flex flex-row justify-center">
+    <main className="w-screen h-screen flex flex-row justify-center bg-apple">
 
    
     <div className="grid grid-cols-3 gap-8 rounded-sm mt-10 h-5/6 w-11/12">
 
-        <div className="flex flex-col justify-between items-center h-full col-span-2 row-span-2 rounded-lg bg-slate-200" >
+        <div className="flex flex-col justify-between items-center h-full col-span-2 row-span-2 rounded-lg bg-white hover:animate-spin" >
 
           <h1 className="text-3xl font-extrabold flex flex-row justify-start w-full">
             <span className=""> AutoPilot </span>
@@ -202,16 +206,19 @@ const About = () => {
             <AddObstacles Aliens={aliens} />
           </div>
           
+          <div className="h-4 w-4">
+
+          </div>
 
     
         </div>
 
 
 
-        <div className="h-full rounded-lg bg-slate-200 flex flex-col justify-between ">
+        <div className="h-full rounded-lg bg-white flex flex-col justify-between">
 
           <h1 className="text-3xl font-extrabold flex flex-col content-center justify-center">
-            <span className=""> TouristMode </span>
+            <span className="hover:animate-pulse"> TouristMode </span>
           </h1>
           
           <div className="h-auto w-auto flex flex-row justify-around">
@@ -222,8 +229,18 @@ const About = () => {
           </div>
           
 
-          <div className="h-auto w-auto flex flex-row justify-center">
-            <button type="button" className="btn btn-info btn-lg" onClick={start} > {intervalId ? "STOP" : "AutoPilot"} </button>
+          <div className="h-auto w-auto flex flex-row justify-evenly items-center">
+            <button className="bg-sky-500 hover:bg-sky-700 px-2 py-2 text-sm rounded-lg font-semibold text-white" onClick={start}>
+              {intervalId ? "STOP" : "AutoPilot"}
+            </button>
+
+            <button className="bg-fuchsia-500 hover:bg-fuchsia-700 px-2 py-2 text-sm rounded-lg font-semibold text-white" onClick={reset}>
+              Reset
+            </button>
+          </div>
+
+          <div className="h-1 w-1 relative">
+
           </div>
           
   
@@ -232,28 +249,30 @@ const About = () => {
 
 
 
-        <div className="h-full rounded-lg bg-slate-200 flex flex-col justify-between hover:bg-gradient-to-tr from-green-400 to-blue-500">
+        <div className="h-full rounded-lg bg-black flex flex-col justify-between items-center hover:bg-gradient-to-bl from-green-400 to-blue-500 hover:scale-110">
 
-          <h1 className="text-3xl font-extrabold flex flex-col content-center justify-center ">
-            <span className=""> Battery </span>
+          <h1 className="text-5xl font-extrabold flex flex-row justify-start  w-11/12">
+            <span className="text-white"> Battery </span>
           </h1>
 
-          <div className="d-flex flex-row justify-content-evenly align-items-center" >
+          <div className="d-flex flex-row justify-content-evenly align-items-center w-10/12">
 
-            <div className="p-2 mr-5 text-3xl" > {`${batteryLevel} %`}  </div>
+            <div className="p-2 text-3xl text-white" > {`${batteryLevel} %`}  </div>
             <img src={imgSrc} className="App-logo" alt="logo" />
 
 
-            <button className="bg-sky-500 hover:bg-sky-700 px-5 py-2 text-sm  rounded-lg font-semibold text-white" onClick={whenClicked}>
+            <button className="bg-sky-500 hover:bg-sky-700 px-2 py-2 text-sm rounded-lg font-semibold text-white" onClick={whenClicked}>
               Check Health
             </button>
 
           </div>
 
+          <div className="h-3 w-3">
+
+          </div>
+
         </div>
       
-
-
 
       </div>
 
