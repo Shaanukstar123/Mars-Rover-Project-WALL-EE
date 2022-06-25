@@ -5,33 +5,34 @@ const mongoose = require('mongoose');
 app = express();
 
 const mqtt = require("mqtt");
-var client = mqtt.connect('mqtt://35.176.71.115');
+let client = mqtt.connect('mqtt://35.176.71.115');
 
 app.use(cors());
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
 //JSON variables
-var location ={
+let location ={
   obstacle:1,
   xcoord:100,
   ycoord:100
 };
-var battery = {percentage: 0};
 
-var alien = {
+let battery = {percentage: 0};
+
+let alien = {
   color:-1, // -1 means no new alien detected. Default value
-  xcoorda:0,
-  ycoorda:0
-}
+  xcoord:0,
+  ycoord:0
+};
 
-var fan = {
-  is_new : 0, // 0 if variable not changed, 1 if new fan is detected
+let fan = {
+  is_new : 0, // 0 if letiable not changed, 1 if new fan is detected
   xcoord : -1,
   ycoord : -1
 };
 
-var building = {
+let building = {
   is_new : 0, 
   xcoord : -1,
   ycoord : -1
@@ -50,8 +51,8 @@ const Rover = mongoose.model('coordinates', roverSchema);
 
 const alienSchema = new mongoose.Schema({
   color : String,
-  xcoorda: Number,
-  ycoorda: Number,
+  xcoord: Number,
+  ycoord: Number,
 });
 
 const fanSchema = new mongoose.Schema({
@@ -91,12 +92,12 @@ mongoose.connect(connection, { useNewUrlParser: true, UseUnifiedTopology: true})
     ;
 
     Fan.deleteMany({})
-    .then(console.log("Deleted Aliens Collection"))
+    .then(console.log("Deleted Fan Collection"))
     .catch((err) => console.log(err))
     ;
 
     Building.deleteMany({})
-    .then(console.log("Deleted Aliens Collection"))
+    .then(console.log("Deleted Building Collection"))
     .catch((err) => console.log(err))
     ;
 
@@ -104,7 +105,7 @@ mongoose.connect(connection, { useNewUrlParser: true, UseUnifiedTopology: true})
       id: 732,
       xcoord: 0,
       ycoord: 0,
-      obstacle: 0 // 1 when obstacle detected
+      obstacle: 0
     }).save();
 
 
@@ -125,15 +126,19 @@ client.on('message', function(topic,message){
   if (topic =="battery"){
     battery = JSON.parse(message);
   }
+
   if (topic =="location"){
-    location = JSON.parse(message); //updates global JSON variables
+    location = JSON.parse(message); //updates global JSON letiables
   }
+
   if (topic =="aliens"){
     alien = JSON.parse(message);
   }
+
   if (topic =="fans"){
     fan = JSON.parse(message);
   }
+
   if (topic =="buildings"){
     building = JSON.parse(message);
   }
@@ -148,9 +153,10 @@ app.get("/battery",(req,res)=>{
   res.json(battery);
 });
 
+
 app.post("/rControl", (req, res) =>{
   console.log(req.body);
-  client.publish('direction',JSON.stringify(req.body)); //publishes direction straight from front-end request without saving to var
+  client.publish('direction',JSON.stringify(req.body)); //publishes direction straight from front-end request without saving to let
   res.json({"Received" : req.body.directionMove });
 } )
 
@@ -183,8 +189,8 @@ app.get("/obstacles",(req,res)=>{
   if (alien.color!==-1){
     const alienObj = new Alien({
       color: colors[alien.color],
-      xcoorda: alien.xcoorda,
-      ycoorda: alien.ycoorda
+      xcoord: alien.xcoord,
+      ycoord: alien.ycoord
     });
 
     alienObj.save()
@@ -198,13 +204,14 @@ app.get("/obstacles",(req,res)=>{
 
   }
   
-  Alien.find({}, 'color xcoorda ycoorda')
+  Alien.find({}, 'color xcoord ycoord')
     .then( function (result){
       console.log("New Alien:", result)
       return res.json(result);
     })
     .catch((err) => console.log(err))
   ;
+
 })
 
 app.get("/fans",(req,res)=>{
@@ -221,6 +228,7 @@ app.get("/fans",(req,res)=>{
       })
       .catch((err) => console.log(err))
     ;
+
     console.log("Sent to db: ",fanObj);
     fan.is_new = 0; //resets to null fan
 
