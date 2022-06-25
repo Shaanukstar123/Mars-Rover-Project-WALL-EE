@@ -160,6 +160,14 @@ app.post("/rControl", (req, res) =>{
   res.json({"Received" : req.body.directionMove });
 } )
 
+app.get("/reset",(req,res)=>{
+
+  Alien.deleteMany({})
+    .then(console.log("Deleted Aliens Collection"))
+    .catch((err) => console.log(err))
+  ;
+  
+});
 
 
 app.get("/coordinates",(req,res)=>{
