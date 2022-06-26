@@ -160,6 +160,12 @@ app.post("/rControl", (req, res) =>{
   res.json({"Received" : req.body.directionMove });
 } )
 
+app.post("/shortestDistance", (req, res) =>{
+  console.log(req.body);
+  client.publish('direction',JSON.stringify(req.body));
+  res.json({"Received" : req.body.directionMove });
+} )
+
 app.get("/coordinatesMQTT",(req,res)=>{
 
   let x = Math.floor((Math.random() * 234));
