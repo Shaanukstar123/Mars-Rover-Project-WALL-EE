@@ -1,11 +1,11 @@
-#include <MFRC522.h>
+#include <MFRC522.h>//
 #include <WiFi.h>
-#include <ArduinoJson.h>
-#include <HTTPClient.h>
+#include <ArduinoJson.h>//
+#include<HTTPClient.h>//
 #include <WiFiUdp.h>
-#include <NTPClient.h>
-#include <WebSocketsClient.h> //gilmaimon/ArduinoWebsockets@^0.5.3 
-#include <PubSubClient.h>
+#include <NTPClient.h>//
+//#include <WebSocketsClient.h> //gilmaimon/ArduinoWebsockets@^0.5.3 
+#include <PubSubClient.h>//
 #include <string.h> 
 #include <Arduino.h>
 #include <stdint.h>
@@ -23,18 +23,17 @@ unsigned long previousMillis = 0;
 unsigned long interval = 30000;
 const char* host_ip= "35.176.71.115";
 int host_port = 3000;
-WebSocketsClient webSocket;
 
 //MQTT Broker data:
 const char *broker = "35.176.71.115";
-char *topic = "test";
-char *topic2 = "epic";
 const char *mqtt_user ="marsrover";
 const char *mqtt_pass = "marsrover123";
 const int mqtt_port = 1883;
+char command_msg[256];
+char coord_msg[256];
+char rControl_msg[256];
 
 //Json variables for Publishing
-
 StaticJsonDocument <256> location;
 StaticJsonDocument <256> battery;
 StaticJsonDocument <256> aliens;
@@ -42,9 +41,10 @@ StaticJsonDocument <256> fans;
 StaticJsonDocument <256> buildings;
 
 //Json variables for Subscribing
-StaticJsonDocument<256> centralCommand;
+StaticJsonDocument <256> centralCommand; // check setup()
 StaticJsonDocument <256> rControl;
-StaticJsonDocument<256> coordinates;
+StaticJsonDocument <256>coordinates;
+
 bool autoMode = false; //true if autopilot is on
 
 //String command = "";
@@ -54,62 +54,53 @@ WiFiClient espClient;
 PubSubClient client(espClient);
 
 void callback(char *topic, byte *payload, unsigned int length) { //Data received
- Serial.print("Message arrived in topic: ");
- Serial.println(topic);
- Serial.print("Message:");
+  Serial.print("Message arrived in topic: ");
+  Serial.println(topic);
+  Serial.print("Message: ");
+  Serial.print(command_msg);
 
- char msg[128];
- if (*topic==*"centralCommand"){
-  deserializeJson(centralCommand,payload);
-  //serializeJson(centralCommand,msg);
-  Serial.println("Central comm message: ");
-  //Serial.print(msg);
-  }
- 
-  if (centralCommand["mode"] == 1){
-
-    if (*topic == *"direction"){
-      Serial.println("Remote commands are here!");
-      deserializeJson(rControl,payload);
-    }}
-
-  if (centralCommand["mode"] == 2){
-    if (*topic == *"coordinates"){
+  if (String(topic) =="coordinates"){
+    if (String(command_msg) == "{\"mode\":2}"){
       deserializeJson(coordinates,payload);
-      serializeJson(coordinates,msg);
-      Serial.println(msg);
-      Serial.println("Coordindate mode active");
-    }}
+      serializeJson(coordinates,coord_msg);
+      Serial.println(coord_msg);
+      if (coordinates["ycoord"] ==5){
+        Serial.println("Hallelujah");
+      }
+    }
+  }
 
-  if (centralCommand["mode"] == 3)
-   { autoMode = true;}
+  else if (String(topic) == "rControl"){
+    if (String(command_msg) =="{\"mode\":1}"){
+      deserializeJson(rControl,payload);
+      Serial.println("REmote: ");
+      serializeJson(rControl,rControl_msg);
+      Serial.println(rControl_msg);
+      if (rControl["directionMove"] =="F"){
+        Serial.print("Rover moving Forward");
+      }
+  }
+  }
+
+  else if (String(topic)=="centralCommand"){
+    deserializeJson(centralCommand,payload);
+    //serializeJson(centralCommand,msg);
+    Serial.println("Central msg: ");
+    serializeJson(centralCommand,command_msg);
+    Serial.print(command_msg);
+  
+  }
+  //if (centralCommand["mode"]!=0){
+  
+
+  if (String(command_msg) =="{\"mode\":3}")
+    Serial.println("Autopilot Mode entered");
+    { autoMode = true;}
 
 
- //command = RControl_msg["directionMove"];
- //auto num = sub_msg["something"];
- //char msg[128];
- //int num = 10;
- //num = sub_msg["something"];
- //serializeJson(RControl_msg,msg);
- //Serial.println(msg);
- //Serial.println(num);
-//}
-  //Serial.print((char) payload[i]);
-//}
 Serial.println();
 Serial.println("-----------------------");
- /*for (int i = 0; i < length; i++) {
-     Serial.print((char) payload[i]);
-     //command+= (char) payload[i];
-      if (topic =="direction"){
-        command+= (char) payload[i];
-      }
- }
- roverCommand = command;
 
- Serial.println();
- Serial.println("-----------------------");
-*/
 }
 
 void pub(String message,char *topic){
@@ -138,8 +129,6 @@ void mqttConnect(){
       Serial.println("Failed with state: ");
       Serial.print(client.state());
     }
-    pub("hello",topic);
-    sub(topic2);
   }
 }
 
@@ -156,7 +145,7 @@ void initWifi(){
   const char* password = "hotpasss";
 
 
-  WiFi.begin("angelophone","hotpasss");
+  WiFi.begin(ssid,password);
   Serial.print(" Connecting to WiFi ...");
   while (WiFi.status()!=WL_CONNECTED){
     Serial.print('.');
@@ -166,19 +155,6 @@ void initWifi(){
   Serial.println(WiFi.localIP());
 
 }
-
-/*void webSocketEvent(WStype_t type, uint8_t * payload, size_t length){
-  if (type == WStype_TEXT){
-  }
-  webSocket.sendTXT("Hello there");
-  Serial.println("Message sent");
-} 
-void initSocket(){
-  webSocket.begin(host_ip, host_port, "/"); //address, port, URL route
-  webSocket.onEvent(webSocketEvent);
-  webSocket.setReconnectInterval(5000);
-}
- */ //Websockets Not used anymore. MQTT used instead
 
 void wifi_check(){
   unsigned long currentMillis = millis();
