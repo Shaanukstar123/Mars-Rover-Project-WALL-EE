@@ -252,20 +252,19 @@ const About = () => {
 
 
           <form className="flex flex-row justify-evenly" onSubmit={hello}>
+      
 
             <div className="relative z-0 w-2/6 mb-1.5 group">
-              <input type="number" name="xcoord" value={inputs.xcoord || ""} onChange={handleChange}  className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-b-2 border-orange-300 appearance-none dark:text-white focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
+              <input type="number" name="xcoord" value={inputs.xcoord || ""} onChange={handleChange}  className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-b-2 border-teal-300 appearance-none dark:text-white focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
               <label className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">X</label>
             </div>
 
             <div className="relative z-0 w-2/6 mb-1.5 group">
-              <input type="number" name="ycoord" value={inputs.ycoord || ""} onChange={handleChange}  id="floating_password" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
+              <input type="number" name="ycoord" value={inputs.ycoord || ""} onChange={handleChange}  id="floating_password" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-b-2 border-red-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
               <label  className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Y</label>
             </div>
 
-            <button type="submit" className="bg-gradient-to-r from-pink-500 to-yellow-500 hover:bg-sky-700 px-2 py-2 text-sm rounded-lg font-semibold text-white">
-              Submit
-            </button>
+            <button type="submit" className="text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-auto  px-2 py-2.5 text-center">Submit</button>
           </form>
           
           
