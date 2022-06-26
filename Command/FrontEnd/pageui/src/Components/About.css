@@ -6,5 +6,9 @@
   transform: scale(1.5);
 }
 
+.Logo{
+  background-image: url(./static/grid.jpg);
+}
+
 
 

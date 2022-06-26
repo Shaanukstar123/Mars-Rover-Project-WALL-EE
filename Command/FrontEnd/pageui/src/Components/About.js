@@ -7,6 +7,7 @@ import two from './static/2.png'
 import three from './static/3.png'
 
 
+
 const About = () => {
 
 
@@ -212,7 +213,7 @@ const About = () => {
   }
 
   return (
-    <main className="w-screen h-screen flex flex-row justify-center bg-apple">
+    <main className="w-screen h-screen flex flex-row justify-center bg-slate-200">
 
    
     <div className="grid grid-cols-3 gap-8 rounded-sm mt-10 h-5/6 w-11/12">
@@ -223,7 +224,7 @@ const About = () => {
             <span className=""> AutoPilot </span>
           </h1>
 
-          <div className="h-5/6 w-4/6 relative border-dashed border-2 border-orange-500 bg-cyan-500">
+          <div className="h-5/6 w-4/6 relative Logo" >
             <Rover  Coordinates={coords}  />
             <AddObstacles Aliens={aliens} />
           </div>
@@ -237,13 +238,13 @@ const About = () => {
 
 
 
-        <div className="h-full rounded-lg bg-white flex flex-col justify-between items-center">
+        <div className="h-full rounded-lg bg-gradient-to-br from-green-200 via-green-300 to-blue-500 flex flex-col justify-between items-center hover:drop-shadow-2xl">
 
           <h1 className="text-3xl font-extrabold flex flex-col content-center justify-center w-full">
             <span className="hover:animate-pulse"> TouristMode </span>
           </h1>
           
-          <div className="h-auto w-7/12 grid grid-cols-3 grid-rows-3">
+          <div className="h-auto w-6/12 grid grid-cols-3 grid-rows-3">
             <button type="button" className="btn btn-primary  col-start-2" id="F" onMouseUp={endclicket}  onMouseDown={startclicket}> F </button>
             <button type="button" className="btn btn-secondary  col-start-2 row-start-3" id="B" onMouseUp={endclicket}  onMouseDown={startclicket} > B </button>
             <button type="button" className="btn btn-danger  col-start-3 row-start-2" id="R" onMouseUp={endclicket}  onMouseDown={startclicket} > R </button>
@@ -255,13 +256,13 @@ const About = () => {
       
 
             <div className="relative z-0 w-2/6 mb-1.5 group">
-              <input type="number" name="xcoord" value={inputs.xcoord || ""} onChange={handleChange}  className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-b-2 border-teal-300 appearance-none dark:text-white focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
-              <label className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">X</label>
+              <input type="number" name="xcoord" value={inputs.xcoord || ""} onChange={handleChange}  className="block py-2.5 px-0 w-full text-sm  bg-transparent border-b-2 border-teal-300 appearance-none  focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
+              <label className="peer-focus:font-medium absolute text-sm text-gray-500  duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">X</label>
             </div>
 
             <div className="relative z-0 w-2/6 mb-1.5 group">
-              <input type="number" name="ycoord" value={inputs.ycoord || ""} onChange={handleChange}  id="floating_password" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-b-2 border-red-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
-              <label  className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Y</label>
+              <input type="number" name="ycoord" value={inputs.ycoord || ""} onChange={handleChange}  id="floating_password" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-b-2 border-red-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
+              <label  className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Y</label>
             </div>
 
             <button type="submit" className="text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-auto  px-2 py-2.5 text-center">Submit</button>
@@ -289,7 +290,7 @@ const About = () => {
 
 
 
-        <div className="h-full rounded-lg bg-black flex flex-col justify-between items-center hover:bg-gradient-to-bl from-green-400 to-blue-500 hover:scale-110">
+        <div className="h-full rounded-lg bg-purple-400 flex flex-col justify-between items-center hover:bg-gradient-to-bl from-green-400 to-blue-500 hover:scale-110">
 
           <h1 className="text-3xl font-extrabold flex flex-row justify-start  w-11/12">
             <span className="text-white"> Battery </span>
