@@ -1,16 +1,14 @@
+#include <MFRC522.h>//
+#include <WiFi.h>
+#include <ArduinoJson.h>//
+#include<HTTPClient.h>//
+#include <WiFiUdp.h>
+#include <NTPClient.h>//
+//#include <WebSocketsClient.h> //gilmaimon/ArduinoWebsockets@^0.5.3 
+#include <PubSubClient.h>//
 #include <string.h> 
 #include <Arduino.h>
 #include <stdint.h>
-#include <SPI.h>
-#include <Wire.h>
-#include <MFRC522.h>
-#include <WiFi.h>
-#include <ArduinoJson.h>
-#include<HTTPClient.h>
-#include <WiFiUdp.h>
-#include<NTPClient.h>
-#include <WebSocketsClient.h>
-#include <PubSubClient.h>
 
 #define SCK 18
 #define MISO 19
@@ -27,20 +25,30 @@ const char* host_ip= "35.176.71.115";
 int host_port = 3000;
 
 //MQTT Broker data:
-
 const char *broker = "35.176.71.115";
 const char *mqtt_user ="marsrover";
 const char *mqtt_pass = "marsrover123";
 const int mqtt_port = 1883;
+char command_msg[256];
+char coord_msg[256];
+char rControl_msg[256];
 
 //Json variables for Publishing
-StaticJsonDocument <256> location_msg;
-StaticJsonDocument <256> battery_msg;
-StaticJsonDocument <256> obstacle_msg;
+DynamicJsonDocument location (1024);
+StaticJsonDocument <256> battery;
+StaticJsonDocument <256> aliens;
+StaticJsonDocument <256> fans;
+StaticJsonDocument <256> buildings;
 
 //Json variables for Subscribing
-StaticJsonDocument <256> RControl_msg;
-StaticJsonDocument<256> command_msg;
+DynamicJsonDocument centralCommand (1024); // check setup()
+StaticJsonDocument <256> rControl;
+DynamicJsonDocument coordinates (1024);
+
+bool autoMode = false; //true if autopilot is on
+
+//String command = "";
+//String roverCommand = "";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -48,24 +56,64 @@ PubSubClient client(espClient);
 void callback(char *topic, byte *payload, unsigned int length) { //Data received
   Serial.print("Message arrived in topic: ");
   Serial.println(topic);
-  //Serial.print("Message:");
-  //for (int i = 0; i < length; i++) {
+  Serial.print("Message: ");
+  Serial.print(command_msg);
 
-  deserializeJson(sub_msg,payload);
-  //auto num = sub_msg["something"];
-  char msg[128];
-  int num = 10;
-  num = sub_msg["something"];
-  serializeJson(sub_msg,msg);
-  Serial.println(msg);
-  Serial.println(num);
-  //}
-    //Serial.print((char) payload[i]);
-  //}
-  Serial.println();
-  Serial.println("-----------------------");
-
+  if (String(topic) =="coordinates"){
+    if (String(command_msg) == "{\"mode\":2}"){
+      deserializeJson(coordinates,payload);
+      serializeJson(coordinates,coord_msg);
+      Serial.println(coord_msg);
+      if (coordinates["ycoord"] ==5){
+        Serial.println("Hallelujah");
+      }
+    }
   }
+
+  else if (String(topic) == "rControl"){
+    if (String(command_msg) =="{\"mode\":1}"){
+      deserializeJson(rControl,payload);
+      Serial.println("REmote: ");
+      serializeJson(rControl,rControl_msg);
+      Serial.println(rControl_msg);
+      if (rControl["directionMove"] =="F"){
+        Serial.print("Rover moving Forward");
+      }
+  }
+  }
+
+  else if (String(topic)=="centralCommand"){
+    deserializeJson(centralCommand,payload);
+    //serializeJson(centralCommand,msg);
+    Serial.println("Central msg: ");
+    serializeJson(centralCommand,command_msg);
+    Serial.print(command_msg);
+  
+  }
+  //if (centralCommand["mode"]!=0){
+  
+
+  if (String(command_msg) =="{\"mode\":3}")
+    Serial.println("Autopilot Mode entered");
+    { autoMode = true;}
+
+
+Serial.println();
+Serial.println("-----------------------");
+
+}
+
+void pub(String message,char *topic){
+  //convert string to char*
+  const char *cstr = message.c_str();
+  client.publish(topic, cstr); 
+  Serial.println("Message sent");
+}
+
+void sub(char *topic){
+  Serial.println("Waiting for sub...");
+  client.subscribe(topic);
+}
 
 void mqttConnect(){
   client.setServer(broker,mqtt_port);
@@ -81,17 +129,7 @@ void mqttConnect(){
       Serial.println("Failed with state: ");
       Serial.print(client.state());
     }
-
-    //publishing and subscribing
-    client.subscribe("#"); //subscribe to all topics 
-    char msg_char[128];
-    serializeJson(pub_msg,msg_char);
-    client.publish("test",msg_char);
-    
-    
-    
   }
-
 }
 
 void initWifi(){
@@ -103,8 +141,8 @@ void initWifi(){
     Serial.println("Name: "+WiFi.SSID(i));}
 
       //**Access Point Details**//
-  const char* ssid = "Wokwi-GUEST";
-  const char* password = "";
+  const char* ssid = "Shan-Wifi"; //CHANGE FOR OTHER WIFI/NETWORK CONNECTIONS
+  const char* password = "hotspot123";
 
 
   WiFi.begin(ssid,password);
@@ -118,7 +156,6 @@ void initWifi(){
 
 }
 
-
 void wifi_check(){
   unsigned long currentMillis = millis();
   if (WiFi.status()!=WL_CONNECTED && (currentMillis - previousMillis >=interval)){
@@ -128,21 +165,21 @@ void wifi_check(){
     previousMillis = currentMillis;
   }
 }
-void setup() {
-  // put your setup code here, to run once:
-  SPI.begin();
-  mfrc522.PCD_Init();
-  Serial.begin(115200); //opens serial connection to print to console
-  Serial.println("Hello, ESP32!");
 
+void setup(){
+  Serial.begin(115200);
+  centralCommand["mode"] = 0;
+  mfrc522.PCD_Init();
   initWifi();
   mqttConnect();
-  //initSocket();
+  sub("#");
+
 }
 
-void loop() {
+void loop(){
   client.loop();
   wifi_check();
+  delay(1000);
 }
 
 //Resources:
