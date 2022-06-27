@@ -12,10 +12,14 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
 //JSON variables
-let location ={
+var centralCommand = {
+  mode: 1
+};
+
+var location ={
   obstacle:1,
-  xcoord:100,
-  ycoord:100
+  xcoord:0,
+  ycoord:0
 };
 
 let battery = {percentage: 0};
@@ -24,7 +28,7 @@ let alien = {
   color:-1, // -1 means no new alien detected. Default value
   xcoord:0,
   ycoord:0
-};
+}
 
 let fan = {
   is_new : 0, // 0 if letiable not changed, 1 if new fan is detected
@@ -39,15 +43,6 @@ let building = {
 };
 
 // MongoDB Schemas and Models
-const roverSchema = new mongoose.Schema({
-  id: Number,
-  xcoord: Number,
-  ycoord: Number,
-  obstacle: Number 
-});
-
-const Rover = mongoose.model('coordinates', roverSchema);
-
 
 const alienSchema = new mongoose.Schema({
   color : String,
@@ -81,11 +76,6 @@ mongoose.connect(connection, { useNewUrlParser: true, UseUnifiedTopology: true})
     console.log('Listening on port 8080');
 
 
-    Rover.deleteMany({})
-      .then(console.log("Deleted Rover Collection"))
-      .catch((err) => console.log(err))
-    ;
-
     Alien.deleteMany({})
       .then(console.log("Deleted Aliens Collection"))
       .catch((err) => console.log(err))
@@ -100,13 +90,6 @@ mongoose.connect(connection, { useNewUrlParser: true, UseUnifiedTopology: true})
     .then(console.log("Deleted Building Collection"))
     .catch((err) => console.log(err))
     ;
-
-    new Rover({
-      id: 732,
-      xcoord: 0,
-      ycoord: 0,
-      obstacle: 0
-    }).save();
 
 
   }))
@@ -145,18 +128,21 @@ client.on('message', function(topic,message){
   
 });
 
-
-
 // Routes
 
 app.get("/battery",(req,res)=>{
   res.json(battery);
 });
 
+app.get("/coordinates",(req,res)=>{ //constantly updates location coordinates of rover
+  return res.json(location);
+});
 
 app.post("/rControl", (req, res) =>{
   console.log(req.body);
-  client.publish('direction',JSON.stringify(req.body)); //publishes direction straight from front-end request without saving to let
+  centralCommand.mode = 1;
+  publish('centralCommand',JSON.stringify(centralCommand))
+  client.publish('direction',JSON.stringify(req.body)); //publishes direction straight from front-end request without saving to var
   res.json({"Received" : req.body.directionMove });
 } )
 
@@ -169,32 +155,9 @@ app.get("/reset",(req,res)=>{
   
 });
 
-
-app.get("/coordinates",(req,res)=>{
-  const filter = { id: 732 };
-  const update = location;
-
-  Rover.findOneAndUpdate(filter, update, {returnOriginal: false})
-    .catch((err) => console.log(err))
-  ;
-
- 
-  Rover.findOne({ id: 732 }, 'xcoord ycoord obstacle')
-    .then( function (result){
-      //console.log("New data:", result);
-      return res.json(result);
-    })
-    .catch((err) => console.log(err))
-    
-  ;
-  
-});
-
-
 app.get("/obstacles",(req,res)=>{
-  let colors = ["red", "green", "blue", "pink"];
-  //console.log(alien.color);
-  if (alien.color!==-1){
+  let colors = ["red", "green", "blue", "pink", "yellow", "lightgreen"];
+  if (alien.color!=-1){
     const alienObj = new Alien({
       color: colors[alien.color],
       xcoord: alien.xcoord,
@@ -208,7 +171,7 @@ app.get("/obstacles",(req,res)=>{
       .catch((err) => console.log(err))
     ;
     console.log("Sent to db: ",alienObj);
-    alien.color = 1; //resets to null alien
+    alien.color = -1; //resets to null alien
 
   }
   
