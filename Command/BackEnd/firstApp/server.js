@@ -12,6 +12,10 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
 //JSON variables
+var centralCommand = {
+  mode: 1
+};
+
 var location ={
   obstacle:1,
   xcoord:100,
@@ -150,6 +154,8 @@ app.get("/battery",(req,res)=>{
 
 app.post("/rControl", (req, res) =>{
   console.log(req.body);
+  centralCommand.mode = 1;
+  publish('centralCommand',JSON.stringify(centralCommand))
   client.publish('direction',JSON.stringify(req.body)); //publishes direction straight from front-end request without saving to var
   res.json({"Received" : req.body.directionMove });
 } )
