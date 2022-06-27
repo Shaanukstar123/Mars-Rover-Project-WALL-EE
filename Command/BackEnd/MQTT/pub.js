@@ -8,31 +8,31 @@ var coordinates ={
 var centralCommand ={
     mode: 2
 };
-var location = {
-    x: 100,
-    y: 200,
-    objectDetected: false
-};
 var direction = {directionMove: 'F'};
 var battery = {battery: 0};
 var z;
 var alien = {
     color: 2,
-    xcoord:0,
-    ycoord:0
+    xcoord:200,
+    ycoord:200
   };
 
 var fan = {
     is_new: 1,
     xcoord: 0,
     ycoord:0
-} 
+} ;
+
+var location = {
+    obstacle:1,
+    x: 100,
+    y: 200};
 
 var building = {
     is_new: 1,
     xcoord: 0,
     ycoord:0
-}
+};
 // client.publish('centralCommand',JSON.stringify(centralCommand));
 
 // client.publish('rControl',JSON.stringify(direction));
@@ -41,7 +41,8 @@ centralCommand.mode = 1;
 // client.publish('rControl',JSON.stringify(direction));
 // centralCommand.mode = 3;*/
 client.publish('centralCommand',JSON.stringify(centralCommand));
-client.publish('coordinates',JSON.stringify(coordinates));
+client.publish('location',JSON.stringify(location));
+//client.publish('coordinates',JSON.stringify(coordinates));
 client.publish('aliens',JSON.stringify(alien));
 
 client.on("connect",function(){
@@ -72,13 +73,13 @@ client.on("connect",function(){
         //console.log(direction);
         //console.log(battery);
         //console.log(alien);
-        client.publish('location',JSON.stringify(location)); //publishing to topic test
-        client.publish('battery',JSON.stringify(battery));
-        //client.publish('aliens',JSON.stringify(alien));
-        client.publish('fans',JSON.stringify(fan));
-        client.publish('buildings',JSON.stringify(building));
-        client.publish('centralCommand',JSON.stringify(centralCommand));
-        client.publish('coordinates',JSON.stringify(coordinates));
+        // client.publish('location',JSON.stringify(location)); //publishing to topic test
+        // client.publish('battery',JSON.stringify(battery));
+        client.publish('aliens',JSON.stringify(alien));
+        // client.publish('fans',JSON.stringify(fan));
+        // client.publish('buildings',JSON.stringify(building));
+        // client.publish('centralCommand',JSON.stringify(centralCommand));
+        // client.publish('coordinates',JSON.stringify(coordinates));
 
     },1000); //1 second interval between pubs
 });

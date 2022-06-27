@@ -13,7 +13,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 //JSON variables
 var centralCommand = {
-  mode: 1
+  mode: 0
 };
 
 var location ={
@@ -22,7 +22,7 @@ var location ={
   ycoord:0
 };
 
-let battery = {percentage: 0};
+var battery = {percentage: 0};
 
 let alien = {
   color:-1, // -1 means no new alien detected. Default value
@@ -125,7 +125,7 @@ client.on('message', function(topic,message){
   if (topic =="buildings"){
     building = JSON.parse(message);
   }
-  
+
 });
 
 // Routes
@@ -140,11 +140,14 @@ app.get("/coordinates",(req,res)=>{ //constantly updates location coordinates of
 
 app.post("/rControl", (req, res) =>{
   console.log(req.body);
-  centralCommand.mode = 1;
-  publish('centralCommand',JSON.stringify(centralCommand))
-  client.publish('direction',JSON.stringify(req.body)); //publishes direction straight from front-end request without saving to var
+  if (centralCommand.mode!=1){
+    centralCommand.mode = 1;
+    client.publish('centralCommand',JSON.stringify(centralCommand));
+  }
+    
+  client.publish('rControl',JSON.stringify(req.body)); //publishes direction straight from front-end request without saving to var
   res.json({"Received" : req.body.directionMove });
-} )
+})
 
 app.get("/reset",(req,res)=>{
 
@@ -163,6 +166,18 @@ app.get("/reset",(req,res)=>{
   
 });
 
+app.post("/shortestDistance", (req, res) =>{
+  console.log(req.body);
+  client.publish('coordinates',JSON.stringify(req.body));
+  //res.json({"Received" : req.body.directionMove });
+} )
+
+app.post("/sendShortestDistance", (req, res) =>{
+  console.log(req.body);
+  client.publish('centralCommand',JSON.stringify(req.body));
+
+  //res.json({"Received" : req.body.directionMove });
+})
 app.get("/obstacles",(req,res)=>{
   let colors = ["red", "green", "blue", "pink", "yellow", "lightgreen"];
   if (alien.color!=-1){
