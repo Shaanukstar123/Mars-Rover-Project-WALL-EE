@@ -80,7 +80,7 @@ reg [7:0] SPI_dataretain, dataIndex;
 reg cycleNo;
 
 reg [15:0] angleCalc;
-reg [4:0] angleSlice;
+//reg [4:0] angleSlice;
 ////////////////////////////////////////////////////////////////////////
 //
 parameter IMAGE_W = 11'd640;
@@ -199,6 +199,7 @@ assign blue_detect =  (Hue > 178 && Hue < 260) ? ((Saturation > 60) ? ((Value > 
 assign yellow_detect = ((Hue > 49) && (Hue < 78)) ? ((Saturation > 90) ? ((Value > 100) ? 1 : 0) : 0) : 0; //Uniquely defines the yellow ball
 //assign pink_detect = (Hue < 30) ? (((Saturation > 100) && (Saturation < 190)) ? ((Value > 120) ? 1 : 0) : 0) : 0;//Uniuely defines the pink ball
 assign pink_detect = (Hue < 30) ? ((Saturation < 175) ? ((Value > 120) ? 1 : 0) : 0) : 0;//Uniuely defines the pink ball
+//assign pink_detect = 0;
 assign lightgreen_detect = ((Hue > 105) && (Hue < 136)) ? ((Saturation > 90) ? ((Value > 90) ? 1 : 0) : 0) : 0; //uniqeuly defines the green ball - perfect
 
 //assign pink_detect = 0;
@@ -443,56 +444,77 @@ always@(posedge clk) begin
 	//Receive any data from the ESP32
 	if (SPI_read_valid) begin
 		SPI_read_ready = 1;
-		SPI_write_valid = 1;
 	end else begin
 		SPI_read_ready = 0;
 		SPI_write_valid = 0;
-		SPI_dataretain = 0;
+		//SPI_dataretain = 0;
 		SPI_dataout = 0;
 	end
-	//Recieved a command to output ball data
+	//Recieved a command to output ball  data
 	if (SPI_datain != 0) begin
-		SPI_dataretain = SPI_datain;
-		dataIndex = (SPI_dataretain-1)>>1;
+		SPI_write_valid = 1;
+		//SPI_dataretain = SPI_datain;
+		//dataIndex = (SPI_dataretain-1)>>1;
 		//Balls
-		if (dataIndex < 6) begin
-			angleCalc = (((left[dataIndex]+right[dataIndex])-detectionThreshold)/40);
-			angleSlice = angleCalc[4:0];
-			//SPI_dataout = ((SPI_dataretain % 2) == 1) ?  {dataIndex[2:0], pixelWidth[dataIndex][7:3]} : {pixelWidth[dataIndex][2:0], angleCalc[4:0]};
-			if((SPI_dataretain % 2) == 0) begin
-				//First half of packet
-				if (pixelWidth[dataIndex[2:0]] > 60) begin
-					SPI_dataout = {dataIndex[2:0]+1, pixelWidth[dataIndex][8:4]};
-				end else begin
-					SPI_dataout = 0;
-				end
-			end else begin
-				//Second half of packet
-				if (pixelWidth[dataIndex[2:0]] > 60) begin
-					SPI_dataout = {pixelWidth[dataIndex][3:1], angleSlice};
-				end else begin
-					SPI_dataout = 0;
-				end
-			end
+		// if (dataIndex < 6) begin
+		// 	angleCalc = ((left[dataIndex[2:0]]+right[dataIndex[2:0]])/40);
+		// 	//SPI_dataout = ((SPI_dataretain % 2) == 1) ?  {dataIndex[2:0], pixelWidth[dataIndex][7:3]} : {pixelWidth[dataIndex][2:0], angleCalc[4:0]};
+		// 	if((SPI_dataretain % 2) == 0) begin
+		// 		//First half of packet
+		// 		if (pixelWidth[dataIndex[2:0]] > 60) begin
+		// 			SPI_dataout = {dataIndex[2:0]+1, pixelWidth[dataIndex[2:0]][8:4]};
+		// 		end else begin
+		// 			SPI_dataout = 0;
+		// 		end
+		// 	end else begin
+		// 		//Second half of packet
+		// 		if (pixelWidth[dataIndex[2:0]] > 60) begin
+		// 			SPI_dataout = {pixelWidth[dataIndex[2:0]][3:1], 5'b11111};
+		// 		end else begin
+		// 			SPI_dataout = 0;
+		// 		end
+		// 	end
+		// end
+		if(SPI_datain == 1) begin //Red ball
+			SPI_dataout = (pixelWidth[0] > 60) ? {3'b001, pixelWidth[0][8:4]} : 8'd0;
+		end else if(SPI_datain == 2) begin
+			angleCalc = ((left[0]+right[0])/40);
+			SPI_dataout = (pixelWidth[0] > 60) ? {pixelWidth[0][3:1], angleCalc[4:0]} : 8'd0;
+		end else if(SPI_datain == 3) begin //Green ball
+			SPI_dataout = (pixelWidth[1] > 60) ? {3'b010, pixelWidth[1][8:4]} : 8'd0;
+		end else if(SPI_datain == 4) begin
+			angleCalc = ((left[1]+right[1])/40);
+			SPI_dataout = (pixelWidth[1] > 60) ? {pixelWidth[1][3:1], angleCalc[4:0]} : 8'd0;
+		end else if(SPI_datain == 5) begin //Blue ball
+			SPI_dataout = (pixelWidth[2] > 60) ? {3'b011, pixelWidth[2][8:4]} : 8'd0;
+		end else if(SPI_datain == 6) begin
+			angleCalc = ((left[2]+right[2])/40);
+			SPI_dataout = (pixelWidth[2] > 60) ? {pixelWidth[2][3:1], angleCalc[4:0]} : 8'd0;
+		end else if(SPI_datain == 7) begin //Yellow
+			SPI_dataout = (pixelWidth[3] > 60) ? {3'b100, pixelWidth[3][8:4]} : 8'd0;
+		end else if(SPI_datain == 8) begin
+			angleCalc = ((left[3]+right[3])/40);
+			SPI_dataout = (pixelWidth[3] > 60) ? {pixelWidth[3][3:1], angleCalc[4:0]} : 8'd0;
+		end else if(SPI_datain == 9) begin //Pink
+			SPI_dataout = (pixelWidth[4] > 60) ? {3'b101, pixelWidth[4][8:4]} : 8'd0;
+		end else if(SPI_datain == 10) begin
+			angleCalc = ((left[4]+right[4])/40);
+			SPI_dataout = (pixelWidth[4] > 60) ? {pixelWidth[4][3:1], angleCalc[4:0]} : 8'd0;
+		end else if(SPI_datain == 11) begin //Light green
+			SPI_dataout = (pixelWidth[5] > 60) ? {3'b110, pixelWidth[5][8:4]} : 8'd0;
+		end else if(SPI_datain == 12) begin
+			angleCalc = ((left[5]+right[5])/40);
+			SPI_dataout = (pixelWidth[5] > 60) ? {pixelWidth[5][3:1], angleCalc[4:0]} : 8'd0;
+		end else if(SPI_datain == 14) begin  //Buildings
+			SPI_dataout = ((buildingWidth > 60) && (alternatingCount > 6)) ? {3'b111, buildingWidth[8:4]} : 8'd0;
+		end else if(SPI_datain == 15) begin
+			angleCalc = ((buildingLeft+buildingRight)/40);
+			SPI_dataout = (pixelWidth[1] > 60) ? {buildingWidth[3:1], angleCalc[4:0]} : 8'd0;
+		end else begin
+			SPI_dataout = 0;
 		end
-		//First half
-		if (SPI_dataretain == 15) begin
-			if ((buildingWidth > 60) && (alternatingCount > 6)) begin
-				SPI_dataout = {3'b111, buildingWidth[8:4]};
-			end else begin
-				SPI_dataout = 0;
-			end
-		end
-		//Second half
-		if (SPI_dataretain == 16) begin
-			if ((buildingWidth > 60) && (alternatingCount > 6)) begin
-				angleCalc = (((buildingLeft+buildingRight)-detectionWidth)/40);
-				angleSlice = angleCalc[4:0];
-				SPI_dataout = {buildingWidth[3:1], angleSlice};
-			end else begin
-				SPI_dataout = 0;
-			end
-		end
+	end else begin
+		SPI_dataout = 0;
 	end
 end
 

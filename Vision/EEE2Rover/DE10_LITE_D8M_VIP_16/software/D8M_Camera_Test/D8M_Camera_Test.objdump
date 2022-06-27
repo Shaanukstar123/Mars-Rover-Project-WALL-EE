@@ -608,7 +608,7 @@ Disassembly of section .entry:
    20014:	08409114 	ori	at,at,580
     jmp r1
    20018:	0800683a 	jmp	at
-   2001c:	00000000 	call	0 <__alt_mem_onchip_memory2_0-0x20000>
+   2001c:	00000000 	call	0 <__reset-0x20000>
 
 Disassembly of section .exceptions:
 
@@ -3582,7 +3582,7 @@ int main()
    21b10:	00021c3c 	xorhi	zero,zero,2160
    21b14:	00021b94 	movui	zero,2158
    21b18:	00021bc4 	movi	zero,2159
-   21b1c:	00021c80 	call	21c8 <__alt_mem_onchip_memory2_0-0x1de38>
+   21b1c:	00021c80 	call	21c8 <__reset-0x1de38>
    21b20:	00021c90 	cmplti	zero,zero,2162
    21b24:	00021c90 	cmplti	zero,zero,2162
    21b28:	00021c90 	cmplti	zero,zero,2162
@@ -6929,7 +6929,7 @@ void QUEUE_Empty(QUEUE_STRUCT *pQueue){
    24734:	000249b8 	rdprs	zero,zero,2342
    24738:	00025160 	cmpeqi	zero,zero,2373
    2473c:	00025304 	movi	zero,2380
-   24740:	00024880 	call	2488 <__alt_mem_onchip_memory2_0-0x1db78>
+   24740:	00024880 	call	2488 <__reset-0x1db78>
    24744:	000249e0 	cmpeqi	zero,zero,2343
    24748:	00025304 	movi	zero,2380
    2474c:	00024a20 	cmpeqi	zero,zero,2344
@@ -6969,7 +6969,7 @@ void QUEUE_Empty(QUEUE_STRUCT *pQueue){
    247d4:	00025304 	movi	zero,2380
    247d8:	00025304 	movi	zero,2380
    247dc:	00025304 	movi	zero,2380
-   247e0:	00025040 	call	2504 <__alt_mem_onchip_memory2_0-0x1dafc>
+   247e0:	00025040 	call	2504 <__reset-0x1dafc>
    247e4:	00025304 	movi	zero,2380
    247e8:	00025304 	movi	zero,2380
    247ec:	000250a0 	cmpeqi	zero,zero,2370
@@ -14071,7 +14071,7 @@ void QUEUE_Empty(QUEUE_STRUCT *pQueue){
    2b494:	0002be28 	cmpgeui	zero,zero,2808
    2b498:	0002be28 	cmpgeui	zero,zero,2808
    2b49c:	0002bd64 	muli	zero,zero,2805
-   2b4a0:	0002bd80 	call	2bd8 <__alt_mem_onchip_memory2_0-0x1d428>
+   2b4a0:	0002bd80 	call	2bd8 <__reset-0x1d428>
    2b4a4:	0002be28 	cmpgeui	zero,zero,2808
    2b4a8:	0002b668 	cmpgeui	zero,zero,2777
    2b4ac:	0002bd90 	cmplti	zero,zero,2806
@@ -14096,7 +14096,7 @@ void QUEUE_Empty(QUEUE_STRUCT *pQueue){
    2b4f8:	0002be28 	cmpgeui	zero,zero,2808
    2b4fc:	0002be28 	cmpgeui	zero,zero,2808
    2b500:	0002be28 	cmpgeui	zero,zero,2808
-   2b504:	0002bbc0 	call	2bbc <__alt_mem_onchip_memory2_0-0x1d444>
+   2b504:	0002bbc0 	call	2bbc <__reset-0x1d444>
    2b508:	0002be28 	cmpgeui	zero,zero,2808
    2b50c:	0002be28 	cmpgeui	zero,zero,2808
    2b510:	0002be28 	cmpgeui	zero,zero,2808
@@ -14116,7 +14116,7 @@ void QUEUE_Empty(QUEUE_STRUCT *pQueue){
    2b548:	0002bc50 	cmplti	zero,zero,2801
    2b54c:	0002be28 	cmpgeui	zero,zero,2808
    2b550:	0002be28 	cmpgeui	zero,zero,2808
-   2b554:	0002bcc0 	call	2bcc <__alt_mem_onchip_memory2_0-0x1d434>
+   2b554:	0002bcc0 	call	2bcc <__reset-0x1d434>
    2b558:	0002be28 	cmpgeui	zero,zero,2808
    2b55c:	0002be28 	cmpgeui	zero,zero,2808
    2b560:	0002be28 	cmpgeui	zero,zero,2808
@@ -17103,11 +17103,11 @@ void QUEUE_Empty(QUEUE_STRUCT *pQueue){
    2e364:	1000683a 	jmp	r2
    2e368:	0002e590 	cmplti	zero,zero,2966
    2e36c:	0002e3e0 	cmpeqi	zero,zero,2959
-   2e370:	0002e580 	call	2e58 <__alt_mem_onchip_memory2_0-0x1d1a8>
+   2e370:	0002e580 	call	2e58 <__reset-0x1d1a8>
    2e374:	0002e3d4 	movui	zero,2959
-   2e378:	0002e580 	call	2e58 <__alt_mem_onchip_memory2_0-0x1d1a8>
+   2e378:	0002e580 	call	2e58 <__reset-0x1d1a8>
    2e37c:	0002e554 	movui	zero,2965
-   2e380:	0002e580 	call	2e58 <__alt_mem_onchip_memory2_0-0x1d1a8>
+   2e380:	0002e580 	call	2e58 <__reset-0x1d1a8>
    2e384:	0002e3d4 	movui	zero,2959
    2e388:	0002e3e0 	cmpeqi	zero,zero,2959
    2e38c:	0002e3e0 	cmpeqi	zero,zero,2959
@@ -24829,19 +24829,19 @@ alt_exception_cause_generated_bad_addr(alt_exception_cause cause)
    3312c:	1000683a 	jmp	r2
    33130:	00033170 	cmpltui	zero,zero,3269
    33134:	00033170 	cmpltui	zero,zero,3269
-   33138:	00033180 	call	3318 <__alt_mem_onchip_memory2_0-0x1cce8>
-   3313c:	00033180 	call	3318 <__alt_mem_onchip_memory2_0-0x1cce8>
-   33140:	00033180 	call	3318 <__alt_mem_onchip_memory2_0-0x1cce8>
+   33138:	00033180 	call	3318 <__reset-0x1cce8>
+   3313c:	00033180 	call	3318 <__reset-0x1cce8>
+   33140:	00033180 	call	3318 <__reset-0x1cce8>
    33144:	00033170 	cmpltui	zero,zero,3269
    33148:	00033178 	rdprs	zero,zero,3269
-   3314c:	00033180 	call	3318 <__alt_mem_onchip_memory2_0-0x1cce8>
+   3314c:	00033180 	call	3318 <__reset-0x1cce8>
    33150:	00033170 	cmpltui	zero,zero,3269
    33154:	00033170 	cmpltui	zero,zero,3269
-   33158:	00033180 	call	3318 <__alt_mem_onchip_memory2_0-0x1cce8>
+   33158:	00033180 	call	3318 <__reset-0x1cce8>
    3315c:	00033170 	cmpltui	zero,zero,3269
    33160:	00033178 	rdprs	zero,zero,3269
-   33164:	00033180 	call	3318 <__alt_mem_onchip_memory2_0-0x1cce8>
-   33168:	00033180 	call	3318 <__alt_mem_onchip_memory2_0-0x1cce8>
+   33164:	00033180 	call	3318 <__reset-0x1cce8>
+   33168:	00033180 	call	3318 <__reset-0x1cce8>
    3316c:	00033170 	cmpltui	zero,zero,3269
   case NIOS2_EXCEPTION_MISALIGNED_TARGET_PC:
   case NIOS2_EXCEPTION_TLB_READ_PERM_VIOLATION:

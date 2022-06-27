@@ -16,13 +16,18 @@ uint8_t spi_reg;
 uint16_t spi_returnval;
 String recievedData;
 byte incomingByte = 0;
+const int buzzer = 25;
+const int TONE_PWM_CHANNEL = 0; 
+long startTime;
+int lastUsed;
+//For each obstacle
 
-//For each ball
-void grabBallData(int ballCode) {
+int grabBallData(byte ballCode) {
+  int distance = 0;
   //Ask for the two packets ball data
   SPI.beginTransaction(settings);
   digitalWrite(PIN_SS, LOW);
-  byte syncPacket = SPI.transfer(0x0); //Packet required for sync
+  byte syncPacket = SPI.transfer(0b10101010); //Packet required for sync
   byte packet1 = SPI.transfer(ballCode);
   //SPI.endTransaction();
   //digitalWrite(PIN_SS, HIGH);
@@ -38,8 +43,9 @@ void grabBallData(int ballCode) {
     Serial.print(ballCode);
     Serial.print(" : ");
     Serial.println(recievedData);
-    analyseData(recievedData);
+    distance = analyseData(recievedData);
   }
+  return distance;
 }
 
 double distanceCalc(int width)
@@ -99,12 +105,13 @@ String stringFlip(String input)
 }
 
 
-void analyseData(String x)
+int analyseData(String x)
 {
   //Serial.println(recievedData);
   //Identification
   bool detectionMade = false;
   String alienBin;
+  int distance = 0;
   for (int y = 0; y < 3; y++) //extracting the distance
     {alienBin += x[y];}
 
@@ -153,13 +160,13 @@ void analyseData(String x)
     //Distance
     String distanceBin = "";
   
-  for (int y = 3; y < 11; y++) //extracting the distance
-    {distanceBin += x[y];}
+  for (int y = 3; y < 11; y++) { //extracting the distance
+      distanceBin += x[y];
+    }
     distanceBin += "0"; //Needs a trailing zero as the data from the FPGA removes the LSB
     Serial.println(distanceBin);
     int pixelWidth = toInteger(distanceBin);
-    int distance = distanceCalc(pixelWidth);
-
+    distance = int(distanceCalc(pixelWidth));
     Serial.print("Approximate distance from Rover : ");
     Serial.print(distance);
     Serial.println(" centimeters.");
@@ -170,13 +177,16 @@ void analyseData(String x)
   for (int y = 11; y < 16; y++) //extracting the angle
     {angleBin += x[y];}
   
-  int angle = toInteger(angleBin);
+  int angleRaw = toInteger(angleBin);
+  int angle = (angleRaw*2.2)-30;
 
- 
+ if (angleRaw == 0) {
+  Serial.print("Erroneous Angle data!");
+ } else {
     Serial.print("Approximate angle from Rover : ");
     Serial.print(angle);
     Serial.println(" degrees.");
-  
+ }
   
 
   }
@@ -208,7 +218,7 @@ void analyseData(String x)
     Serial.print("Approximate angle from Rover : ");
     Serial.println(angle + " degrees.");
   }
-
+  return distance;
 
 }
 
@@ -222,18 +232,43 @@ void setup() {
   SPI.begin();
   spi_returnval = 0;
   Serial.println("Start");
+  ledcAttachPin(buzzer, TONE_PWM_CHANNEL);
+  startTime = millis();
+  lastUsed = 0;
 }
 
 void loop()
 {
+  int minDistance = 100;
+  int distance = 0;
   //Ask for data for each ball
   for (byte x = 1; x < 13; x = x + 2) {
-    delay(20);
-    grabBallData(x);
+    delay(500);
+    distance = grabBallData(x);
+    if ((distance != 0) && (distance < minDistance)) {
+      minDistance = distance;
+    }
   }
   //Building
-  delay(20);
-  grabBallData(14);
+  delay(500);
+  distance = grabBallData(14);
+  if ((distance != 0) && (distance < minDistance)) {
+      minDistance = distance;
+    }
+  //Buzzer sound
+  if ((millis()-startTime) > minDistance*20) {
+    startTime = millis();
+    if (lastUsed == 0) {
+      ledcWriteTone(TONE_PWM_CHANNEL, 200);
+      lastUsed = 1;
+    }
+  } else {
+    if (lastUsed == 1) {
+      ledcWriteTone(TONE_PWM_CHANNEL, 0);
+      lastUsed = 0;
+    }
+  }
+  
 //  if (Serial.available() > 0) {
 //    // read the incoming byte:
 //    incomingByte = Serial.parseInt();
