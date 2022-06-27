@@ -209,14 +209,14 @@ const About = () => {
   const handleChange = (event) => {
     const name = event.target.name;
     const value = event.target.value;
-    setInputs(values => ({...values, [name]: value}))
+    setInputs(values => ({...values, [name]: parseInt(value)}))
   }
 
   const hello = async (evt) => {
     evt.preventDefault();
     //console.log(inputs);
 
-    await fetch('http://localhost:8080/shortestDistance', {
+    await fetch('http://35.176.71.115:8080/shortestDistance', {
       method: "POST",
       headers: {
         'Content-type': "application/json"
@@ -225,7 +225,21 @@ const About = () => {
     });
 
 
-    console.log("Data Sent");
+    console.log("CoordData Sent");
+  }
+
+  const shortestDistance = async (evt) => {
+    evt.preventDefault();
+
+    await fetch('http://35.176.71.115:8080/sendShortestDistance', {
+      method: "POST",
+      headers: {
+        'Content-type': "application/json"
+      },
+      body: JSON.stringify({'move': 2})
+    });
+
+    //console.log("Data Sent");
   }
 
   return (
@@ -306,7 +320,7 @@ const About = () => {
                 </form>
 
                 <div className='h-12'>
-
+                  <button onClick={shortestDistance} className="text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-med w-auto  px-4 py-2 text-center"> Send </button>
                 </div>
 
               </div>
