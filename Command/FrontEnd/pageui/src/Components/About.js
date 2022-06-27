@@ -85,7 +85,7 @@ const About = () => {
   
   };
 
-  const start = (event) => {
+  const start = async (event) => {
 
     console.log("start called");
     if(intervalId) {
@@ -95,9 +95,6 @@ const About = () => {
         'animate-pulse',
       );
 
-      // event.currentTarget.classList.add(
-      //   'hover:blur-sm',
-      // );
     
       setIntervalId(0);
       return;
@@ -106,13 +103,18 @@ const About = () => {
   
     const newIntervalId = setInterval(fetchCoordinateData, 800);
 
-    // event.currentTarget.classList.remove(
-    //   'hover:blur-sm',
-    // );
 
     event.currentTarget.classList.add(
       'animate-pulse',
     );
+
+    await fetch('http://35.176.71.115:8080/autoPilot', {
+      method: "POST",
+      headers: {
+        'Content-type': "application/json"
+      },
+      body: JSON.stringify({'mode': 3})
+    });
 
     setIntervalId(newIntervalId);
   }
@@ -236,7 +238,7 @@ const About = () => {
       headers: {
         'Content-type': "application/json"
       },
-      body: JSON.stringify({'move': 2})
+      body: JSON.stringify({'mode': 2})
     });
 
     //console.log("Data Sent");

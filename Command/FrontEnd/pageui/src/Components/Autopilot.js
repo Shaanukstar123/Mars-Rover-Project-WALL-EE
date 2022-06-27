@@ -60,7 +60,7 @@ const Autopilot = () => {
   
   };
 
-  const start = (event) => {
+  const start = async (event) => {
 
     if(intervalId) {
       clearInterval(intervalId);
@@ -79,6 +79,14 @@ const Autopilot = () => {
 
   
     const newIntervalId = setInterval(fetchCoordinateData, 700);
+
+    await fetch('http://35.176.71.115:8080/autoPilot', {
+      method: "POST",
+      headers: {
+        'Content-type': "application/json"
+      },
+      body: JSON.stringify({'mode': 3})
+    });
 
     event.currentTarget.classList.remove(
       'btn-success',
