@@ -2,8 +2,8 @@ const mqtt = require("mqtt");
 var client = mqtt.connect('mqtt://35.176.71.115');
 var i = 0;
 var coordinates ={
-    xcoord: 0,
-    ycoord: 5
+    xcoord: -5,
+    ycoord: 0
 };
 var centralCommand ={
     mode: 2
@@ -17,9 +17,9 @@ var direction = {directionMove: 'F'};
 var battery = {battery: 0};
 var z;
 var alien = {
-    color: -1,
-    xcoorda:0,
-    ycoorda:0
+    color: 2,
+    xcoord:0,
+    ycoord:0
   };
 
 var fan = {
@@ -33,14 +33,16 @@ var building = {
     xcoord: 0,
     ycoord:0
 }
+// client.publish('centralCommand',JSON.stringify(centralCommand));
+
+// client.publish('rControl',JSON.stringify(direction));
+centralCommand.mode = 1;
+//client.publish('centralCommand',JSON.stringify(centralCommand));
+// client.publish('rControl',JSON.stringify(direction));
+// centralCommand.mode = 3;*/
 client.publish('centralCommand',JSON.stringify(centralCommand));
 client.publish('coordinates',JSON.stringify(coordinates));
-client.publish('rControl',JSON.stringify(direction));
-centralCommand.mode = 1;
-client.publish('centralCommand',JSON.stringify(centralCommand));
-client.publish('rControl',JSON.stringify(direction));
-centralCommand.mode = 3;
-client.publish('centralCommand',JSON.stringify(centralCommand));
+client.publish('aliens',JSON.stringify(alien));
 
 client.on("connect",function(){
     setInterval(function(){
@@ -51,9 +53,9 @@ client.on("connect",function(){
             ycoord:i+10,
             obstacle: z
         };
-        alien.color = 0;
-        alien.xcoorda = i;
-        alien.ycoorda = i;
+        alien.color = -1;
+        alien.xcoord = i;
+        alien.ycoord = i;
 
         building.xcoord = i+50;
         building.ycoord = i+25;
@@ -70,14 +72,13 @@ client.on("connect",function(){
         //console.log(direction);
         //console.log(battery);
         //console.log(alien);
-
-        //client.publish('location',JSON.stringify(location)); //publishing to topic test
-        //client.publish('battery',JSON.stringify(battery));
+        client.publish('location',JSON.stringify(location)); //publishing to topic test
+        client.publish('battery',JSON.stringify(battery));
         //client.publish('aliens',JSON.stringify(alien));
-        //client.publish('fans',JSON.stringify(fan));
-        //client.publish('buildings',JSON.stringify(building));
-       // client.publish('centralCommand',JSON.stringify(centralCommand));
-        //client.publish('coordinates',JSON.stringify(coordinates));
+        client.publish('fans',JSON.stringify(fan));
+        client.publish('buildings',JSON.stringify(building));
+        client.publish('centralCommand',JSON.stringify(centralCommand));
+        client.publish('coordinates',JSON.stringify(coordinates));
 
     },1000); //1 second interval between pubs
 });
