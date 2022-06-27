@@ -152,6 +152,14 @@ app.get("/reset",(req,res)=>{
     .then(console.log("Deleted Aliens Collection"))
     .catch((err) => console.log(err))
   ;
+  Building.deleteMany({})
+    .then(console.log("Deleted Aliens Collection"))
+    .catch((err) => console.log(err))
+  ;
+  Fan.deleteMany({})
+    .then(console.log("Deleted Aliens Collection"))
+    .catch((err) => console.log(err))
+  ;
   
 });
 
