@@ -53,6 +53,7 @@ const int CW  = 1; // do not change
 
 #define PIN_SS_FPGA 4
 char buffer[256];
+char alien_buffer [256];
 
 //Optic Sensor stuff
 class Alien
@@ -108,7 +109,7 @@ class locationdata
   //step tracker for avoid/automatic mode
   int avoidStep; //Tracks the steps of avoidance;
   int autoStep;
-  
+  bool sthdetection;
 
 };
 
@@ -157,81 +158,80 @@ void approximateLocation(int distance, int angle, String colour, int roverX, int
 
 
   String JSON = "{\n\tcolour : \"" + colour + "\"\n\tX-Coordinate : " + String(alienX) + "\n\tY-Coordinate : " + String(alienY) + "\n}";
-  char* topic = "aliens";
 
-  pub(JSON, topic);
+  aliens["xcoord"] = alienX;
+  aliens["ycoord"] = alienY;
+  aliens["color"] = colour;
+
+  char* topic = "aliens";
+  serializeJson(aliens,alien_buffer);
+
+  pub(alien_buffer, topic);
 }
 
 
-void analyseData(String x)
+int analyseData(String x)
 {
   //Serial.println(recievedData);
   //Identification
   bool detectionMade = false;
   String alienBin;
+  int distance = 0;
   for (int y = 0; y < 3; y++) //extracting the distance
     {alienBin += x[y];}
 
   if (alienBin != "000")
   {
-    String colour = "";
     detectionMade == true;
     if (alienBin == "001")
     {
       Serial.println("Red Alien detected.");
-      colour = "Red";
     }
 
     if (alienBin == "010")
     {
       //green
       Serial.println("Green Alien detected.");
-      colour = "Green";
     }
 
     if (alienBin == "011")
     {
       //blue
       Serial.println("Blue Alien detected.");
-      colour = "Blue";
     }
 
     if (alienBin == "100")
     {
       //orange 
       Serial.println("Yellow Alien detected.");
-      colour = "Yellow";
     }
 
     if (alienBin == "101")
     {
       //pink
       Serial.println("Pink Alien detected.");
-      colour = "Pink";
     }
 
     if (alienBin == "110")
     {
       //grey
       Serial.println("Light Green Alien detected.");
-      colour = "Light green";
     }
     if (alienBin == "111")
     {
       //building
       Serial.println("Building detected.");
-      colour = "Building";
     }
     //Distance
     String distanceBin = "";
   
-  for (int y = 3; y < 11; y++) //extracting the distance
-    {distanceBin += x[y];}
+  for (int y = 3; y < 11; y++) { //extracting the distance
+      distanceBin += x[y];
+    }
     distanceBin += "0"; //Needs a trailing zero as the data from the FPGA removes the LSB
     Serial.println(distanceBin);
     int pixelWidth = toInteger(distanceBin);
-    int distance = distanceCalc(pixelWidth);
-
+    distance = int(distanceCalc(pixelWidth));
     Serial.print("Approximate distance from Rover : ");
     Serial.print(distance);
     Serial.println(" centimeters.");
@@ -241,16 +241,49 @@ void analyseData(String x)
 
   for (int y = 11; y < 16; y++) //extracting the angle
     {angleBin += x[y];}
+  
+  int angleRaw = toInteger(angleBin);
+  int angle = (angleRaw*2.2)-30;
 
-  int angle = toInteger(angleBin);
-  angle = (70*angle)/32 - 35;
+ if (angleRaw == 0) {
+  Serial.print("Erroneous Angle data!");
+ } else {
     Serial.print("Approximate angle from Rover : ");
     Serial.print(angle);
     Serial.println(" degrees.");
+ }
+  
 
-
-    approximateLocation(distance, angle, colour, rover.X, rover.Y, rover.angle);
   }
+
+  //Distance
+
+  // String distanceBin;
+
+  // for (int y = 3; y < 11; y++) //extracting the distance
+  //   {distanceBin += x[y];}
+
+  // int distance = toInteger(distanceBin);
+
+  // if (detectionMade)
+  // {
+  //   Serial.print("Approximate distance from Rover : ");
+  //   Serial.println(distance + " centimeters.");
+  // }
+
+  String angleBin;
+
+  for (int y = 11; y < 16; y++) //extracting the angle
+    {angleBin += x[y];}
+  
+  int angle = toInteger(angleBin);
+  angle = (70*angle)/32;
+  if (detectionMade)
+  {
+    Serial.print("Approximate angle from Rover : ");
+    Serial.println(angle + " degrees.");
+  }
+  return distance;
 
 }
 
@@ -259,14 +292,14 @@ void roverMovement() //DONE
 
     int speed = 50;
     //Serial.println(roverCommand);
-    if (rControl["directionMove"] == "B") // bwd
+    if (rControl["directionMove"] == "F") // bwd
     {
     //Serial.println("backwards!");
     robot.rotate(motor1, speed, CCW);
     robot.rotate(motor2, speed, CW);
     }
 
-    if (rControl["directionMove"] == "F") //fwd
+    if (rControl["directionMove"] == "B") //fwd
     {
     //Serial.println("forwards!");
     robot.rotate(motor1, speed, CW);
@@ -295,18 +328,32 @@ void roverMovement() //DONE
     }
 }
 
- void grabBallData(int ballCode) {
+uint16_t spi_val;
+uint8_t spi_reg;
+uint16_t spi_returnval;
+String recievedData;
+byte incomingByte = 0;
+
+const int buzzer = 25;
+const int TONE_PWM_CHANNEL = 0; 
+long startTime;
+int lastUsed;
+SPISettings settings(128000, MSBFIRST, SPI_MODE1);
+//For each obstacle
+
+int grabBallData(byte ballCode) {
+  int distance = 0;
   //Ask for the two packets ball data
   SPI.beginTransaction(settings);
-  digitalWrite(PIN_SS_FPGA, LOW);
-  byte syncPacket = SPI.transfer(0x0); //Packet required for sync
+  digitalWrite(PIN_SS, LOW);
+  byte syncPacket = SPI.transfer(0b10101010); //Packet required for sync
   byte packet1 = SPI.transfer(ballCode);
   //SPI.endTransaction();
   //digitalWrite(PIN_SS, HIGH);
   //SPI.beginTransaction(settings);
   //digitalWrite(PIN_SS, LOW);
   byte packet2 = SPI.transfer(ballCode+1);
-  digitalWrite(PIN_SS_FPGA, HIGH);
+  digitalWrite(PIN_SS, HIGH);
   SPI.endTransaction();
   //convert to binary
   int dataIn = (packet1 << 8) + (packet2);
@@ -315,9 +362,11 @@ void roverMovement() //DONE
     Serial.print(ballCode);
     Serial.print(" : ");
     Serial.println(recievedData);
-    analyseData(recievedData);
+    distance = analyseData(recievedData);
   }
+  return distance;
 }
+
 
 //OPTIC SENSOR STUFF
 
@@ -378,7 +427,7 @@ void angleCalc(){
 void roverCoordUpdate(int dist)
 {
   rover.Xdoub += dist*sin(rover.angle*3.14159/180);
-  rover.Ydoub -= dist*cos(rover.angle*3.14159/180);
+  rover.Ydoub += dist*cos(rover.angle*3.14159/180);
   rover.X = rover.Xdoub;
   rover.Y = rover.Ydoub;
 }
@@ -399,13 +448,13 @@ int val = mousecam_read_reg(ADNS3080_PIXEL_SUM);
   MD md;
   mousecam_read_motion(&md);
   for(int i=0; i<md.squal/4; i++)
-  //   Serial.print('*');
-  // Serial.print(' ');
-  // Serial.print((val*100)/351);
-  // Serial.print(' ');
-  // Serial.print(md.shutter); Serial.print(" (");
-  // Serial.print((int)md.dx); Serial.print(',');
-  // Serial.print((int)md.dy); Serial.println(')');
+    Serial.print('*');
+  Serial.print(' ');
+  Serial.print((val*100)/351);
+  Serial.print(' ');
+  Serial.print(md.shutter); Serial.print(" (");
+  Serial.print((int)md.dx); Serial.print(',');
+  Serial.print((int)md.dy); Serial.println(')');
 
   delay(20);
 
@@ -480,13 +529,13 @@ void roverGoto(int x, int y){
       
         if ((y - rover.Y )!= 0){ 
         double ratio = (double(x-rover.X))/(y-rover.Y);
-        double ATAN = (-atan(ratio))*180/3.14159;
+        double ATAN = (atan(ratio))*180/3.14159;
         angle = ATAN;
         }
 
       else if((y - rover.Y )== 0){
-        if (x-rover.X > 0)  {angle = -90;}
-        if (x-rover.X < 0)  {angle = 90;}  
+        if (x-rover.X > 0)  {angle = 90;}
+        if (x-rover.X < 0)  {angle = -90;}  
       }
 
       Serial.println("YTarget" + String(y));
@@ -524,8 +573,8 @@ void roverGoto(int x, int y){
       //if (rover.angle == angle)
       if(withinFive(rover.angle, angle))
       {
-        robot.rotate(motor1, 30, CW); 
-        robot.rotate(motor2, 30, CCW);
+        robot.rotate(motor1, 30, CCW); 
+        robot.rotate(motor2, 30, CW);
       }
       // Rover starts going forwards
       //if (rover.angle == angle)
@@ -571,11 +620,13 @@ void sendObjects()
   {
     if (Objects[i].sent == false && Objects[i].used == true) //sends used object slots
     {
-      String JSON = "{\n\t\"Obstacle\" : \"Unknown\"\n\tX-Coordinate: " 
-                    + String(Objects[i].x) + "\n\tY-Coordinate : " 
-                    + String(Objects[i].y) + "\n}";
-      char* topic = "Obstacles";
-      pub(JSON, topic);
+      location["obstacle"] = 1;
+      Serial.println("Object detected and sent");
+      // String JSON = "{\n\t\"Obstacle\" : \"Unknown\"\n\tX-Coordinate: " 
+      //               + String(Objects[i].x) + "\n\tY-Coordinate : " 
+      //               + String(Objects[i].y) + "\n}";
+      // char* topic = "Obstacles";
+      // pub(JSON, topic);
       Objects[i].sent = true;
     }
   }
@@ -599,14 +650,14 @@ void USensorFunction(int &RoverX, int &RoverY, int &RoverAngle, bool FPGA_detect
 
   Serial.println(distance_cm);
 
-  if (xlocation >500 || ylocation > 300 || xlocation < 0 || ylocation < 0)
+  if (xlocation >300 || ylocation > 200 || xlocation < 0 || ylocation < 0)
   {
     Serial.println("Wall found");
     rover.detection = 0;
     rover.walldetection = 1;
   }
 
-  if (distance_cm < 20 && !(xlocation >500 || ylocation > 300 || xlocation < 0 || ylocation < 0))
+  if (distance_cm < 20 && !(xlocation >300 || ylocation > 200 || xlocation < 0 || ylocation < 0))
   {
     rover.detection = 1;
     if (rover.fpga_detection = 0){
@@ -635,6 +686,8 @@ void USensorFunction(int &RoverX, int &RoverY, int &RoverAngle, bool FPGA_detect
   //Degug, X and Y of the object
   Serial.println("X: " + String(xlocation));
   Serial.println("Y: " + String(ylocation));
+
+  rover.sthdetection = rover.walldetection||rover.detection;
 }
 
 // void automaticMode()
@@ -659,6 +712,7 @@ void roverDataTransfer()
     
     serializeJson(location,buffer);
     pub(buffer,topic);
+    location["obstacle"] = 0;
 }
 
 void batteryPercent(int example){
@@ -671,34 +725,77 @@ void halt() //stops the rover
   {robot.brake(1);
   robot.brake(2);}
 
+bool targetMet = false;
+int sweepx = 30;
+int sweepy = 0;
 int sweep(int& step)
 {
+  // if (step != 0)
+  // {
+  // int x = 10;
+  // int y = 10;
+
+  // if (step % 2 == 0)  {y += 10*(step);} //check if even step. y target increases.
+
+  // else {y = rover.Y;}
+
+  // if (step % 2 == 1){
+  //   if (step-1 % 4 == 0)  {x += 20;}}//+=280
+
+  // else {x = rover.X;}
+
+  // if (y > 200)  {step = 0;}
+
+  // if (step != 0)
+  // {roverGoto(x, y);}
+
+  // if (withinFive(x, rover.X) && withinFive(y, rover.Y))
+  // {
+  //   step++;
+  // }
+  // if (y > 200) {step = 0;
+  // halt();} //stops the sweep mode.
+  // }
+  // return step;
+  // if (step == 1)
+  // {
+  // int x = 30;
+  // int y = 0;
+  // }
+
   if (step != 0)
   {
-  int x = 10;
-  int y = 10;
-
-  if (step % 2 == 0)  {y += 10*(step);} //check if even step. y target increases.
-
-  else {y = rover.Y;}
-
-  if (step % 2 == 1){
-    if (step-1 % 4 == 0)  {x += 280;}}
-
-  else {x = rover.X;}
-
-  if (y > 200)  {step = 0;}
-
-  if (step != 0)
-  {roverGoto(x, y);}
-
-  if (withinFive(x, rover.X) && withinFive(y, rover.Y))
+    if (!targetMet) {
+      roverGoto(sweepx, sweepy);
+    }
+  }
+  if (withinFive(sweepx, rover.X) && withinFive(sweepy, rover.Y))
   {
     step++;
+    targetMet = true;
   }
-  if (y > 200) {step = 0;
-  robot.brake(1); 
-  robot.brake(2);} //stops the sweep mode.
+  if ((step % 2 == 0) && (targetMet))  {
+    sweepy += 10;
+    targetMet = false;
+    } //check if even step. y target increases.
+
+  //else {y = rover.Y;}
+
+  if ((step % 2 == 1) && (targetMet)){
+    if (sweepx<5){
+      sweepx =30;
+      targetMet = false;
+    }
+    else{
+      sweepx=0;
+      targetMet = false;
+    }
+   }//=290
+
+  //else {x = rover.X;}
+  if (sweepy > 50) {
+    step = 0;
+    halt(); //stops the sweep mode.
   }
   return step;
 
@@ -780,11 +877,11 @@ void roverAvoid()
 Serial.println("Targets: ");
 Serial.println(targetX);
 Serial.println(targetY);
-
+int distance = 10;
   if (rover.avoidStep == 1)
   {
-    targetX = rover.X + 10* sin(3.14159*angleConvert(rover.angle+90)/180);
-    targetY = rover.Y + 10* cos(3.14159*angleConvert(rover.angle+90)/180);
+    targetX = rover.X + distance* sin(3.14159*angleConvert(rover.angle+90)/180); //r
+    targetY = rover.Y + distance* cos(3.14159*angleConvert(rover.angle+90)/180);
     rover.avoidStep++;
   }
   else if (rover.avoidStep == 2)
@@ -795,8 +892,8 @@ Serial.println(targetY);
   }
   else if (rover.avoidStep == 3)
   {
-    targetX = rover.X + 5* sin(3.14159*angleConvert(rover.angle-90)/180);
-    targetY = rover.Y + 5* cos(3.14159*angleConvert(rover.angle-90)/180);
+    targetX = rover.X + distance* sin(3.14159*angleConvert(rover.angle-90)/180);
+    targetY = rover.Y + distance* cos(3.14159*angleConvert(rover.angle-90)/180);
     rover.avoidStep++;
   }
   else if (rover.avoidStep == 4)
@@ -807,8 +904,8 @@ Serial.println(targetY);
   }
   else if (rover.avoidStep == 5)
   {
-    targetX = rover.X + 5* sin(3.14159*angleConvert(rover.angle-90)/180);
-    targetY = rover.Y + 5* cos(3.14159*angleConvert(rover.angle-90)/180);
+    targetX = rover.X + distance* sin(3.14159*angleConvert(rover.angle-90)/180);
+    targetY = rover.Y + distance* cos(3.14159*angleConvert(rover.angle-90)/180);
     rover.avoidStep++;
   }
   else if (rover.avoidStep == 6)
@@ -819,11 +916,39 @@ Serial.println(targetY);
     rover.avoiding = 0;
     halt();}
   }
+  // Joshua's
+  // targetX = rover.X + distance* sin(3.14159*angleConvert(rover.angle+90)/180); //r
+  // targetY = rover.Y + distance* cos(3.14159*angleConvert(rover.angle+90)/180);
+  // while(!(rover.sthdetection&&(withinFive(rover.X, targetX) && withinFive(rover.Y, targetY)))){
+  //   roverGoto(targetX, targetY);
+  //   USensorFunction(rover.X, rover.Y, rover.angle, );
+  // }
+  // targetX = rover.X + distance* sin(3.14159*angleConvert(rover.angle-90)/180);
+  // targetY = rover.Y + distance* cos(3.14159*angleConvert(rover.angle-90)/180);
+  // while(!(rover.sthdetection&&(withinFive(rover.X, targetX) && withinFive(rover.Y, targetY)))){
+  //   roverGoto(targetX, targetY);
+  //   USensorFunction();
+  // }
+  // targetX = rover.X + distance* sin(3.14159*angleConvert(rover.angle-90)/180);
+  // targetY = rover.Y + distance* cos(3.14159*angleConvert(rover.angle-90)/180);
+  // while(!(rover.sthdetection&&(withinFive(rover.X, targetX) && withinFive(rover.Y, targetY)))){
+  //   roverGoto(targetX, targetY);
+  //   USensorFunction();
+  // }
 }
 
 void setup() {
   Serial.begin(115200);
-  
+
+  // Setup SPI stuff
+  pinMode(PIN_SS, OUTPUT);
+  // //SPI.begin();
+   spi_returnval = 0;
+  // Serial.println("Start");
+  ledcAttachPin(buzzer, TONE_PWM_CHANNEL);
+  startTime = millis();
+  lastUsed = 0;
+  // location["obstacle"] = 0;
    //CONNECTION SETUP
   mfrc522.PCD_Init();
   initWifi();
@@ -831,8 +956,8 @@ void setup() {
   sub("#");
     
   //COMPONENT SETUP
-  mousecam_init(); //OPTIC SENSOR
-  opticSetup();
+  //mousecam_init(); //OPTIC SENSOR
+  //opticSetup();
   gyroSetup();
   robot.begin();
   // USensorSetup();
@@ -842,12 +967,12 @@ void setup() {
   //roverTurn(270);
   
   //FPGA SETUP STUFF
-  // pinMode(PIN_SS_FPGA,OUTPUT);
-  // pinMode(PIN_MOUSECAM_CS, OUTPUT);
+  pinMode(PIN_SS_FPGA,OUTPUT);
+  pinMode(PIN_MOUSECAM_CS, OUTPUT);
   // SPI.begin();
-  // SPI.setClockDivider(SPI_CLOCK_DIV32);
+  SPI.setClockDivider(SPI_CLOCK_DIV32);
   // //SPI.setDataMode(SPI_MODE0);
-  // SPI.setBitOrder(MSBFIRST); //Setting up SPI bus
+  SPI.setBitOrder(MSBFIRST); //Setting up SPI bus
 
   //setting up rover initials
   rover.X = 0;
@@ -857,8 +982,8 @@ void setup() {
   rover.autoMode = false;
   rover.detection = 0;
   rover.coordinateMode = 0;
-  rover.avoidStep = 1;
-  rover.autoStep = 1;
+  rover.avoidStep = 0;
+  rover.autoStep = 0;
 
   
   // rover.coordinateMode = 1;
@@ -893,13 +1018,44 @@ void setup() {
 
 void FPGAdetect()
 {
-  for (byte x = 1; x < 13; x+= 2)
-  {
-  delay(20);
-  grabBallData(x);
+  // for (byte x = 1; x < 13; x+= 2)
+  // {
+  // delay(20);
+  // grabBallData(x);
+  // }
+  // delay(20);
+  // grabBallData(14);
+
+  //FPGA
+  int minDistance = 100;
+  int distance = 0;
+  //Ask for data for each ball
+  for (byte x = 1; x < 13; x = x + 2) {
+    delay(20);
+    distance = grabBallData(x);
+    if ((distance != 0) && (distance < minDistance)) {
+      minDistance = distance;
+    }
   }
+  //Building
   delay(20);
-  grabBallData(14);
+  distance = grabBallData(14);
+  if ((distance != 0) && (distance < minDistance)) {
+      minDistance = distance;
+    }
+  //Buzzer sound
+  if ((millis()-startTime) > minDistance*20) {
+    startTime = millis();
+    if (lastUsed == 0) {
+      ledcWriteTone(TONE_PWM_CHANNEL, 200);
+      lastUsed = 1;
+    }
+  } else {
+    if (lastUsed == 1) {
+      ledcWriteTone(TONE_PWM_CHANNEL, 0);
+      lastUsed = 0;
+    }
+  }
 
 }
 
@@ -913,27 +1069,31 @@ void loop() {
   roverMovement(); //Wifi connection dependent
   //roverDatatransfaer
  
-  // FPGAdetect();
+  FPGAdetect();
   // digitalWrite(PIN_SS_FPGA, HIGH);
   // delay(20);
   // SPI.setDataMode(SPI_MODE3);
   // digitalWrite(PIN_MOUSECAM_CS, LOW);
   // delay(20);
-  opticMain();
+  // //opticMain();
   // delay(20);
   // digitalWrite(PIN_MOUSECAM_CS, HIGH);
+
 
  //roverAvoid();
   //printCoordinates();
   
-  if (millis() % 1000 == 0)
-  {roverDataTransfer();}
+  // if (millis() % 1000 == 0)
+  // {roverDataTransfer();}
   
   angleConversion();
 
   //getCoordinates();
-
-  printCoordinates();
+  if (rover.detection)
+  {
+    roverAvoid();
+  }
+  //printCoordinates();
 
  
 
@@ -950,8 +1110,36 @@ if (rover.autoStep >= 1)
 {
   sweep(rover.autoStep);
 }
+  delay(300);
 
-
-  delay(100);
+  //FPGA
+  // int minDistance = 100;
+  // int distance = 0;
+  // //Ask for data for each ball
+  // for (byte x = 1; x < 13; x = x + 2) {
+  //   delay(20);
+  //   distance = grabBallData(x);
+  //   if ((distance != 0) && (distance < minDistance)) {
+  //     minDistance = distance;
+  //   }
+  // }
+  // //Building
+  // delay(20);
+  // distance = grabBallData(14);
+  // if ((distance != 0) && (distance < minDistance)) {
+  //     minDistance = distance;
+  //   }
+  //Buzzer sound
+  // if ((millis()-startTime) > minDistance*20) {
+  //   startTime = millis();
+  //   if (lastUsed == 0) {
+  //     ledcWriteTone(TONE_PWM_CHANNEL, 200);
+  //     lastUsed = 1;
+  //   }
+  // } else {
+  //   if (lastUsed == 1) {
+  //     ledcWriteTone(TONE_PWM_CHANNEL, 0);
+  //     lastUsed = 0;
+  //   }
+  // }
 }
-
