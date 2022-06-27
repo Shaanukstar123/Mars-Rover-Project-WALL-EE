@@ -18,8 +18,8 @@ var centralCommand = {
 
 var location ={
   obstacle:1,
-  xcoord:100,
-  ycoord:100
+  xcoord:0,
+  ycoord:0
 };
 var battery = {percentage: 0};
 
@@ -143,9 +143,8 @@ app.post("/rControl", (req, res) =>{
 
 
 app.get("/obstacles",(req,res)=>{
-  let colors = ["red", "green", "blue", "pink"];
-  //console.log(alien.color);
-  if (alien.color!==-1){
+  let colors = ["red", "green", "blue", "pink", "yellow", "lightgreen"];
+  if (alien.color!=-1){
     const alienObj = new Alien({
       color: colors[alien.color],
       xcoord: alien.xcoord,
@@ -159,7 +158,7 @@ app.get("/obstacles",(req,res)=>{
       .catch((err) => console.log(err))
     ;
     console.log("Sent to db: ",alienObj);
-    alien.color = 1; //resets to null alien
+    alien.color = -1; //resets to null alien
 
   }
   
