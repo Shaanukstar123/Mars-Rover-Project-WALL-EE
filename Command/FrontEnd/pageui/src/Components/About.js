@@ -7,6 +7,10 @@ import AddObstacles from './AddObstacles';
 import one from './static/1.png'
 import two from './static/2.png'
 import three from './static/3.png'
+import up from './static/up.png'
+import down from './static/down.png'
+import left from './static/left.png'
+import right from './static/right.png'
 
 
 // Core modules imports are same as usual
@@ -236,7 +240,7 @@ const About = () => {
             <span className=""> AutoPilot </span>
           </h1>
 
-          <div className="h-5/6 w-4/6 relative Logo" >
+          <div className="h-5/6 w-4/6 relative border-2 border-black border-dashed" >
             <Rover  Coordinates={coords}  />
             <AddObstacles Aliens={aliens} />
           </div>

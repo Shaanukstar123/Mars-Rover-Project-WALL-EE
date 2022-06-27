@@ -1,4 +1,7 @@
-
+import up from './static/up.png'
+import down from './static/down.png'
+import left from './static/left.png'
+import right from './static/right.png'
 
 const Controller = () => {
 
@@ -42,10 +45,21 @@ const Controller = () => {
   return (
     <div className="d-flex flex-row justify-content-evenly align-items-center"  style={{minHeight: "93vh", maxHeight:"100vh"}} >
 
-    <button type="button" className="btn btn-primary btn-lg" id="F" onMouseUp={mouseLeaveControl}  onMouseDown={mouseClickControl}> Forward </button>
-    <button type="button" className="btn btn-secondary btn-lg" id="B" onMouseUp={mouseLeaveControl}  onMouseDown={mouseClickControl} > Back </button>
-    <button type="button" className="btn btn-danger btn-lg" id="R" onMouseUp={mouseLeaveControl}  onMouseDown={mouseClickControl} > Right </button>
-    <button type="button" className="btn btn-success btn-lg" id="L" onMouseUp={mouseLeaveControl}  onMouseDown={mouseClickControl} > Left </button>
+    <button type="button" className="btn btn-primary btn-lg" id="F" onMouseUp={mouseLeaveControl}  onMouseDown={mouseClickControl}> 
+      <img src={up} alt="up" id="F" />
+    </button>
+
+    <button type="button" className="btn btn-secondary btn-lg" id="B" onMouseUp={mouseLeaveControl}  onMouseDown={mouseClickControl} >
+    <img src={down} alt="up" id="B" />
+    </button>
+
+    <button type="button" className="btn btn-danger btn-lg" id="R" onMouseUp={mouseLeaveControl}  onMouseDown={mouseClickControl} >
+      <img src={right} alt="up" id="R" /> 
+    </button>
+
+    <button type="button" className="btn btn-success btn-lg" id="L" onMouseUp={mouseLeaveControl}  onMouseDown={mouseClickControl} >
+    <img src={left} alt="up" id="L" />
+    </button>
 
 
 

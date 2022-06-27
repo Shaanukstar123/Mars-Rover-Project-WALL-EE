@@ -3,8 +3,9 @@
 const Obstacle = (props) => {
   
   return (
-    <div style={{borderRadius:"50%", position:"relative", top: `${props.Alien.xcoord}px`, left: `${props.Alien.ycoord}px`, backgroundColor: `${props.color}`, height:'15px', width:'15px' }}>
+    <div className="flex flex-col justify-start items-center" style={{borderRadius:"50%", position:"relative", top: `${props.Alien.xcoord}px`, left: `${props.Alien.ycoord}px`, backgroundColor: `${props.color}`, height:'15px', width:'15px', color:"black" }}>
 
+      <span className="text-xs pt-3"> {props.Alien.xcoord},{props.Alien.ycoord}  </span>
     </div>
   )
 }
