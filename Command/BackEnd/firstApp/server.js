@@ -25,8 +25,8 @@ var battery = {percentage: 0};
 
 var alien = {
   color:-1, // -1 means no new alien detected. Default value
-  xcoorda:0,
-  ycoorda:0
+  xcoord:0,
+  ycoord:0
 }
 
 var fan = {
@@ -42,20 +42,11 @@ var building = {
 };
 
 // MongoDB Schemas and Models
-const roverSchema = new mongoose.Schema({
-  id: Number,
-  xcoord: Number,
-  ycoord: Number,
-  obstacle: Number 
-});
-
-const Rover = mongoose.model('coordinates', roverSchema);
-
 
 const alienSchema = new mongoose.Schema({
   color : String,
-  xcoorda: Number,
-  ycoorda: Number,
+  xcoord: Number,
+  ycoord: Number,
 });
 
 const fanSchema = new mongoose.Schema({
@@ -84,11 +75,6 @@ mongoose.connect(connection, { useNewUrlParser: true, UseUnifiedTopology: true})
     console.log('Listening on port 8080');
 
 
-    Rover.deleteMany({})
-      .then(console.log("Deleted Rover Collection"))
-      .catch((err) => console.log(err))
-    ;
-
     Alien.deleteMany({})
       .then(console.log("Deleted Aliens Collection"))
       .catch((err) => console.log(err))
@@ -103,13 +89,6 @@ mongoose.connect(connection, { useNewUrlParser: true, UseUnifiedTopology: true})
     .then(console.log("Deleted Aliens Collection"))
     .catch((err) => console.log(err))
     ;
-
-    new Rover({
-      id: 732,
-      xcoord: 0,
-      ycoord: 0,
-      obstacle: 0 // 1 when obstacle detected
-    }).save();
 
 
   }))
@@ -144,12 +123,14 @@ client.on('message', function(topic,message){
   
 });
 
-
-
 // Routes
 
 app.get("/battery",(req,res)=>{
   res.json(battery);
+});
+
+app.get("/coordinates",(req,res)=>{ //constantly updates location coordinates of rover
+  return res.json(location);
 });
 
 app.post("/rControl", (req, res) =>{
@@ -161,36 +142,14 @@ app.post("/rControl", (req, res) =>{
 } )
 
 
-
-app.get("/coordinates",(req,res)=>{
-  const filter = { id: 732 };
-  const update = location;
-
-  Rover.findOneAndUpdate(filter, update, {returnOriginal: false})
-    .catch((err) => console.log(err))
-  ;
-
- 
-  Rover.findOne({ id: 732 }, 'xcoord ycoord obstacle')
-    .then( function (result){
-      //console.log("New data:", result);
-      return res.json(result);
-    })
-    .catch((err) => console.log(err))
-    
-  ;
-  
-});
-
-
 app.get("/obstacles",(req,res)=>{
   let colors = ["red", "green", "blue", "pink"];
   //console.log(alien.color);
   if (alien.color!==-1){
     const alienObj = new Alien({
       color: colors[alien.color],
-      xcoorda: alien.xcoorda,
-      ycoorda: alien.ycoorda
+      xcoord: alien.xcoord,
+      ycoord: alien.ycoord
     });
 
     alienObj.save()
@@ -204,7 +163,7 @@ app.get("/obstacles",(req,res)=>{
 
   }
   
-  Alien.find({}, 'color xcoorda ycoorda')
+  Alien.find({}, 'color xcoord ycoord')
     .then( function (result){
       console.log("New Alien:", result)
       return res.json(result);
