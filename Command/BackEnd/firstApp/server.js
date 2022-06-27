@@ -166,14 +166,21 @@ app.post("/shortestDistance", (req, res) =>{
   console.log(req.body);
   client.publish('coordinates',JSON.stringify(req.body));
   //res.json({"Received" : req.body.directionMove });
-} )
+});
+
+app.post("/autoPilot", (req, res) =>{
+  console.log(req.body);
+  client.publish('coordinates',JSON.stringify(req.body));
+  //res.json({"Received" : req.body.directionMove });
+});
 
 app.post("/sendShortestDistance", (req, res) =>{
   console.log(req.body);
   client.publish('centralCommand',JSON.stringify(req.body));
 
   //res.json({"Received" : req.body.directionMove });
-})
+});
+
 app.get("/obstacles",(req,res)=>{
   let colors = ["red", "green", "blue", "pink", "yellow", "lightgreen"];
   if (alien.color!=-1){
