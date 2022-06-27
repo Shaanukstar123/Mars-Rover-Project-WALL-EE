@@ -1,10 +1,22 @@
 import './About.css'
 import { useState, useEffect } from "react";
+
+
 import Rover from './Rover';
 import AddObstacles from './AddObstacles';
 import one from './static/1.png'
 import two from './static/2.png'
 import three from './static/3.png'
+
+
+// Core modules imports are same as usual
+import { Navigation, Pagination} from 'swiper';
+
+import { Swiper, SwiperSlide } from 'swiper/react';
+
+import 'swiper/scss'
+import 'swiper/scss/navigation'
+import 'swiper/scss/pagination'
 
 
 
@@ -18,8 +30,8 @@ const About = () => {
   const [intervalId, setIntervalId] = useState(0);
 
   const [coords, setCoords] = useState({
-    xcoord:590,
-    ycoord:90
+    xcoord:0,
+    ycoord:0
   });
 
   const [batteryLevel, setBatteryLevel] = useState();
@@ -238,52 +250,96 @@ const About = () => {
 
 
 
-        <div className="h-full rounded-lg bg-gradient-to-br from-green-200 via-green-300 to-blue-500 flex flex-col justify-between items-center hover:drop-shadow-2xl">
+        <div className="h-full rounded-lg  bg-white flex flex-row justify-center items-center hover:drop-shadow-2xl">
 
-          <h1 className="text-3xl font-extrabold flex flex-col content-center justify-center w-full">
-            <span className="hover:animate-pulse"> TouristMode </span>
-          </h1>
-          
-          <div className="h-auto w-6/12 grid grid-cols-3 grid-rows-3">
-            <button type="button" className="btn btn-primary  col-start-2" id="F" onMouseUp={endclicket}  onMouseDown={startclicket}> F </button>
-            <button type="button" className="btn btn-secondary  col-start-2 row-start-3" id="B" onMouseUp={endclicket}  onMouseDown={startclicket} > B </button>
-            <button type="button" className="btn btn-danger  col-start-3 row-start-2" id="R" onMouseUp={endclicket}  onMouseDown={startclicket} > R </button>
-            <button type="button" className="btn btn-success row-start-2" id="L" onMouseUp={endclicket}  onMouseDown={startclicket} > L </button>
-          </div>
+        <Swiper pagination={{ type: "fraction"}} navigation={true} modules={[Pagination, Navigation]} 
+          className="mySwiper border-2 border-green-500 h-full w-full" >
+
+          <SwiperSlide className="flex flex-row justify-center">
+            
+            <div className="h-auto w-10/12 flex flex-col justify-between items-center">
+
+              <h1 className="text-3xl font-extrabold flex flex-col content-center justify-center w-full">
+                <span className="hover:animate-pulse"> TouristMode </span>
+              </h1>
+              
+              <div className="h-auto w-6/12 grid grid-cols-3 grid-rows-3">
+                <button type="button" className="btn btn-primary  col-start-2" id="F" onMouseUp={endclicket}  onMouseDown={startclicket}> F </button>
+                <button type="button" className="btn btn-secondary  col-start-2 row-start-3" id="B" onMouseUp={endclicket}  onMouseDown={startclicket} > B </button>
+                <button type="button" className="btn btn-danger  col-start-3 row-start-2" id="R" onMouseUp={endclicket}  onMouseDown={startclicket} > R </button>
+                <button type="button" className="btn btn-success row-start-2" id="L" onMouseUp={endclicket}  onMouseDown={startclicket} > L </button>
+              </div>
+
+              <div className='h-12'>
+
+              </div>
+
+            </div>
+
+          </SwiperSlide>
 
 
-          <form className="flex flex-row justify-evenly" onSubmit={hello}>
+          <SwiperSlide className="flex flex-row justify-center">
+            
+            <div className="h-auto w-10/12 flex flex-col justify-between items-center">
+
+              <h1 className="text-3xl font-extrabold flex flex-col content-center justify-center w-full">
+                <span className="hover:animate-pulse"> VenueMode </span>
+              </h1>
+              
+              <form className="flex flex-row justify-evenly flex-wrap h-2/6" onSubmit={hello}>
       
+                <div className="relative z-0 w-2/6 mb-1.5 group">
+                  <input type="number" name="xcoord" value={inputs.xcoord || ""} onChange={handleChange}  className="block py-2.5 px-0 w-full text-sm  bg-transparent border-b-2 border-teal-300 appearance-none  focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
+                  <label className="peer-focus:font-medium absolute text-sm text-gray-500  duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">X</label>
+                </div>
 
-            <div className="relative z-0 w-2/6 mb-1.5 group">
-              <input type="number" name="xcoord" value={inputs.xcoord || ""} onChange={handleChange}  className="block py-2.5 px-0 w-full text-sm  bg-transparent border-b-2 border-teal-300 appearance-none  focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
-              <label className="peer-focus:font-medium absolute text-sm text-gray-500  duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">X</label>
+                <div className="relative z-0 w-2/6 mb-1.5 group">
+                  <input type="number" name="ycoord" value={inputs.ycoord || ""} onChange={handleChange}  id="floating_password" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-b-2 border-red-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
+                  <label  className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Y</label>
+                </div>
+
+                <button type="submit" className="text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-med w-auto  px-5 py-2 text-center">Submit</button>
+              </form>
+
+              <div className='h-12'>
+
+              </div>
+
             </div>
 
-            <div className="relative z-0 w-2/6 mb-1.5 group">
-              <input type="number" name="ycoord" value={inputs.ycoord || ""} onChange={handleChange}  id="floating_password" className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-b-2 border-red-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
-              <label  className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Y</label>
+          </SwiperSlide>
+
+
+          <SwiperSlide className="flex flex-row justify-center">
+            
+            <div className="h-auto w-10/12 flex flex-col justify-between items-center">
+
+              <h1 className="text-3xl font-extrabold flex flex-col content-center justify-center w-full">
+                <span className="hover:animate-pulse"> AutoPilot </span>
+              </h1>
+              
+              <div className="h-auto w-7/12 flex flex-row justify-evenly items-center">
+                <button className="bg-sky-500 hover:bg-sky-700 px-2 py-2 text-sm rounded-lg font-semibold text-white" onClick={start}>
+                  {intervalId ? "STOP" : "AutoPilot"}
+                </button>
+
+                <button className="bg-fuchsia-500 hover:bg-fuchsia-700 px-2 py-2 text-sm rounded-lg font-semibold text-white" onClick={reset}>
+                  Reset
+                </button>
+              </div>
+
+              <div className="h-10 w-1 relative">
+
+              </div>
+
             </div>
 
-            <button type="submit" className="text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-auto  px-2 py-2.5 text-center">Submit</button>
-          </form>
-          
-          
+          </SwiperSlide>
 
-          <div className="h-auto w-7/12 flex flex-row justify-evenly items-center">
-            <button className="bg-sky-500 hover:bg-sky-700 px-2 py-2 text-sm rounded-lg font-semibold text-white" onClick={start}>
-              {intervalId ? "STOP" : "AutoPilot"}
-            </button>
+        </Swiper>
+             
 
-            <button className="bg-fuchsia-500 hover:bg-fuchsia-700 px-2 py-2 text-sm rounded-lg font-semibold text-white" onClick={reset}>
-              Reset
-            </button>
-          </div>
-
-          <div className="h-1 w-1 relative">
-
-          </div>
-          
   
         </div>
 
