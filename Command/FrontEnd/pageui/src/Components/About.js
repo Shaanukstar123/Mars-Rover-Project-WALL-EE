@@ -35,7 +35,7 @@ const About = () => {
 
   const [coords, setCoords] = useState({
     xcoord:0,
-    ycoord:0
+    ycoord:10
   });
 
   const [batteryLevel, setBatteryLevel] = useState();

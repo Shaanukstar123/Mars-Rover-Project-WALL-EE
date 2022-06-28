@@ -2,7 +2,7 @@ import React from 'react'
 
 const Building = (props) => {
   return (
-    <div className="flex flex-col justify-start items-center" style={{borderRadius:"3%", position:"relative", top: `${props.Building.xcoord}px`, left: `${props.Building.ycoord}px`, backgroundColor: "black", height:'10px', width:'15px', color:"black" }}>
+    <div className="flex flex-col justify-start items-center" style={{borderRadius:"3%", position:"relative", top: `${props.Building.xcoord*2}px`, left: `${props.Building.ycoord*2}px`, backgroundColor: "black", height:'10px', width:'15px', color:"black" }}>
       <span className="text-xs pt-3"> {props.Building.xcoord},{props.Building.ycoord}  </span>
     </div>
   )
