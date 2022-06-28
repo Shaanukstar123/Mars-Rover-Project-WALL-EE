@@ -94,6 +94,7 @@ const About = () => {
   
       if(obj.obstacle === 1){
         fetchObstacleData();
+        fetchBuildingData();
       }
 
       console.log("object is:", obj);
@@ -268,8 +269,7 @@ const About = () => {
   }
 
   return (
-    <main className="w-screen h-screen flex flex-row justify-center bg-gradient-to-tr from-pink-500 via-red-500 to-yellow-500">
-
+    <main className="w-screen h-screen flex flex-row justify-center bg-gradient-to-tl from-green-300 to-purple-400">
    
     <div className="grid grid-cols-3 gap-8 rounded-sm mt-10 h-5/6 w-11/12">
 
@@ -387,7 +387,7 @@ const About = () => {
 
 
 
-        <div className="h-full rounded-lg bg-purple-400 flex flex-col justify-between items-center hover:bg-gradient-to-bl from-green-400 to-blue-500 hover:scale-110">
+        <div className="h-full rounded-lg bg-conic-to-l from-yellow-500 via-purple-500 to-blue-500 flex flex-col justify-between items-center hover:bg-gradient-to-bl from-green-400 to-blue-500 hover:scale-110">
 
           <h1 className="text-3xl font-extrabold flex flex-row justify-start  w-11/12">
             <span className="text-white"> Battery </span>
