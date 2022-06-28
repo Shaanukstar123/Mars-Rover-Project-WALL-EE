@@ -17,7 +17,7 @@ var centralCommand = {
 };
 
 var location ={
-  obstacle:1,
+  obstacle:0,
   xcoord:0,
   ycoord:0
 };
@@ -136,6 +136,8 @@ app.get("/coordinates",(req,res)=>{ //constantly updates location coordinates of
 
 app.post("/rControl", (req, res) =>{
   console.log(req.body);
+  console.log("THIS IS CENTRAL COMMAND: ");
+  console.log(centralCommand);
   if (centralCommand.mode!=1){
     centralCommand.mode = 1;
     client.publish('centralCommand',JSON.stringify(centralCommand));
@@ -162,23 +164,26 @@ app.get("/reset",(req,res)=>{
   
 });
 
-app.post("/shortestDistance", (req, res) =>{
-  console.log(req.body);
-  client.publish('coordinates',JSON.stringify(req.body));
-  //res.json({"Received" : req.body.directionMove });
-});
+ app.post("/shortestDistance", (req, res) =>{
+   console.log(req.body);
+   client.publish('coordinates',JSON.stringify(req.body));
+   //res.json({"Received" : req.body.directionMove });
+ });
 
 app.post("/autoPilot", (req, res) =>{
   console.log(req.body);
-  client.publish('coordinates',JSON.stringify(req.body));
-  //res.json({"Received" : req.body.directionMove });
-});
+  if (centralCommand !=3){
+    centralCommand = 3;
+    client.publish('centralCommand',JSON.stringify(req.body));
+  }
+  res.json({"Received" : req.body.directionMove });
+ });
 
 app.post("/sendShortestDistance", (req, res) =>{
   console.log(req.body);
+  centralCommand = req.body;
   client.publish('centralCommand',JSON.stringify(req.body));
-
-  //res.json({"Received" : req.body.directionMove });
+  res.json({"Received" : req.body.directionMove });
 });
 
 app.get("/obstacles",(req,res)=>{
