@@ -4,7 +4,7 @@ JedecChain;
 	DefaultMfr(6E);
 
 	P ActionCode(Cfg)
-		Device PartName(10M50DAF484) Path("C:/Users/Shaheen/Documents/Year2/Wall-EE/Wall-EE/Vision/EEE2Rover/DE10_LITE_D8M_VIP_16/output_files/") File("DE10_LITE_D8M_VIP_time_limited.sof") MfrSpec(OpMask(1));
+		Device PartName(10M50DAF484) Path("C:/Users/Shaheen/Documents/Year2/Wall-EE/DE10_LITE_D8M_VIP_16/") File("DE10_LITE_D8M_VIP.pof") MfrSpec(OpMask(1) Child_OpMask(2 1 1));
 
 ChainEnd;
 

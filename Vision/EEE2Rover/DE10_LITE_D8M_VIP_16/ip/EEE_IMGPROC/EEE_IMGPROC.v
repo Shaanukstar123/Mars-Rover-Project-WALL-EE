@@ -178,6 +178,7 @@ assign Luminance = (maxVal + minVal)/2;
 
 //////////////////// Threshold sections
 wire red_detect, green_detect, blue_detect, lightgreen_detect, pink_detect, yellow_detect;
+wire pink_detect1, pink_detect2;
 ////////////////////
 //assign red_detect = ((compHue > 330) || (compHue < 35)) ? ((compSat > 150) ? ((compVal > 60) ? 1 : 0) : 0) : 0;
 // assign red_detect = ((Hue > 330) || (Hue < 25)) ? ((Saturation > 155) ? ((Value > 80) ? 1 : 0) : 0) : 0;X
@@ -191,14 +192,20 @@ wire red_detect, green_detect, blue_detect, lightgreen_detect, pink_detect, yell
 
 
 //For lab
-//assign red_detect = (Hue < 34) ? ((Saturation > 200) ? ((Value > 60) ? 1 : 0) : 0) : 0;  //Somewhat includes the pink
-assign red_detect = (Hue < 38) ? ((Saturation > 145) ? ((Value > 47) ? 1 : 0) : 0) : 0; //Room
-assign green_detect =  ((Hue > 120) && (Hue < 190)) ? ((Saturation > 80)? ((Value > 30) ? 1 : 0) : 0) : 0; //Somwhat includes lightgreen
-assign blue_detect =  (Hue > 178 && Hue < 260) ? ((Saturation > 60) ? ((Value > 5) ? 1 : 0) : 0) : 0; //Somwhat includes green
+//assign red_detect = (Hue < 38) ? ((Saturation > 145) ? ((Value > 60) ? 1 : 0) : 0) : 0;  //Somewhat includes the pink
+assign red_detect = (Hue < 30) ? ((Saturation > 170) ? ((Value > 47) ? 1 : 0) : 0) : 0; //Room
+//assign green_detect =  ((Hue > 120) && (Hue < 190)) ? ((Saturation > 80)? ((Value > 30) ? 1 : 0) : 0) : 0; //Somwhat includes lightgreen
+assign green_detect =  ((Hue > 110) && (Hue < 190)) ? ((Saturation > 75)? ((Value > 30) ? 1 : 0) : 0) : 0; //Somwhat includes lightgreen
+//assign blue_detect =  (Hue > 178 && Hue < 260) ? ((Saturation > 60) ? ((Value > 5) ? 1 : 0) : 0) : 0; //Somwhat includes green
+assign blue_detect =  (Hue > 178 && Hue < 260) ? ((Saturation > 50) ? ((Value > 5) ? 1 : 0) : 0) : 0; //Somwhat includes green
 //assign yellow_detect = ((Hue > 51) && (Hue < 62)) ? ((Saturation > 128) ? ((Value > 180) ? 1 : 0) : 0) : 0; //Uniquely defines the yellow ball
-assign yellow_detect = ((Hue > 49) && (Hue < 78)) ? ((Saturation > 90) ? ((Value > 100) ? 1 : 0) : 0) : 0; //Uniquely defines the yellow ball
+assign yellow_detect = ((Hue > 50) && (Hue < 68)) ? ((Saturation > 150) ? ((Value > 150) ? 1 : 0) : 0) : 0; //Uniquely defines the yellow ball
 //assign pink_detect = (Hue < 30) ? (((Saturation > 100) && (Saturation < 190)) ? ((Value > 120) ? 1 : 0) : 0) : 0;//Uniuely defines the pink ball
-assign pink_detect = (Hue < 30) ? ((Saturation < 175) ? ((Value > 120) ? 1 : 0) : 0) : 0;//Uniuely defines the pink ball
+
+//assign pink_detect = (Hue < 30) ? ((Saturation < 175) ? ((Value > 200) ? 1 : 0) : 0) : 0;//Uniuely defines the pink ball
+//assign pink_detect1 = (Hue < 18) ? ((Saturation > 150) ? ((Value > 200) ? 1 : 0) : 0) : 0; //Room
+assign pink_detect = (Hue < 30) ? (((Saturation > 110 && Saturation < 185)) ? ((Value > 120) ? 1 : 0) : 0) : 0;
+//assign pink_detect = (pink_detect1 || pink_detect2);
 //assign pink_detect = 0;
 assign lightgreen_detect = ((Hue > 105) && (Hue < 136)) ? ((Saturation > 90) ? ((Value > 90) ? 1 : 0) : 0) : 0; //uniqeuly defines the green ball - perfect
 
@@ -228,11 +235,12 @@ localparam detectionThreshold = 12;
 wire detectionArray [5:0];
 //assign detectionArray = {red_detect, green_detect, blue_detect, orange_detect, pink_detect, gray_detect};
 //assign detectionArray[0] = (red_detect && !pink_detect); //Red overlaps with pink
-assign detectionArray[0] = red_detect;
+assign detectionArray[0] = (red_detect  && !pink_detect);
 assign detectionArray[1] = (green_detect && !lightgreen_detect); //Green overlaps with light green
 //assign detectionArray[2] = (blue_detect && !green_detect); //blue overlaps with green
 assign detectionArray[2] = blue_detect;
 assign detectionArray[3] = yellow_detect;
+//assign detectionArray[4] = pink_detect;
 assign detectionArray[4] = (pink_detect && !red_detect);
 assign detectionArray[5] = lightgreen_detect;
 wire [23:0] colourCodes [5:0]; //Holds output colour codes for all balls
@@ -319,7 +327,7 @@ always @(posedge clk) begin
 		buildingDetect = 0;
 		alternatingCountTemp = 0;
 	end
-	if ((x > pixelRange) && (x < IMAGE_W-1) && (y < IMAGE_H) && (in_valid)) begin
+	if ((x > pixelRange) && (x < IMAGE_W+1) && (y < IMAGE_H) && (in_valid)) begin
 		//For each colour
 		for(i = 0; i < 6; i = i + 1) begin
 			//If a colour pixel was detected, add to buffers for that colour
@@ -336,7 +344,7 @@ always @(posedge clk) begin
 			//Shift all buffers by 1 (shift register)
 			pixelBuffer[i] = pixelBuffer[i]*2;
 			//Mode filtering and contour detection
-			if (tempCount > detectionThreshold) begin
+			if ((tempCount > detectionThreshold) && (x < IMAGE_W-1)) begin
 				//whiteMet = 0;
 				//blackMet = 0;
 				//buildingWhitePixelBuffer = 0;
@@ -419,13 +427,15 @@ always @(posedge clk) begin
 		end
 		//If neither colour pixels have been found recently, a building is not being scanned
 		if ((whiteCount < detectionWidth) && (blackCount < detectionWidth)) begin
-			if(buildingtempWidth > buildingWidth) begin
-				buildingXMin = buildingtempXMax - buildingtempWidth;
+			if(alternatingCountTemp > alternatingCount) begin
+				//buildingXMin = buildingtempXMax - buildingtempWidth;
+				buildingXMin = buildingtempXMin;
 				buildingXMax = buildingtempXMax;
 				buildingWidth = buildingtempWidth;
 				alternatingCount = alternatingCountTemp;
 			end
 			buildingDetect = 0;
+			buildingtempWidth = 0;
 		end
 		// //If the current coordinate is an xMin, xMax, yMin or yMax of another ball, colour accordingly
 		for(i = 0; i < 6; i = i + 1) begin
@@ -476,40 +486,40 @@ always@(posedge clk) begin
 		// 	end
 		// end
 		if(SPI_datain == 1) begin //Red ball
-			SPI_dataout = (pixelWidth[0] > 60) ? {3'b001, pixelWidth[0][8:4]} : 8'd0;
+			SPI_dataout = (pixelWidth[0] > 75) ? {3'b001, pixelWidth[0][8:4]} : 8'd0;
 		end else if(SPI_datain == 2) begin
 			angleCalc = ((left[0]+right[0])/40);
-			SPI_dataout = (pixelWidth[0] > 60) ? {pixelWidth[0][3:1], angleCalc[4:0]} : 8'd0;
+			SPI_dataout = (pixelWidth[0] > 75) ? {pixelWidth[0][3:1], angleCalc[4:0]} : 8'd0;
 		end else if(SPI_datain == 3) begin //Green ball
-			SPI_dataout = (pixelWidth[1] > 60) ? {3'b010, pixelWidth[1][8:4]} : 8'd0;
+			SPI_dataout = (pixelWidth[1] > 75) ? {3'b010, pixelWidth[1][8:4]} : 8'd0;
 		end else if(SPI_datain == 4) begin
 			angleCalc = ((left[1]+right[1])/40);
-			SPI_dataout = (pixelWidth[1] > 60) ? {pixelWidth[1][3:1], angleCalc[4:0]} : 8'd0;
+			SPI_dataout = (pixelWidth[1] > 75) ? {pixelWidth[1][3:1], angleCalc[4:0]} : 8'd0;
 		end else if(SPI_datain == 5) begin //Blue ball
-			SPI_dataout = (pixelWidth[2] > 60) ? {3'b011, pixelWidth[2][8:4]} : 8'd0;
+			SPI_dataout = (pixelWidth[2] > 75) ? {3'b011, pixelWidth[2][8:4]} : 8'd0;
 		end else if(SPI_datain == 6) begin
 			angleCalc = ((left[2]+right[2])/40);
-			SPI_dataout = (pixelWidth[2] > 60) ? {pixelWidth[2][3:1], angleCalc[4:0]} : 8'd0;
+			SPI_dataout = (pixelWidth[2] > 75) ? {pixelWidth[2][3:1], angleCalc[4:0]} : 8'd0;
 		end else if(SPI_datain == 7) begin //Yellow
-			SPI_dataout = (pixelWidth[3] > 60) ? {3'b100, pixelWidth[3][8:4]} : 8'd0;
+			SPI_dataout = (pixelWidth[3] > 75) ? {3'b100, pixelWidth[3][8:4]} : 8'd0;
 		end else if(SPI_datain == 8) begin
 			angleCalc = ((left[3]+right[3])/40);
-			SPI_dataout = (pixelWidth[3] > 60) ? {pixelWidth[3][3:1], angleCalc[4:0]} : 8'd0;
+			SPI_dataout = (pixelWidth[3] > 75) ? {pixelWidth[3][3:1], angleCalc[4:0]} : 8'd0;
 		end else if(SPI_datain == 9) begin //Pink
-			SPI_dataout = (pixelWidth[4] > 60) ? {3'b101, pixelWidth[4][8:4]} : 8'd0;
+			SPI_dataout = (pixelWidth[4] > 75) ? {3'b101, pixelWidth[4][8:4]} : 8'd0;
 		end else if(SPI_datain == 10) begin
 			angleCalc = ((left[4]+right[4])/40);
-			SPI_dataout = (pixelWidth[4] > 60) ? {pixelWidth[4][3:1], angleCalc[4:0]} : 8'd0;
+			SPI_dataout = (pixelWidth[4] > 75) ? {pixelWidth[4][3:1], angleCalc[4:0]} : 8'd0;
 		end else if(SPI_datain == 11) begin //Light green
-			SPI_dataout = (pixelWidth[5] > 60) ? {3'b110, pixelWidth[5][8:4]} : 8'd0;
+			SPI_dataout = (pixelWidth[5] > 75) ? {3'b110, pixelWidth[5][8:4]} : 8'd0;
 		end else if(SPI_datain == 12) begin
 			angleCalc = ((left[5]+right[5])/40);
-			SPI_dataout = (pixelWidth[5] > 60) ? {pixelWidth[5][3:1], angleCalc[4:0]} : 8'd0;
+			SPI_dataout = (pixelWidth[5] > 75) ? {pixelWidth[5][3:1], angleCalc[4:0]} : 8'd0;
 		end else if(SPI_datain == 14) begin  //Buildings
-			SPI_dataout = ((buildingWidth > 60) && (alternatingCount > 6)) ? {3'b111, buildingWidth[8:4]} : 8'd0;
+			SPI_dataout = ((buildingWidth > 75) && (alternatingCount > 6)) ? {3'b111, buildingWidth[8:4]} : 8'd0;
 		end else if(SPI_datain == 15) begin
 			angleCalc = ((buildingLeft+buildingRight)/40);
-			SPI_dataout = (pixelWidth[1] > 60) ? {buildingWidth[3:1], angleCalc[4:0]} : 8'd0;
+			SPI_dataout = (pixelWidth[1] > 75) ? {buildingWidth[3:1], angleCalc[4:0]} : 8'd0;
 		end else begin
 			SPI_dataout = 0;
 		end
@@ -685,13 +695,13 @@ always@(posedge clk) begin
 		//Save all bounding boxes to show next frame
 		//Simple low pass filter to prevent quick jumping around
 		for(i = 0; i < 6; i = i + 1) begin
-			if ((xMax[i] > xMin[i]) & (pixelWidth[i] > 40)) begin
+			if ((xMax[i] > xMin[i]) & (pixelWidth[i] > 75)) begin
 				left[i] <= (left[i]+xMin[i])/2;
 				right[i] <= (right[i]+xMax[i])/2;
 			end
 		end
 		//Building bounds, only show if there are at least two white and black strips together
-		if ((buildingWidth > 60) && (alternatingCount > 6)) begin
+		if ((buildingWidth > 75) && (alternatingCount > 6)) begin
 			buildingLeft <= (buildingLeft + buildingXMin)/2;
 			buildingRight <= (buildingRight + buildingXMax)/2;
 		end

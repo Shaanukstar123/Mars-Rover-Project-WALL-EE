@@ -29,10 +29,6 @@ int grabBallData(byte ballCode) {
   digitalWrite(PIN_SS, LOW);
   byte syncPacket = SPI.transfer(0b10101010); //Packet required for sync
   byte packet1 = SPI.transfer(ballCode);
-  //SPI.endTransaction();
-  //digitalWrite(PIN_SS, HIGH);
-  //SPI.beginTransaction(settings);
-  //digitalWrite(PIN_SS, LOW);
   byte packet2 = SPI.transfer(ballCode+1);
   digitalWrite(PIN_SS, HIGH);
   SPI.endTransaction();
@@ -243,14 +239,14 @@ void loop()
   int distance = 0;
   //Ask for data for each ball
   for (byte x = 1; x < 13; x = x + 2) {
-    delay(500);
+    delay(20);
     distance = grabBallData(x);
     if ((distance != 0) && (distance < minDistance)) {
       minDistance = distance;
     }
   }
   //Building
-  delay(500);
+  delay(20);
   distance = grabBallData(14);
   if ((distance != 0) && (distance < minDistance)) {
       minDistance = distance;
