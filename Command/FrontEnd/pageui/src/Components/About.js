@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 
 import Rover from './Rover';
 import AddObstacles from './AddObstacles';
+import AddBuildings from './AddBuildings';
 import one from './static/1.png'
 import two from './static/2.png'
 import three from './static/3.png'
@@ -28,6 +29,8 @@ const About = () => {
 
   const [aliens, setAliens] = useState([]);
 
+  const [buildings, setBuildings] = useState([])
+
   const [intervalId, setIntervalId] = useState(0);
 
   const [coords, setCoords] = useState({
@@ -49,6 +52,26 @@ const About = () => {
     
       console.log("Alien location: " , alienObj);
       setAliens(alienObj);
+      //setAliens((aliens) => [...aliens, alienObj]);
+
+    }
+    
+    catch(err){
+      console.log(err);
+    }
+
+  
+  };
+
+  const fetchBuildingData = async () => {
+    try{
+
+      const request = await fetch('http://35.176.71.115:8080/buildings');
+      const buildingObj = await request.json();
+
+    
+      console.log("Buildings location: " , buildingObj);
+      setBuildings(buildingObj);
       //setAliens((aliens) => [...aliens, alienObj]);
 
     }
@@ -113,6 +136,7 @@ const About = () => {
 
   const reset = () => {
     setAliens([]);
+    setBuildings([]);
   }
 
   const startclicket = async (evt) =>{
@@ -249,15 +273,16 @@ const About = () => {
    
     <div className="grid grid-cols-3 gap-8 rounded-sm mt-10 h-5/6 w-11/12">
 
-        <div className="flex flex-col justify-between items-center h-full col-span-2 row-span-2 rounded-lg bg-white" >
+        <div className="flex flex-col justify-between items-center h-full col-span-2 row-span-2 rounded-lg bg-white">
 
           <h1 className="text-3xl font-extrabold flex flex-row justify-start w-full">
-            <span className=""> AutoPilot </span>
+            AutoPilot  <span className="text-red-500"> : {coords.xcoord}, {coords.ycoord} </span>
           </h1>
 
-          <div className="h-5/6 w-4/6 relative border-2 border-black border-dashed" >
+          <div className="h-5/6 w-4/6 relative border-2 border-black border-dashed" style={{width:'460px', height:'710px'}} >
             <Rover  Coordinates={coords}  />
             <AddObstacles Aliens={aliens} />
+            <AddBuildings Buildings={buildings} />
           </div>
           
           <div className="h-4 w-4">
@@ -302,7 +327,7 @@ const About = () => {
               <div className="h-auto w-10/12 flex flex-col justify-between items-center">
 
                 <h1 className="text-3xl font-extrabold flex flex-col content-center justify-center w-full">
-                  <span className="hover:animate-pulse"> VenueMode </span>
+                  <span className="text-slate-700"> VenueMode </span>
                 </h1>
                 
                 <form className="flex flex-row justify-evenly flex-wrap h-2/6" onSubmit={hello}>
@@ -320,8 +345,8 @@ const About = () => {
                   <button type="submit" className="text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-med w-auto  px-5 py-2 text-center">Submit</button>
                 </form>
 
-                <div className='h-12'>
-                  <button onClick={shortestDistance} className="text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-med w-auto  px-4 py-2 text-center"> Send </button>
+                <div className='h-12 mb-12'>
+                  <button onClick={shortestDistance} className="text-white bg-lime-400 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-med w-auto  px-4 py-2 text-center"> Send </button>
                 </div>
 
               </div>

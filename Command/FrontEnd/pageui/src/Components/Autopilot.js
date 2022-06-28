@@ -76,17 +76,13 @@ const Autopilot = () => {
 
     if(intervalId) {
       clearInterval(intervalId);
-      
-      
-    
+          
       setIntervalId(0);
       return;
     }
 
   
     const newIntervalId = setInterval(fetchCoordinateData, 700);
-
-
 
     setIntervalId(newIntervalId);
   }
@@ -100,13 +96,14 @@ const Autopilot = () => {
   return (
     <div className="d-flex flex-row justify-content-evenly align-items-center" style={{minHeight: "93vh", maxHeight:"100vh", border:"4px solid orange"}}>
 
-      <div style={{border:"4px solid purple", height:"70vh", width:"55vw"}} id="johnCena">
-        <Rover  Coordinates={coords}  />
-        <AddObstacles Aliens={aliens} />
-      </div>
+    <div className="h-5/6 w-4/6 relative border-2 border-black border-dashed" style={{width:'460px', height:'710px'}} >
+      <Rover  Coordinates={coords}  />
+      <AddObstacles Aliens={aliens} />
 
-      <button type="button" className="btn btn-success" onClick={start} > {intervalId ? "STOP" : "AutoPilot"} </button>
-      <button type="button" className="btn btn-info" onClick={reset} > Reset </button>
+    </div>
+
+    <button type="button" className="btn btn-success" onClick={start} > {intervalId ? "STOP" : "AutoPilot"} </button>
+    <button type="button" className="btn btn-info" onClick={reset} > Reset </button>
 
 
     </div>
