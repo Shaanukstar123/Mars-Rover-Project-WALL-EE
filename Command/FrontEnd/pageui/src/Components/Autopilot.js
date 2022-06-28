@@ -61,25 +61,6 @@ const Autopilot = () => {
   };
 
   const start = async (event) => {
-
-    if(intervalId) {
-      clearInterval(intervalId);
-      
-      event.currentTarget.classList.remove(
-        'btn-danger',
-      );
-
-      event.currentTarget.classList.add(
-        'btn-success',
-      );
-    
-      setIntervalId(0);
-      return;
-    }
-
-  
-    const newIntervalId = setInterval(fetchCoordinateData, 700);
-
     await fetch('http://35.176.71.115:8080/autoPilot', {
       method: "POST",
       headers: {
@@ -88,13 +69,24 @@ const Autopilot = () => {
       body: JSON.stringify({'mode': 3})
     });
 
-    event.currentTarget.classList.remove(
-      'btn-success',
-    );
+    startTimer(event);
+  };
 
-    event.currentTarget.classList.add(
-      'btn-danger',
-    );
+  const startTimer = (event) => {
+
+    if(intervalId) {
+      clearInterval(intervalId);
+      
+      
+    
+      setIntervalId(0);
+      return;
+    }
+
+  
+    const newIntervalId = setInterval(fetchCoordinateData, 700);
+
+
 
     setIntervalId(newIntervalId);
   }

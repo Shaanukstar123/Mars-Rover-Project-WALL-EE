@@ -7,10 +7,7 @@ import AddObstacles from './AddObstacles';
 import one from './static/1.png'
 import two from './static/2.png'
 import three from './static/3.png'
-import up from './static/up.png'
-import down from './static/down.png'
-import left from './static/left.png'
-import right from './static/right.png'
+
 
 
 // Core modules imports are same as usual
@@ -85,29 +82,7 @@ const About = () => {
   
   };
 
-  const start = async (event) => {
-
-    console.log("start called");
-    if(intervalId) {
-      clearInterval(intervalId);
-      
-      event.currentTarget.classList.remove(
-        'animate-pulse',
-      );
-
-    
-      setIntervalId(0);
-      return;
-    }
-
-  
-    const newIntervalId = setInterval(fetchCoordinateData, 800);
-
-
-    event.currentTarget.classList.add(
-      'animate-pulse',
-    );
-
+  const start = async(event) => {
     await fetch('http://35.176.71.115:8080/autoPilot', {
       method: "POST",
       headers: {
@@ -116,6 +91,23 @@ const About = () => {
       body: JSON.stringify({'mode': 3})
     });
 
+    startTimer(event);
+  }
+
+  const startTimer = async (event) => {
+
+    console.log("start called");
+    if(intervalId) {
+      clearInterval(intervalId);
+         
+      setIntervalId(0);
+      return;
+    }
+
+  
+    const newIntervalId = setInterval(fetchCoordinateData, 800);
+
+   
     setIntervalId(newIntervalId);
   }
 
@@ -123,13 +115,20 @@ const About = () => {
     setAliens([]);
   }
 
-  const startclicket = (evt) =>{
-    start(evt);
+  const startclicket = async (evt) =>{
+    await fetch('http://35.176.71.115:8080/rControl', {
+      method: "POST",
+      headers: {
+        'Content-type': "application/json"
+      },
+      body: JSON.stringify({'mode': 1})
+    });
+    startTimer(evt);
     mouseClickControl(evt);
   }
 
   const endclicket = (evt) =>{
-    start(evt);
+    startTimer(evt);
     mouseLeaveControl(evt);
   }
 
